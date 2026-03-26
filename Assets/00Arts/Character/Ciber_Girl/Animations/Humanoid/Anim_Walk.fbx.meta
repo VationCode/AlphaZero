@@ -1,21 +1,17 @@
 fileFormatVersion: 2
-guid: 4a37f78e0efe11e4dbf44d9c5c036d17
-AssetOrigin:
-  serializedVersion: 1
-  productId: 214658
-  packageName: Ciber girl
-  packageVersion: 1.0
-  assetPath: Assets/Ciber_Girl/Mesh/Ciber_girl_A_pose_neon.fbx
-  uploadId: 483442
+guid: 3102e23045d6fcd4abfb916b72db83f0
 ModelImporter:
   serializedVersion: 22200
-  internalIDToNameTable: []
+  internalIDToNameTable:
+  - first:
+      74: -2282383924012439423
+    second: root|walk
   externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
     materialSearch: 1
-    materialLocation: 0
+    materialLocation: 1
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0

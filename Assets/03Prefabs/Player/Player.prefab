@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5815108667787495793}
+  - component: {fileID: 7607785541208430536}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -32,6 +33,18 @@ Transform:
   - {fileID: 7680210562956215730}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7607785541208430536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1181273884135749401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a57a2cea67e7f9c489fdfc983e202128, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4379596798889115435
 GameObject:
   m_ObjectHideFlags: 0
@@ -115,6 +128,24 @@ PrefabInstance:
     - target: {fileID: 883414888201540733, guid: 2db751cbfd2517541924ba57a5bd7eb4, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3302811467225498945, guid: 2db751cbfd2517541924ba57a5bd7eb4, type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: 4a37f78e0efe11e4dbf44d9c5c036d17, type: 3}
+    - target: {fileID: 3302811467225498945, guid: 2db751cbfd2517541924ba57a5bd7eb4, type: 3}
+      propertyPath: m_WarningMessage
+      value: "\nBinding warning: Some generic clip(s) animate transforms that are
+        already bound by a Humanoid avatar. These transforms can only be changed
+        by Humanoid clips.\n\tTransform 'c_middle1.r'\n\tTransform 'c_ring3.l'\n\tTransform
+        'root'\n\tTransform 'arm_stretch.l'\n\tTransform 'spine_02.x'\n\tTransform
+        'spine_01.x'\n\tTransform 'toes_01.r'\n\tTransform 'c_ring3.r'\n\tTransform
+        'thigh_stretch.r'\n\tTransform 'c_index2.r'\n\tand more ...\n\tFrom animation
+        clip 'root|idle'\n\tFrom animation clip 'root|attack'\n\tFrom animation clip
+        'root|attack'\n\tFrom animation clip 'root|attack'\n\tFrom animation clip
+        'root|attack'\n\tFrom animation clip 'root|Flip'\n\tFrom animation clip 'root|attack'\n\tFrom
+        animation clip 'root|run'\n\tFrom animation clip 'root|walk'\n\tFrom animation
+        clip 'root|somersaults'\n\tand more ..."
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
