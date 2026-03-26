@@ -1,7 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
-// ÃÖ»óÀ§ Å¬·¡½º Root Composition
-// ÇÃ·¹ÀÌ¾îÀÇ ÀüÃ¼ÀûÀÎ ¿¬°á¼º °ü¸®
+// ìµœìƒìœ„ í´ë˜ìŠ¤ Root Composition
+// í”Œë ˆì´ì–´ì˜ ì „ì²´ì ì¸ ì—°ê²°ì„± ê´€ë¦¬
 public class PlayerCore : MonoBehaviour
 {
     void Start()
