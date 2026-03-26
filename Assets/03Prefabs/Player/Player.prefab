@@ -85,6 +85,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 7680210562956215730}
     m_Modifications:
+    - target: {fileID: 454524248042386657, guid: 2db751cbfd2517541924ba57a5bd7eb4, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a3fbcccddf81b604f8f470f4f523ee93, type: 2}
     - target: {fileID: 507030465228246727, guid: 2db751cbfd2517541924ba57a5bd7eb4, type: 3}
       propertyPath: m_Name
       value: Ciber_girl_A_pose_neon
@@ -129,6 +133,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2770312180315557373, guid: 2db751cbfd2517541924ba57a5bd7eb4, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: c2f1d47057e83c9408f2c76699061dd3, type: 2}
+    - target: {fileID: 2951978860578482514, guid: 2db751cbfd2517541924ba57a5bd7eb4, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a3fbcccddf81b604f8f470f4f523ee93, type: 2}
     - target: {fileID: 3302811467225498945, guid: 2db751cbfd2517541924ba57a5bd7eb4, type: 3}
       propertyPath: m_Avatar
       value: 
@@ -147,6 +159,14 @@ PrefabInstance:
         animation clip 'root|run'\n\tFrom animation clip 'root|walk'\n\tFrom animation
         clip 'root|somersaults'\n\tand more ..."
       objectReference: {fileID: 0}
+    - target: {fileID: 4124599856370942887, guid: 2db751cbfd2517541924ba57a5bd7eb4, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 1525f3684d2f650489ade5123d2201e7, type: 2}
+    - target: {fileID: 5338008244707167944, guid: 2db751cbfd2517541924ba57a5bd7eb4, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 2bcc4ffed6672ba408b7aac9872297f1, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
