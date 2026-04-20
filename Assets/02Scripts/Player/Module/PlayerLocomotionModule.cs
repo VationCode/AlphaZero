@@ -37,8 +37,15 @@ namespace player.module
 
         #region Runtime
         private float m_currentMoveSpeed;
-        private Vector2 m_currentDir;
+        private Vector3 m_currentDir;
+        private Vector3 m_currentVelocity;
         #endregion
+
+        private void Awake()
+        {
+            m_characterController = GetComponent<CharacterController>();
+        }
+
         public void Bind(PlayerInputBoundary playerInputBoundary)
         {
             m_inputBoundary = playerInputBoundary;
@@ -46,9 +53,26 @@ namespace player.module
 
         public void Move()
         {
-            m_currentDir = m_inputBoundary.MoveDirection;
+            // 방향 계산
+            Vector2 _moveInputDir = m_inputBoundary.MoveInputDir;
+            Vector3 _Dir = transform.forward * _moveInputDir.y + transform.right * _moveInputDir.x;
+            if (_Dir.sqrMagnitude < 0.01f) _Dir = Vector2.zero;
+            else _Dir = Vector3.ClampMagnitude(_Dir, 1f);
+            m_currentDir = _Dir;
+
+            // 속력 계산
             m_currentMoveSpeed = m_currentDir.y < 0 ? m_backMoveSpeed : m_baseMoveSpeed;
 
+            // 속도 계산
+            m_currentVelocity = m_currentDir * m_currentMoveSpeed;
+
+            // 이동 적용
+            m_characterController.Move(m_currentVelocity * Time.deltaTime);
+        }
+
+        private void Update()
+        {
+            Move();
         }
 
         public void Rotation()

@@ -8,6 +8,7 @@ using player.module;
 // 플레이어의 전체적인 연결성 관리
 namespace alpha.player
 {
+    [RequireComponent(typeof(PlayerInputBoundary))]
     [RequireComponent(typeof(PlayerLocomotionModule))]
     public class PlayerCore : MonoBehaviour
     {
@@ -19,9 +20,17 @@ namespace alpha.player
         [SerializeField] private PlayerLocomotionModule m_locomotionModule;
         #endregion
 
+        private void Awake()
+        {
+            m_inputBoundary = GetComponent<PlayerInputBoundary>();
+            m_locomotionModule = GetComponent<PlayerLocomotionModule>();
+
+            Bind();
+        }
+
         void Start()
         {
-            Bind();
+            
         }
 
         void Bind()
