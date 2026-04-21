@@ -8,12 +8,14 @@ using player.module;
 // 플레이어의 전체적인 연결성 관리
 namespace alpha.player
 {
+    [RequireComponent(typeof(PlayerAnimationBoundary))]
     [RequireComponent(typeof(PlayerInputBoundary))]
     [RequireComponent(typeof(PlayerLocomotionModule))]
     public class PlayerCore : MonoBehaviour
     {
         #region Boundary
         [SerializeField] private PlayerInputBoundary m_inputBoundary;
+        [SerializeField] private PlayerAnimationBoundary m_aniBoundary;
         #endregion
 
         #region Module
@@ -23,6 +25,8 @@ namespace alpha.player
         private void Awake()
         {
             m_inputBoundary = GetComponent<PlayerInputBoundary>();
+            m_aniBoundary = GetComponent<PlayerAnimationBoundary>();
+
             m_locomotionModule = GetComponent<PlayerLocomotionModule>();
 
             Bind();
@@ -35,7 +39,7 @@ namespace alpha.player
 
         void Bind()
         {
-            m_locomotionModule.Bind(m_inputBoundary);
+            m_locomotionModule.Bind(m_inputBoundary, m_aniBoundary);
         }
         // Update is called once per frame
         void Update()

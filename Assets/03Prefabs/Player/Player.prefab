@@ -10,8 +10,10 @@ GameObject:
   m_Component:
   - component: {fileID: 5815108667787495793}
   - component: {fileID: 3196930623124620514}
+  - component: {fileID: 3708332480665042693}
   - component: {fileID: 7607785541208430536}
   - component: {fileID: 6904360069377277340}
+  - component: {fileID: 2191524596123845827}
   - component: {fileID: 7755682499213568396}
   m_Layer: 0
   m_Name: Player
@@ -61,6 +63,28 @@ CharacterController:
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!95 &3708332480665042693
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1181273884135749401}
+  m_Enabled: 1
+  m_Avatar: {fileID: 9000000, guid: 4a37f78e0efe11e4dbf44d9c5c036d17, type: 3}
+  m_Controller: {fileID: 9100000, guid: 71f7662ccf16fc348a241105035c34a3, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!114 &7607785541208430536
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -74,6 +98,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_inputBoundary: {fileID: 0}
+  m_aniBoundary: {fileID: 0}
   m_locomotionModule: {fileID: 0}
 --- !u!114 &6904360069377277340
 MonoBehaviour:
@@ -87,6 +112,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a9a6effb4e272a45aeb46101e102963, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2191524596123845827
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1181273884135749401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3035c9603f192ac4ea5e448c8b509b17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_animator: {fileID: 0}
 --- !u!114 &7755682499213568396
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -101,7 +139,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_characterController: {fileID: 0}
   m_baseMoveSpeed: 7
-  m_backMoveSpeed: 3
   m_combatMoveSpeed: 5
   m_rotationSpeed: 0
   m_jumpPower: 0
@@ -230,7 +267,8 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 2bcc4ffed6672ba408b7aac9872297f1, type: 2}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 3302811467225498945, guid: 2db751cbfd2517541924ba57a5bd7eb4, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

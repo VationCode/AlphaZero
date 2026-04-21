@@ -562,6 +562,18 @@ PrefabInstance:
       propertyPath: m_SkinWidth
       value: 0.0001
       objectReference: {fileID: 0}
+    - target: {fileID: 3708332480665042693, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_Avatar
+      value: 
+      objectReference: {fileID: 9000000, guid: 4a37f78e0efe11e4dbf44d9c5c036d17, type: 3}
+    - target: {fileID: 3708332480665042693, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_Controller
+      value: 
+      objectReference: {fileID: 9100000, guid: 71f7662ccf16fc348a241105035c34a3, type: 2}
+    - target: {fileID: 3708332480665042693, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_WarningMessage
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 5815108667787495793, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -625,6 +637,10 @@ PrefabInstance:
     - target: {fileID: 7573442079951160626, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
       propertyPath: m_ApplyRootMotion
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_moveMagitudeLerpSpeed
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
