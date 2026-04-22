@@ -1,5 +1,5 @@
 # AlphaZero
-# 객체 설계 구조
+## 객체 내부 역할 구조
 ##### RootComposition : 최상위/조립
     Boundary : 입력/출력 외부 이벤트
     Flow : 흐름 제어
