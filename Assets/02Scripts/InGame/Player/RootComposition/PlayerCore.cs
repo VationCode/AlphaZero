@@ -2,8 +2,8 @@
 // Boundary : 외부와의 연결점
 // Module : 기능들의 집합체
 using UnityEngine;
-using player.boundary;
-using player.module;
+using alpha.player.boundary;
+using alpha.player.module;
 
 // 플레이어의 전체적인 연결성 관리
 namespace alpha.player
@@ -14,8 +14,8 @@ namespace alpha.player
     public class PlayerCore : MonoBehaviour
     {
         #region Boundary
-        [SerializeField] private PlayerInputBoundary m_inputBoundary;
-        [SerializeField] private PlayerAnimationBoundary m_aniBoundary;
+        public PlayerInputBoundary m_inputBoundary;
+        public PlayerAnimationBoundary m_aniBoundary;
         #endregion
 
         #region Module
