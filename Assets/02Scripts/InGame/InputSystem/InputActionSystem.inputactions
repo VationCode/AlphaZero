@@ -1,6 +1,6 @@
 {
     "version": 1,
-    "name": "PlayerInputAction",
+    "name": "InputActionSystem",
     "maps": [
         {
             "name": "Player",
@@ -10,15 +10,6 @@
                     "name": "Move",
                     "type": "Value",
                     "id": "185f18d9-3c99-4a67-9236-b330dab80019",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
-                    "name": "Look",
-                    "type": "Value",
-                    "id": "e64eb77a-5c22-4f49-87bb-2a1b9fc21473",
                     "expectedControlType": "Vector2",
                     "processors": "",
                     "interactions": "",
@@ -80,10 +71,27 @@
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
-                },
+                }
+            ]
+        },
+        {
+            "name": "Camera",
+            "id": "7c66b931-af41-47c2-956d-46230d0552e0",
+            "actions": [
+                {
+                    "name": "Look",
+                    "type": "Value",
+                    "id": "8753b6a1-0e39-418a-bbe8-61178cb51671",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
                 {
                     "name": "",
-                    "id": "76f99e8c-0b12-4b8f-8b2c-c4d400b2c6ba",
+                    "id": "f6bc1f38-7980-4c90-a66c-4c3615f00a5b",
                     "path": "<Mouse>/delta",
                     "interactions": "",
                     "processors": "",

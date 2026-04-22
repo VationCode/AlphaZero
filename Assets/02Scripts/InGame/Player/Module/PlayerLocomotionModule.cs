@@ -1,4 +1,4 @@
-// Module : 기능들의 집합체
+// Module : 기능 수행
 using alpha.player.boundary;
 using UnityEngine;
 
@@ -10,7 +10,7 @@ namespace alpha.player.module
     {
         #region Ref Component
         [SerializeField] private CharacterController m_characterController; // 물리영향거의x, 직접스크립트제어 방식
-        private PlayerInputBoundary m_inputBoundary;
+        private InputSystemBoundary m_inputBoundary;
         private PlayerAnimationBoundary m_aniBoundary;
         #endregion
 
@@ -52,7 +52,7 @@ namespace alpha.player.module
             m_characterController = GetComponent<CharacterController>();
         }
 
-        public void Bind(PlayerInputBoundary inputBoundary, PlayerAnimationBoundary aniBoundary)
+        public void Bind(InputSystemBoundary inputBoundary, PlayerAnimationBoundary aniBoundary)
         {
             m_inputBoundary = inputBoundary;
             m_aniBoundary = aniBoundary;

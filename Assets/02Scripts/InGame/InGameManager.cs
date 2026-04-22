@@ -6,18 +6,19 @@ using static UnityEngine.InputManagerEntry;
 public class InGameManager : MonoBehaviour
 {
     [SerializeField]
-    private PlayerCore m_playerCore;
+    private PlayerInstaller m_playerInstaller;
     [SerializeField]
-    private CameraCore m_cameraCore;
-
+    private CameraInstaller m_cameraInstaller;
 
     private void Awake()
     {
-        
+        m_playerInstaller.Install();
+        m_cameraInstaller.Install();
     }
+
     void Start()
     {
-        m_cameraCore.Bind(m_playerCore.m_inputBoundary);
+        
     }
 
 }

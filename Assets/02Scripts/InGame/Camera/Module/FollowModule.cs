@@ -6,7 +6,7 @@ namespace alpha.camera.module
     public class FollowModule : MonoBehaviour
     {
         #region Ref Component
-        private PlayerInputBoundary m_inputBoundary;
+        private InputSystemBoundary m_inputBoundary;
         #endregion
 
         #region Config 
@@ -25,7 +25,7 @@ namespace alpha.camera.module
 
         #endregion
 
-        public void Bind(PlayerInputBoundary inputBoundary)
+        public void Bind(InputSystemBoundary inputBoundary)
         {
             m_inputBoundary = inputBoundary;
         }
@@ -44,7 +44,7 @@ namespace alpha.camera.module
 
         public void Follow()
         {
-
+            Debug.Log(m_inputBoundary.LookInputDir);
            // transform.position = m_currentTarget.position + m_offset;
         }
 

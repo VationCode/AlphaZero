@@ -8,6 +8,7 @@ namespace alpha.camera
     [RequireComponent(typeof(FollowModule))]
     public class CameraCore : MonoBehaviour
     {
+        private InputSystemBoundary m_inputSystemBoundary;
         [SerializeField]
         private FollowModule m_followModule;
 
@@ -16,10 +17,11 @@ namespace alpha.camera
             m_followModule = GetComponent<FollowModule>();
         }
 
-        public void Bind(PlayerInputBoundary inputBoundary)
+        public void Bind(InputSystemBoundary inputSystemBoundary)
         {
-            m_followModule.Bind(inputBoundary);
+            m_inputSystemBoundary = inputSystemBoundary;
 
+            m_followModule.Bind(m_inputSystemBoundary);
         }
     }
 }
