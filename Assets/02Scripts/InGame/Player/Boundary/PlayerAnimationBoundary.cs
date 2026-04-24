@@ -16,5 +16,17 @@ namespace alpha.player.boundary
         {
             m_animator.SetFloat("move", moveMagnitude);
         }
+        public void SetJumpUp()
+        {
+            m_animator.CrossFade("JumpUp", 0.1f);
+        }
+        public void SetFall()
+        {
+            m_animator.CrossFade("Fall", 0.2f);
+        }
+        public void SetLand()
+        {
+            m_animator.CrossFade("Landing", 0.143f, 0, 0.443f);
+        }
     }
 }
