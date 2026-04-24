@@ -1,6 +1,8 @@
 // Module : 기능 수행
 using alpha.player.boundary;
+using Unity.Android.Gradle.Manifest;
 using UnityEngine;
+using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 namespace alpha.player.module
 {
@@ -25,26 +27,45 @@ namespace alpha.player.module
         [SerializeField] private float m_rotationSpeed;
         private float m_rotationsmoothTime = 0.1f;
 
+        [Header("[ Ground ]")]
+        [SerializeField]
+        private float m_groundDistance;
+        [SerializeField]
+        private LayerMask m_groundMask;
+
         [Header("[ Jump ]")]
-        [SerializeField] private float m_jumpPower;
+        [SerializeField] 
+        private float m_jumpPower;
 
         [Header("[ Dash ]")]
-        [SerializeField] private float m_dashPower;
+        [SerializeField] 
+        private float m_dashPower;
 
         [Header("[ Fly ]")]
-        [SerializeField] private float m_flyUpPower;
+        [SerializeField] 
+        private float m_flyUpPower;
+
+
 
         [Header("[ Gravity ]")]
         [SerializeField] private float m_gravityPower;
         #endregion
 
         #region Runtime
+        // Move
         private float m_currentMoveSpeed;
         private Vector3 m_currentDir;
         private Vector3 m_currentVelocity;
         private float m_moveAniMagnitude;
         private float m_moveAniVelocity;
+        //Rotation
         private float m_rotationSmoothVelocity;
+
+        // Ground
+        private bool m_isGrounded;
+        private float m_lastGroundTime;
+        // Jump
+
         #endregion
 
         private void Awake()
@@ -58,7 +79,7 @@ namespace alpha.player.module
             m_aniBoundary = aniBoundary;
         }
 
-        public void Move(bool isCombat)
+        public Vector3 Move(bool isCombat)
         {
             // 카메라기준으로 캐릭터 이동
             Vector3 _forward = Camera.main.transform.forward;
@@ -79,19 +100,23 @@ namespace alpha.player.module
             // 속도 계산
             Vector3 _velocity = _Dir * _speed;
 
-            // 이동 적용 => 추후 바운더리로 처리할것 모듈은 어디까지나 계산만
-            m_characterController.Move(_velocity * Time.deltaTime);
+            if(!m_isGrounded)
+            {
+                _velocity = Vector3.zero;
+            }
 
             m_currentDir = _Dir;
             m_currentMoveSpeed = _speed;
-            m_currentVelocity = _velocity;
 
             m_moveAniMagnitude = Mathf.SmoothDamp(m_moveAniMagnitude, _velocity.magnitude, ref m_moveAniVelocity,m_moveAnismoothTime);
             m_aniBoundary.SetMove(m_moveAniMagnitude);
+
+            return _velocity;
         }
         public void Rotation()
         {
             if (m_currentDir == Vector3.zero) return;
+            if(!m_isGrounded) return;
 
             // 이동 방향에 대한 회전값 반환
             Quaternion targetRot = Quaternion.LookRotation(m_currentDir);
@@ -107,14 +132,53 @@ namespace alpha.player.module
 
         private void Update()
         {
-            Move(false);
+            CheckedGround();
+
+            Vector3 _horizontal = Move(false);
+            float _vertical = ApplyGravity();
+
+            Vector3 _finalVelocity = _horizontal + Vector3.up * _vertical;
+
+            m_characterController.Move(_finalVelocity * Time.deltaTime);
+
             Rotation();
+
+            
         }
 
+        public void CheckedGround()
+        {
+            // m_characterController.center 바닥에서 조금 띄어져있는 상태
+            Vector3 worldCenter = m_characterController.transform.TransformPoint(m_characterController.center);
+            float _height = m_characterController.height;
+
+            Vector3 _colliderButtomtr = worldCenter - Vector3.up * (m_characterController.height * 0.5f - m_characterController.skinWidth);
+
+            bool _groundCheck = Physics.CheckSphere(_colliderButtomtr, m_groundDistance, m_groundMask);
+            // 점프같은 상태에서 바로 체크를 하면 True가 나온 후 False가 나오기에
+            // 프레임 단위로 약간의 시간차를 두고 체크
+            if (_groundCheck) m_lastGroundTime = Time.time;
+
+            m_isGrounded = (Time.time - m_lastGroundTime) <= 0.1f;
+        }
+
+        public float ApplyGravity()
+        {
+            if (m_isGrounded && m_currentVelocity.y < 0)
+            {
+                m_currentVelocity.y = -2f; // 바닥에 붙이기용
+            }
+            else
+            {
+                m_currentVelocity.y += m_gravityPower * Time.deltaTime;
+            }
+
+            return m_currentVelocity.y;
+        }
 
         public void Jump()
         {
-
+            
         }
 
         public void Dash()

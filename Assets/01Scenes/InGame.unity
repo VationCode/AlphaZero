@@ -131,7 +131,7 @@ GameObject:
   - component: {fileID: 237356204}
   - component: {fileID: 237356203}
   - component: {fileID: 237356202}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Cube
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1094,6 +1094,22 @@ PrefabInstance:
       propertyPath: m_locomotionModule
       value: 
       objectReference: {fileID: 2058888473}
+    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_gravityPower
+      value: -9.8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_baseMoveSpeed
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_groundDistance
+      value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_groundMask.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
     - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
       propertyPath: m_characterController
       value: 
