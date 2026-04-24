@@ -5,23 +5,23 @@ using UnityEngine;
 
 namespace alpha.camera
 {
-    [RequireComponent(typeof(FollowModule))]
+    [RequireComponent(typeof(CameraMovementModule))]
     public class CameraCore : MonoBehaviour
     {
         private InputSystemBoundary m_inputSystemBoundary;
         [SerializeField]
-        private FollowModule m_followModule;
+        private CameraMovementModule m_movementModule;
 
         private void Awake()
         {
-            m_followModule = GetComponent<FollowModule>();
+            m_movementModule = GetComponent<CameraMovementModule>();
         }
 
         public void Bind(InputSystemBoundary inputSystemBoundary)
         {
             m_inputSystemBoundary = inputSystemBoundary;
 
-            m_followModule.Bind(m_inputSystemBoundary);
+            m_movementModule.Bind(m_inputSystemBoundary);
         }
     }
 }
