@@ -1,8 +1,8 @@
-// Module : 기능들의 집합체
-using player.boundary;
+// Module : 기능 수행
+using alpha.player.boundary;
 using UnityEngine;
 
-namespace player.module
+namespace alpha.player.module
 {
     [RequireComponent(typeof(CharacterController))]
     // 플레이어의 이동과 관련된 기능들을 담당하는 모듈
@@ -10,7 +10,7 @@ namespace player.module
     {
         #region Ref Component
         [SerializeField] private CharacterController m_characterController; // 물리영향거의x, 직접스크립트제어 방식
-        private PlayerInputBoundary m_inputBoundary;
+        private InputSystemBoundary m_inputBoundary;
         private PlayerAnimationBoundary m_aniBoundary;
         #endregion
 
@@ -52,7 +52,7 @@ namespace player.module
             m_characterController = GetComponent<CharacterController>();
         }
 
-        public void Bind(PlayerInputBoundary inputBoundary, PlayerAnimationBoundary aniBoundary)
+        public void Bind(InputSystemBoundary inputBoundary, PlayerAnimationBoundary aniBoundary)
         {
             m_inputBoundary = inputBoundary;
             m_aniBoundary = aniBoundary;
@@ -91,10 +91,12 @@ namespace player.module
         }
         public void Rotation()
         {
-            // 목표 회전 방향 (카메라 앞을 기준으로 왼쪽 오른쪽 키값으로의 회전 방향 추출)
+            if (m_currentDir == Vector3.zero) return;
+
+            // 이동 방향에 대한 회전값 반환
             Quaternion targetRot = Quaternion.LookRotation(m_currentDir);
 
-            // 목표 회전의 Y각도 추출
+            // 목표 회전의 Y각도 추출(지상은 y축만 필요)
             float _targetAngle = targetRot.eulerAngles.y;
 
             float smoothedAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, _targetAngle, ref m_rotationSmoothVelocity, m_rotationsmoothTime);
