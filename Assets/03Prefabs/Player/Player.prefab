@@ -97,8 +97,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a57a2cea67e7f9c489fdfc983e202128, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_aniBoundary: {fileID: 0}
-  m_locomotionModule: {fileID: 0}
+  m_aniBoundary: {fileID: 2191524596123845827}
+  m_locomotionModule: {fileID: 7755682499213568396}
 --- !u!114 &2191524596123845827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -111,7 +111,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3035c9603f192ac4ea5e448c8b509b17, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_animator: {fileID: 0}
+  m_animator: {fileID: 3708332480665042693}
 --- !u!114 &7755682499213568396
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,14 +124,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d580ec5ddd1fb947b078fd2d3387cba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_characterController: {fileID: 0}
-  m_baseMoveSpeed: 7
+  m_characterController: {fileID: 3196930623124620514}
+  m_baseMoveSpeed: 8
   m_combatMoveSpeed: 5
   m_rotationSpeed: 0
-  m_jumpPower: 0
+  m_groundDistance: 0.25
+  m_groundMask:
+    serializedVersion: 2
+    m_Bits: 64
+  m_jumpPower: 3
+  m_jumpDirshorten: 0.5
+  m_fallMultiplier: 2
+  m_landDuration: 0.3
   m_dashPower: 0
   m_flyUpPower: 0
-  m_gravityPower: 0
+  m_gravityPower: -9.8
 --- !u!1 &3165884031288782390
 GameObject:
   m_ObjectHideFlags: 0

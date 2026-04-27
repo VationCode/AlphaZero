@@ -52,8 +52,10 @@ namespace alpha.camera.module
 
             m_currentX = transform.localRotation.eulerAngles.x;
             m_currentY = transform.localRotation.eulerAngles.y;
+
             m_dirNormalized = m_camera.localPosition.normalized;
-            m_currentDistance = m_camera.localPosition.magnitude;
+
+            transform.position = m_currentTarget.position;
         }
 
         public void SetTarget(Transform target)
@@ -79,7 +81,7 @@ namespace alpha.camera.module
                 m_currentDistance = m_maxDistance;
             }
 
-            m_camera.localPosition = Vector3.Lerp(m_camera.localPosition,m_dirNormalized * m_currentDistance, Time.deltaTime * smoothness);
+            m_camera.localPosition = Vector3.Lerp(m_camera.localPosition, m_dirNormalized * m_currentDistance, Time.deltaTime * smoothness);
         }
         public void Rotation()
         {
