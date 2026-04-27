@@ -19,26 +19,28 @@ namespace alpha.player.module
 
         #region Config 
         [Header("[ Move ]")]
-        [SerializeField] private float m_baseMoveSpeed;
+        [SerializeField] 
+        private float m_baseMoveSpeed = 8;
         // [SerializeField] private float m_backMoveSpeed; 현재는 단순화로 진행하여 이후 애니메이션 늘리기
-        [SerializeField] private float m_combatMoveSpeed;
+        [SerializeField] 
+        private float m_combatMoveSpeed = 5;
         private float m_moveAnismoothTime = 0.1f;
 
         [Header("[ rotation ]")]
-        [SerializeField] private float m_rotationSpeed;
-        private float m_rotationsmoothTime = 0.1f;
+        [SerializeField] private float m_rotationsmoothTime = 0.1f;
 
         [Header("[ Ground ]")]
         [SerializeField]
-        private float m_groundDistance;
+        private float m_groundDistance = 0.25f;
         [SerializeField]
         private LayerMask m_groundMask;
 
         [Header("[ Jump ]")]
         [SerializeField]
-        private float m_jumpPower;
+        private float m_jumpPower = 3f;
+        // 점프 시 수평 이동 속도 보정값 (0.1~1 사이)
         [SerializeField, Range(0.1f, 1)]
-        private float m_jumpDirshorten; // 점프 시 수평 이동 속도 보정값 (0.1~1 사이)
+        private float m_jumpDirshorten = 0.5f; 
         private float m_jumpIgnoreGroundTime = 0.2f;
 
         private enum AirState
@@ -54,29 +56,27 @@ namespace alpha.player.module
 
         [Header("[ Fall ]")]
         [SerializeField]
-        private float m_fallMultiplier = 2f;
-        //private float m_lowJumpMultiplier = 2f;
+        private float m_fallMultiplier = 2f;    // 중력 가속도 보정값 (1보다 커야 빠르게 떨어짐)
 
         [Header("[ Land ]")]
         [SerializeField]
         private float m_landDuration = 0.2f;
 
         [Header("[ Dash ]")]
-        //[SerializeField] 
-        //private float m_dashPower;    // 대쉬는 속도보단 시간과 거리에 초점이 맞춰지는게 좋음
+        // 대쉬는 속도보단 시간과 거리에 초점이 맞춰지는게 좋음
         [SerializeField]
-        private float m_dashDistance;
+        private float m_dashDistance = 10;
         [SerializeField]
-        private float m_dashDuration;
+        private float m_dashDuration = 0.5f;
         [SerializeField]
-        private float m_dashEndDuration;
+        private float m_dashEndDuration = 0.2f;
 
         [Header("[ Fly ]")]
         [SerializeField]
         private float m_flyUpPower;
 
         [Header("[ Gravity ]")]
-        [SerializeField] private float m_gravityPower;
+        [SerializeField] private float m_gravityPower = -9.8f;
         #endregion
 
         #region Runtime
@@ -129,7 +129,7 @@ namespace alpha.player.module
         }
         private void Update()
         {
-            CheckedGround();
+            /*CheckedGround();
 
             if (m_isDashing)
             {
@@ -142,7 +142,7 @@ namespace alpha.player.module
             }
 
             Movement();
-            LocomotionAni();
+            LocomotionAni();*/
         }
 
         public void LocomotionAni()
@@ -174,7 +174,7 @@ namespace alpha.player.module
             }
         }
 
-        private void Movement()
+        public void Movement()
         {
             // Dash
             if (m_airState == AirState.Dash)
@@ -217,6 +217,8 @@ namespace alpha.player.module
             m_characterController.Move(_finalVelocity * Time.deltaTime);
 
             Rotation(m_isJumping);
+
+
         }
 
         public void Move(bool isCombat)
