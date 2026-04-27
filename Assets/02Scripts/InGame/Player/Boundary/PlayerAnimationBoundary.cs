@@ -28,5 +28,9 @@ namespace alpha.player.boundary
         {
             m_animator.CrossFade("Landing", 0.143f, 0, 0.443f);
         }
+        public void SetDash()
+        {
+            m_animator.CrossFade("Dash", 0.1f);
+        }
     }
 }

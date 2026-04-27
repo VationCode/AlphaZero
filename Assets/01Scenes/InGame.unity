@@ -986,34 +986,6 @@ PrefabInstance:
       propertyPath: m_animator
       value: 
       objectReference: {fileID: 2058888477}
-    - target: {fileID: 3196930623124620514, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_Height
-      value: 1.95
-      objectReference: {fileID: 0}
-    - target: {fileID: 3196930623124620514, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_Radius
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 3196930623124620514, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_Center.y
-      value: 1.04
-      objectReference: {fileID: 0}
-    - target: {fileID: 3196930623124620514, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_SkinWidth
-      value: 0.0001
-      objectReference: {fileID: 0}
-    - target: {fileID: 3708332480665042693, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_Avatar
-      value: 
-      objectReference: {fileID: 9000000, guid: 4a37f78e0efe11e4dbf44d9c5c036d17, type: 3}
-    - target: {fileID: 3708332480665042693, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: 71f7662ccf16fc348a241105035c34a3, type: 2}
-    - target: {fileID: 3708332480665042693, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_WarningMessage
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 5815108667787495793, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1054,42 +1026,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 5906962211230336601, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 1.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 7573442079951160626, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_Avatar
-      value: 
-      objectReference: {fileID: 9000000, guid: 4a37f78e0efe11e4dbf44d9c5c036d17, type: 3}
-    - target: {fileID: 7573442079951160626, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 9100000, guid: 71f7662ccf16fc348a241105035c34a3, type: 2}
-    - target: {fileID: 7573442079951160626, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_UpdateMode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7573442079951160626, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_CullingMode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 7573442079951160626, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_WarningMessage
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7573442079951160626, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 7607785541208430536, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
       propertyPath: m_aniBoundary
       value: 
       objectReference: {fileID: 2058888474}
-    - target: {fileID: 7607785541208430536, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_inputBoundary
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 7607785541208430536, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
       propertyPath: m_locomotionModule
       value: 
@@ -1097,6 +1037,14 @@ PrefabInstance:
     - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
       propertyPath: m_jumpPower
       value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_dashDistance
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_dashDuration
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
       propertyPath: m_gravityPower
@@ -1119,6 +1067,10 @@ PrefabInstance:
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_dashEndDuration
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
       propertyPath: m_groundMask.m_Bits
       value: 64
       objectReference: {fileID: 0}
@@ -1126,12 +1078,7 @@ PrefabInstance:
       propertyPath: m_characterController
       value: 
       objectReference: {fileID: 2058888478}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_moveMagitudeLerpSpeed
-      value: 5
-      objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 6904360069377277340, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

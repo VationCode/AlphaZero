@@ -35,17 +35,20 @@ namespace alpha.player.module
         private LayerMask m_groundMask;
 
         [Header("[ Jump ]")]
-        [SerializeField] 
+        [SerializeField]
         private float m_jumpPower;
-        [SerializeField, Range(0.1f,1)]
-        private float m_jumpDirshorten;
+        [SerializeField, Range(0.1f, 1)]
+        private float m_jumpDirshorten; // 점프 시 수평 이동 속도 보정값 (0.1~1 사이)
         private float m_jumpIgnoreGroundTime = 0.2f;
+
         private enum AirState
         {
             None,
             Jump,
             Fall,
-            Land
+            Land,
+            Dash,
+            DashEnd
         }
         private AirState m_airState;
 
@@ -55,15 +58,21 @@ namespace alpha.player.module
         //private float m_lowJumpMultiplier = 2f;
 
         [Header("[ Land ]")]
-        [SerializeField] 
+        [SerializeField]
         private float m_landDuration = 0.2f;
 
         [Header("[ Dash ]")]
-        [SerializeField] 
-        private float m_dashPower;
+        //[SerializeField] 
+        //private float m_dashPower;    // 대쉬는 속도보단 시간과 거리에 초점이 맞춰지는게 좋음
+        [SerializeField]
+        private float m_dashDistance;
+        [SerializeField]
+        private float m_dashDuration;
+        [SerializeField]
+        private float m_dashEndDuration;
 
         [Header("[ Fly ]")]
-        [SerializeField] 
+        [SerializeField]
         private float m_flyUpPower;
 
         [Header("[ Gravity ]")]
@@ -79,21 +88,28 @@ namespace alpha.player.module
 
         private float m_moveAniMagnitude;
         private float m_moveAniVelocity;
+        private Vector3 m_lastMoveDir;
+
         //Rotation
         private float m_rotationSmoothVelocity;
 
         // Ground
         private bool m_isGrounded;
         private float m_lastGroundTime;
+
         // Jump
         private bool m_isJumping;
-        private Vector3 m_jumpDir;
         private float m_lastJumpTime;
         private AirState m_prevAirState;
 
         // Fall
         // Land
         private float m_landTimer;
+
+        // Dash
+        private bool m_isDashing;
+        private float m_dashLastTimer;
+        private float m_dashEndTimer;
         #endregion
 
         private void Awake()
@@ -105,7 +121,7 @@ namespace alpha.player.module
             m_airState = AirState.None;
             m_isGrounded = true;
         }
-        
+
         public void Bind(InputSystemBoundary inputBoundary, PlayerAnimationBoundary aniBoundary)
         {
             m_inputBoundary = inputBoundary;
@@ -114,13 +130,93 @@ namespace alpha.player.module
         private void Update()
         {
             CheckedGround();
-            ApplyGravity();
-            UpdateAirState();
 
-            
+            if (m_isDashing)
+            {
+                UpdateDash();
+            }
+            else
+            {
+                ApplyGravity();
+                UpdateAirState();
+            }
+
             Movement();
-
             LocomotionAni();
+        }
+
+        public void LocomotionAni()
+        {
+            if (m_airState == AirState.None)
+            {
+                m_aniBoundary.SetMove(m_moveAniMagnitude);
+            }
+            // 상태가 바뀌었을 때만 실행
+            if (m_prevAirState == m_airState) return;
+
+            switch (m_airState)
+            {
+                case AirState.Jump:
+                    m_aniBoundary.SetJumpUp();
+                    break;
+
+                case AirState.Fall:
+                    m_aniBoundary.SetFall();
+                    break;
+
+                case AirState.Land:
+                    m_aniBoundary.SetLand();
+                    break;
+
+                case AirState.Dash:
+                    m_aniBoundary.SetDash();
+                    break;
+            }
+        }
+
+        private void Movement()
+        {
+            // Dash
+            if (m_airState == AirState.Dash)
+            {
+                m_characterController.Move(m_lastMoveDir * Time.deltaTime);
+                return;
+            }
+
+            // DashEnd (완전 정지 or 약간 감속 가능)
+            if (m_airState == AirState.DashEnd)
+            {
+                // 감속 처리
+                m_lastMoveDir = Vector3.Lerp(m_lastMoveDir, Vector3.zero, 10f * Time.deltaTime);
+                m_characterController.Move(m_lastMoveDir * Time.deltaTime);
+                return;
+            }
+
+            if (m_airState == AirState.Land)
+            {
+                m_characterController.Move(Vector3.zero);
+                return;
+            }
+
+            if (m_inputBoundary.IsJumpInput && m_isGrounded)
+            {
+                Jump();
+            }
+
+            if (m_inputBoundary.IsDashInput)
+            {
+                Dash();
+            }
+
+            Move(false);
+
+            Vector3 _horizontal = m_isJumping ? m_lastMoveDir : m_currentVelocityXZ;
+
+            Vector3 _finalVelocity = _horizontal + Vector3.up * m_currentVelocityY;
+
+            m_characterController.Move(_finalVelocity * Time.deltaTime);
+
+            Rotation(m_isJumping);
         }
 
         public void Move(bool isCombat)
@@ -149,40 +245,23 @@ namespace alpha.player.module
             m_currentVelocityXZ = _velocity;
 
             // 애니메이션 이동값 계산
-            m_moveAniMagnitude = Mathf.SmoothDamp(m_moveAniMagnitude, _velocity.magnitude, ref m_moveAniVelocity,m_moveAnismoothTime);
-        }
-        public void LocomotionAni()
-        {
-            if (m_airState == AirState.None)
-            {
-                m_aniBoundary.SetMove(m_moveAniMagnitude);
-            }
-            // 상태가 바뀌었을 때만 실행
-            if (m_prevAirState == m_airState) return;
-
-            switch (m_airState)
-            {
-                case AirState.Jump:
-                    m_aniBoundary.SetJumpUp();
-                    break;
-
-                case AirState.Fall:
-                    m_aniBoundary.SetFall();
-                    break;
-
-                case AirState.Land:
-                    m_aniBoundary.SetLand(); // ⭐ 추가
-                    break;
-            }
+            m_moveAniMagnitude = Mathf.SmoothDamp(m_moveAniMagnitude, _velocity.magnitude, ref m_moveAniVelocity, m_moveAnismoothTime);
         }
 
-        public void Rotation()
+        public void Rotation(bool instant = false)
         {
             if (m_currentDir == Vector3.zero) return;
-            if(!m_isGrounded) return;
+            if (!m_isGrounded) return;
+            if (m_isDashing) return;
 
             // 이동 방향에 대한 회전값 반환
             Quaternion targetRot = Quaternion.LookRotation(m_currentDir);
+
+            if (instant)
+            {
+                transform.rotation = targetRot;
+                return;
+            }
 
             // 목표 회전의 Y각도 추출(지상은 y축만 필요)
             float _targetAngle = targetRot.eulerAngles.y;
@@ -193,33 +272,6 @@ namespace alpha.player.module
             transform.rotation = Quaternion.Euler(0f, smoothedAngle, 0f);
         }
 
-        private void Movement()
-        {
-            if (m_airState == AirState.Land)
-            {
-                // 이동 막기 (완전 정지)
-                m_characterController.Move(Vector3.zero);
-                return;
-            }
-
-            if (m_inputBoundary.IsJumpInput && m_isGrounded)
-            {
-                Jump();
-            }
-
-            Move(false);
-
-            // 공중일 때는 입력 무시하고 기존 방향 유지
-            Vector3 _horizontal = m_isJumping ? m_jumpDir : m_currentVelocityXZ;
-
-            Vector3 _finalVelocity = _horizontal + Vector3.up * m_currentVelocityY;
-
-            m_characterController.Move(_finalVelocity * Time.deltaTime);
-
-            Rotation();
-        }
-
-        
         public void CheckedGround()
         {
             // 점프 직후 일정 시간 동안 Ground 체크 무시
@@ -273,16 +325,41 @@ namespace alpha.player.module
             }*/
         }
 
+        // ==================== Jump 
         public void Jump()
         {
             m_isJumping = true;
             m_lastJumpTime = Time.time;
-            m_jumpDir = m_currentVelocityXZ * m_jumpDirshorten;
+            m_lastMoveDir = m_currentVelocityXZ * m_jumpDirshorten;
             m_currentVelocityY = Mathf.Sqrt(m_jumpPower * -2f * m_gravityPower);
         }
         private void UpdateAirState()
         {
             m_prevAirState = m_airState;
+
+            // Dash 상태
+            if (m_airState == AirState.Dash)
+            {
+                if (Time.time - m_dashLastTimer >= m_dashDuration)
+                {
+                    m_airState = AirState.DashEnd;
+                    m_dashEndTimer = 0f;
+                }
+                return;
+            }
+
+            // DashEnd 상태
+            if (m_airState == AirState.DashEnd)
+            {
+                m_dashEndTimer += Time.deltaTime;
+
+                if (m_dashEndTimer >= m_dashEndDuration)
+                {
+                    m_airState = AirState.None;
+                }
+                return;
+            }
+
 
             if (m_airState == AirState.Land)
             {
@@ -320,9 +397,42 @@ namespace alpha.player.module
                 m_airState = AirState.Fall;
             }
         }
+
+        // ==================== Dash 
+        private void UpdateDash()
+        {
+            if (Time.time - m_dashLastTimer >= m_dashDuration)
+            {
+                m_isDashing = false;
+            }
+        }
+
         public void Dash()
         {
+            if (m_airState == AirState.Dash || m_airState == AirState.DashEnd) return;
 
+            // 방향 결정 (기존 로직 그대로)
+            Vector2 input = m_inputBoundary.MoveInputDir;
+
+            if (input.sqrMagnitude > 0.01f)
+            {
+                Vector3 forward = Camera.main.transform.forward;
+                forward.y = 0f;
+                Vector3 right = Camera.main.transform.right;
+
+                m_lastMoveDir = (forward * input.y + right * input.x).normalized;
+            }
+            else
+            {
+                m_lastMoveDir = transform.forward;
+            }
+
+            transform.rotation = Quaternion.LookRotation(m_lastMoveDir);
+
+            m_lastMoveDir *= (m_dashDistance / m_dashDuration);
+
+            m_dashLastTimer = Time.time;
+            m_airState = AirState.Dash;
         }
     }
 }
