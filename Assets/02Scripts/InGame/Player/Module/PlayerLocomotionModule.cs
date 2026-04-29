@@ -1,9 +1,6 @@
 // Module : 기능 수행
 using alpha.player.boundary;
-using Unity.Android.Gradle.Manifest;
-using Unity.VisualScripting;
 using UnityEngine;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
 
 namespace alpha.player.module
 {
@@ -176,7 +173,7 @@ namespace alpha.player.module
 
         public void Movement()
         {
-            // Dash
+            /*// Dash
             if (m_airState == AirState.Dash)
             {
                 m_characterController.Move(m_lastMoveDir * Time.deltaTime);
@@ -206,7 +203,7 @@ namespace alpha.player.module
             if (m_inputBoundary.IsDashInput)
             {
                 Dash();
-            }
+            }*/
 
             Move(false);
 
@@ -217,8 +214,6 @@ namespace alpha.player.module
             m_characterController.Move(_finalVelocity * Time.deltaTime);
 
             Rotation(m_isJumping);
-
-
         }
 
         public void Move(bool isCombat)
