@@ -1,7 +1,7 @@
 // RootComposition : 조립(최상위)
-// Boundary : 입력/외부 이벤트
+// Boundary : 외부 이벤트 입력/출력(수행)
 // Flow : 흐름 제어
-// Module : 기능 수행
+// Module : 기능 연산 위주, 수행은 플젝 작을 경우 같이해도 무방
 
 using UnityEngine;
 using alpha.player.boundary;
@@ -11,26 +11,37 @@ using alpha.player.flow;
 // 플레이어의 전체적인 연결 관리
 namespace alpha.player
 {
+    [RequireComponent(typeof(PlayerCharacterControllerBoudary))]
     [RequireComponent(typeof(PlayerAnimationBoundary))]
     [RequireComponent(typeof(PlayerStateMachineFlow))]
     [RequireComponent(typeof(PlayerLocomotionModule))]
     public class PlayerCore : MonoBehaviour
     {
-        // 외부 Event
+        // 외부 Bind
         public InputSystemBoundary InputSystemBoundary { get; private set; }
-        
-        // 내부
-        [SerializeField] private PlayerAnimationBoundary m_aniBoundary;
 
+        #region 내부
+        // Boundary
+        public PlayerAnimationBoundary AnimBoundary { get; private set; }
+        public PlayerCharacterControllerBoudary CharacterCtrlBoudary { get; private set; }
+
+        // Flow
         public PlayerStateMachineFlow StateMachineFlow { get; private set; }
 
+        // Module
         public PlayerLocomotionModule LocomotionModule { get; private set; }
+        #endregion
+
         private void Awake()
         {
-            m_aniBoundary = GetComponent<PlayerAnimationBoundary>();
-
+            // Boundary
+            AnimBoundary = GetComponent<PlayerAnimationBoundary>();
+            CharacterCtrlBoudary = GetComponent<PlayerCharacterControllerBoudary>();
+            
+            // Flow
             StateMachineFlow = GetComponent<PlayerStateMachineFlow>();
 
+            // Module
             LocomotionModule = GetComponent<PlayerLocomotionModule>();
         }
 
@@ -39,7 +50,6 @@ namespace alpha.player
             InputSystemBoundary = inputSystemBoundary;
 
             StateMachineFlow.Bind(this);
-            LocomotionModule.Bind(InputSystemBoundary, m_aniBoundary);
         }
 
         private void Start()

@@ -1518,6 +1518,14 @@ PrefabInstance:
       propertyPath: m_characterController
       value: 
       objectReference: {fileID: 2058888478}
+    - target: {fileID: 8038352877082054449, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_characterCtrl
+      value: 
+      objectReference: {fileID: 2058888478}
+    - target: {fileID: 8038352877082054449, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
+      propertyPath: m_groundMask.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
