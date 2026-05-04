@@ -55,7 +55,7 @@ namespace alpha.player.boundary
         }
         public void DashAnim()
         {
-            m_animator.CrossFade("Dash", 0.1f);
+            m_animator.Play("Dash");
         }
     }
 }

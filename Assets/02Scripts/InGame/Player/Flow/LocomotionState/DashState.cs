@@ -1,16 +1,18 @@
 using UnityEngine;
-
 namespace alpha.player.flow.locomotion
 {
-    public class LandState : PlayerStateBase
+    public class DashState : PlayerStateBase
     {
         private float m_timer;
-        private float m_waitingTime = 0.2f; // 애니 길이에 맞춤
-
+        private float m_waitingTime = 0.5f; // 애니 길이에 맞춤
         public override void Enter(PlayerCore playerCore)
         {
-            m_timer = 0f;
-            playerCore.AnimBoundary.LandAnim();
+            var _loco = playerCore.LocomotionModule;
+
+            Vector3 _dir = _loco.GetLastDirection();
+            _loco.DashStart(_dir);
+
+            playerCore.AnimBoundary.DashAnim();
         }
 
         public override void Update(PlayerCore playerCore)

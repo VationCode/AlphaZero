@@ -16,27 +16,31 @@ namespace alpha.player.flow.locomotion
 
         public override void Update(PlayerCore playerCore)
         {
+            var _loco = playerCore.LocomotionModule;
+            var _ctrl = playerCore.CharacterCtrlBoudary;
+            var _state = playerCore.StateMachineFlow;
+
             // ==================== Ground 체크
             // 실제 물리적 체크
-            bool _isGroundDetected = playerCore.CharacterCtrlBoudary.CheckGround();
+            bool _isGroundDetected = _ctrl.CheckGround();
             // 물리체크이후 찐 Ground체크 (OnLeaveGround함수를 통해 무시(False로 유지)해야하는 경우도 발생하기에)
-            bool _isGroundHit = playerCore.LocomotionModule.UpdateGround(_isGroundDetected);
+            bool _isGroundHit = _loco.UpdateGround(_isGroundDetected);
 
             // ==================== 연산
             // 중력
-            playerCore.LocomotionModule.ApplyGravity();
+            _loco.ApplyGravity();
             // 최종 반영될 속도 
-            Vector3 _finalVelocity = playerCore.LocomotionModule.GetFinalVelocity();
+            Vector3 _finalVelocity = _loco.GetFinalVelocity();
 
             // ==================== 적용
             // 물리
-            playerCore.CharacterCtrlBoudary.SetMove(_finalVelocity);
+            _ctrl.SetMove(_finalVelocity);
 
 
             // ==================== 상태 전환
             if (_finalVelocity.y <= 0)
             {
-                playerCore.StateMachineFlow.ChangeLocoState(LocomotionStateType.Fall);
+                _state.ChangeLocoState(LocomotionStateType.Fall);
             }
         }
 

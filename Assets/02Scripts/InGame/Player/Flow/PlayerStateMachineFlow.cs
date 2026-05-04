@@ -45,7 +45,7 @@ namespace alpha.player.flow
                 { LocomotionStateType.JumpUp, () => new JumpUpState() },
                 { LocomotionStateType.Fall, () => new FallState() },
                 { LocomotionStateType.Land, () => new LandState() },
-                { LocomotionStateType.DashStart, () => new DashStartState() },
+                { LocomotionStateType.DashStart, () => new DashState() },
                 { LocomotionStateType.DashEnd, () => new DashEndState() }
             };
 

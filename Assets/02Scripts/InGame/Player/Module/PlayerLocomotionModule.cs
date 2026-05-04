@@ -1,5 +1,6 @@
 // Module : 기능 연산 위주
 using alpha.player.boundary;
+using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 namespace alpha.player.module
@@ -27,24 +28,9 @@ namespace alpha.player.module
         private float m_jumpDirshorten = 0.5f;
         private float m_jumpIgnoreGroundTime = 0.2f;
 
-        private enum AirState
-        {
-            None,
-            Jump,
-            Fall,
-            Land,
-            Dash,
-            DashEnd
-        }
-        private AirState m_airState;
-
         [Header("[ Fall ]")]
         [SerializeField]
         private float m_fallMultiplier = 2f;    // 중력 가속도 보정값 (1보다 커야 빠르게 떨어짐)
-
-        [Header("[ Land ]")]
-        [SerializeField]
-        private float m_landDuration = 0.2f;
 
         [Header("[ Dash ]")]
         // 대쉬는 속도보단 시간과 거리에 초점이 맞춰지는게 좋음
@@ -72,7 +58,6 @@ namespace alpha.player.module
 
         private float m_moveAniMagnitude;
         private float m_moveAniVelocity;
-        private Vector3 m_lastMoveDir;
 
         // Ground
         private bool m_isGrounded;
@@ -87,7 +72,6 @@ namespace alpha.player.module
         // Jump
         private bool m_isJumping;
         private float m_lastJumpTime;
-        private AirState m_prevAirState;
 
         // Fall
         // Land
@@ -97,11 +81,11 @@ namespace alpha.player.module
         private bool m_isDashing;
         private float m_dashLastTimer;
         private float m_dashEndTimer;
+        private float m_currentDashDistance;
         #endregion
 
         private void Start()
         {
-            m_airState = AirState.None;
             m_isGrounded = true;
         }
 
@@ -147,7 +131,6 @@ namespace alpha.player.module
         public void HandleRotation(bool instant = false)
         {
             if (m_currentDir == Vector3.zero) return;
-            if (m_isDashing) return;
 
             Quaternion targetRot = Quaternion.LookRotation(m_currentDir);
 
@@ -216,6 +199,9 @@ namespace alpha.player.module
             // Ground 무시 시작
             OnLeaveGround(m_jumpIgnoreGroundTime);
 
+            // 입력 방향으로 즉시 회전
+            HandleRotation(true);
+
             // 수평 방향은 "입력 기반"으로 직접 결정
             m_currentVelocityXZ = inputDir * m_baseMoveSpeed * m_jumpDirshorten;
 
@@ -223,11 +209,43 @@ namespace alpha.player.module
             m_currentVelocityY = Mathf.Sqrt(m_jumpPower * -2f * m_gravityPower);
         }
 
-        public void Fall()
-        {
-
-        }
         // ==================== Dash 
-        
+        public void DashStart(Vector3 inputDir)
+        {
+            m_isDashing = true;
+            m_dashLastTimer = Time.time;
+
+            if (inputDir.sqrMagnitude < 0.01f)
+                inputDir = transform.forward;
+
+            inputDir.y = 0f;
+            inputDir.Normalize();
+
+            m_currentDir = inputDir;
+
+            HandleRotation(true);
+
+            m_dashDistance = 0f;
+        }
+
+        public void UpdateDash()
+        {
+            if (!m_isDashing) return;
+
+            float _dashSpeed = m_dashDistance / m_dashDuration;
+
+            float moveStep = _dashSpeed * Time.deltaTime;
+
+            m_currentDashDistance += moveStep;
+
+            // 거리 초과 방지
+            if (m_currentDashDistance >= m_dashDistance)
+            {
+                moveStep -= (m_currentDashDistance - m_dashDistance);
+                m_isDashing = false;
+            }
+
+            m_currentVelocityXZ = m_currentDir * (moveStep / Time.deltaTime);
+        }
     }
 }
