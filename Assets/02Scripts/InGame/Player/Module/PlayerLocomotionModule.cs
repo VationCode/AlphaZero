@@ -1,6 +1,4 @@
 // Module : 기능 연산 위주
-using alpha.player.boundary;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
 
 namespace alpha.player.module
@@ -15,7 +13,6 @@ namespace alpha.player.module
         // [SerializeField] private float m_backMoveSpeed; 현재는 단순화로 진행하여 이후 애니메이션 늘리기
         [SerializeField] 
         private float m_combatMoveSpeed = 5;
-        private float m_moveAnismoothTime = 0.1f;
 
         [Header("[ rotation ]")]
         [SerializeField] private float m_rotationsmoothTime = 0.1f;
@@ -38,8 +35,6 @@ namespace alpha.player.module
         private float m_dashDistance = 10;
         [SerializeField]
         private float m_dashDuration = 0.5f;
-        [SerializeField]
-        private float m_dashEndDuration = 0.2f;
 
         [Header("[ Fly ]")]
         [SerializeField]
@@ -56,9 +51,6 @@ namespace alpha.player.module
         private Vector3 m_currentVelocityXZ;
         private float m_currentVelocityY;
 
-        private float m_moveAniMagnitude;
-        private float m_moveAniVelocity;
-
         // Ground
         private bool m_isGrounded;
         private float m_lastGroundTime;
@@ -68,19 +60,7 @@ namespace alpha.player.module
         //Rotation
         private float m_rotationSmoothVelocity;
 
-
-        // Jump
-        private bool m_isJumping;
-        private float m_lastJumpTime;
-
-        // Fall
-        // Land
-        private float m_landTimer;
-
         // Dash
-        private bool m_isDashing;
-        private float m_dashLastTimer;
-        private float m_dashEndTimer;
         private float m_currentDashDistance;
         #endregion
 
@@ -194,7 +174,7 @@ namespace alpha.player.module
         }
 
         // ==================== Jump 
-        public void JumpUpStart(Vector3 inputDir)
+        public void SetupJump(Vector3 inputDir)
         {
             // Ground 무시 시작
             OnLeaveGround(m_jumpIgnoreGroundTime);
@@ -210,11 +190,8 @@ namespace alpha.player.module
         }
 
         // ==================== Dash 
-        public void DashStart(Vector3 inputDir)
+        public void SetupDash(Vector3 inputDir)
         {
-            m_isDashing = true;
-            m_dashLastTimer = Time.time;
-
             if (inputDir.sqrMagnitude < 0.01f)
                 inputDir = transform.forward;
 
@@ -225,27 +202,28 @@ namespace alpha.player.module
 
             HandleRotation(true);
 
-            m_dashDistance = 0f;
+            m_currentDashDistance = 0;
         }
 
-        public void UpdateDash()
+        public bool UpdateDash()
         {
-            if (!m_isDashing) return;
-
             float _dashSpeed = m_dashDistance / m_dashDuration;
 
-            float moveStep = _dashSpeed * Time.deltaTime;
+            // 프레임당 이동 단위
+            float _moveStep = _dashSpeed * Time.deltaTime;
+            bool _isDashing = true;
 
-            m_currentDashDistance += moveStep;
+            m_currentDashDistance += _moveStep;
 
             // 거리 초과 방지
             if (m_currentDashDistance >= m_dashDistance)
             {
-                moveStep -= (m_currentDashDistance - m_dashDistance);
-                m_isDashing = false;
+                _moveStep -= (m_currentDashDistance - m_dashDistance);
+                _isDashing = false;
             }
 
-            m_currentVelocityXZ = m_currentDir * (moveStep / Time.deltaTime);
+            m_currentVelocityXZ = m_currentDir * (_moveStep / Time.deltaTime);
+            return _isDashing;
         }
     }
 }

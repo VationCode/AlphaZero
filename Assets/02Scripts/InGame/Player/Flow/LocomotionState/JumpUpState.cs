@@ -10,7 +10,7 @@ namespace alpha.player.flow.locomotion
 
             Vector3 _dir = _loco.GetLastDirection();
 
-            _loco.JumpUpStart(_dir);
+            _loco.SetupJump(_dir);
             playerCore.AnimBoundary.JumpUpAnim();
         }
 

@@ -1361,11 +1361,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a57a2cea67e7f9c489fdfc983e202128, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!95 &2058888477 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 3708332480665042693, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-  m_PrefabInstance: {fileID: 784615549153945590}
-  m_PrefabAsset: {fileID: 0}
 --- !u!143 &2058888478 stripped
 CharacterController:
   m_CorrespondingSourceObject: {fileID: 3196930623124620514, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
@@ -1414,10 +1409,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
-    - target: {fileID: 2191524596123845827, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_animator
-      value: 
-      objectReference: {fileID: 2058888477}
     - target: {fileID: 4874161090121348083, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
       propertyPath: m_locoStateText
       value: 
@@ -1462,62 +1453,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7607785541208430536, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_aniBoundary
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7607785541208430536, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_locomotionModule
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7607785541208430536, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_stateMachineFlow
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_jumpPower
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_dashDistance
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_dashDuration
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_gravityPower
-      value: -9.8
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_landDuration
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_baseMoveSpeed
-      value: 8
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_groundDistance
-      value: 0.25
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_jumpDirshorten
-      value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_dashEndDuration
-      value: 0.2
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_groundMask.m_Bits
-      value: 64
-      objectReference: {fileID: 0}
-    - target: {fileID: 7755682499213568396, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
-      propertyPath: m_characterController
-      value: 
-      objectReference: {fileID: 2058888478}
     - target: {fileID: 8038352877082054449, guid: 40f9c6f8fd075254484fd3d3577ef785, type: 3}
       propertyPath: m_characterCtrl
       value: 
