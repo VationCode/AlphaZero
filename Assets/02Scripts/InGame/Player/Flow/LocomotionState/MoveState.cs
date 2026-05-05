@@ -34,8 +34,9 @@ namespace alpha.player.flow.locomotion
             // 최종 반영될 속도 
             Vector3 _finalVelocity = _loco.GetFinalVelocity();
             Vector3 _horizontal = new Vector3(_finalVelocity.x, 0, _finalVelocity.z);   //Ground이동 애니메이션이기에 y제거
+            
             // ==================== 적용
-            // 물리
+            // 실제 이동
             _ctrl.SetMove(_finalVelocity);
             // 애니메이션
             _anim.UpdateGroundMove(_horizontal);
@@ -47,11 +48,15 @@ namespace alpha.player.flow.locomotion
             }
             else if (_input.IsDashInput)
             {
-                _state.ChangeLocoState(LocomotionStateType.DashStart);
+                _state.ChangeLocoState(LocomotionStateType.Dash);
             }
-            else if(!_isGroundHit)
+            else if (!_isGroundHit)
             {
                 _state.ChangeLocoState(LocomotionStateType.Fall);
+            }
+            else if (_input.IsFlyInput)
+            {
+                _state.ChangeLocoState(LocomotionStateType.FlyUp);
             }
         }
 

@@ -28,7 +28,7 @@ namespace alpha.player.flow.locomotion
             Vector3 _finalVelocity = _loco.GetFinalVelocity();
 
             // ==================== 적용
-            // 물리
+            // 실제 이동
             _ctrl.SetMove(_finalVelocity);
 
             // ==================== 상태 전환

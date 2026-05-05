@@ -36,9 +36,14 @@ namespace alpha.player.module
         [SerializeField]
         private float m_dashDuration = 0.5f;
 
+        // 대쉬와 동일하게 Vertical방향으로
         [Header("[ Fly ]")]
         [SerializeField]
-        private float m_flyUpPower;
+        private float m_flyUpDistance = 10;
+        [SerializeField]
+        private float m_flyUpDuration = 0.5f;
+        [SerializeField]
+        private float m_flightMoveSpeed = 15;
 
         [Header("[ Gravity ]")]
         [SerializeField] private float m_gravityPower = -9.8f;
@@ -62,6 +67,9 @@ namespace alpha.player.module
 
         // Dash
         private float m_currentDashDistance;
+
+        // Fly
+        private float m_currentFlyUpDistance;
         #endregion
 
         private void Start()
@@ -224,6 +232,65 @@ namespace alpha.player.module
 
             m_currentVelocityXZ = m_currentDir * (_moveStep / Time.deltaTime);
             return _isDashing;
+        }
+
+        // ==================== Fly
+        public void SetupFlyUp()
+        {
+            m_currentFlyUpDistance = 0;
+        }
+
+        public bool UpdateFlyUp()
+        {
+            float _flyUpSpeed = m_flyUpDistance / m_flyUpDuration;
+            float _moveStep = _flyUpSpeed * Time.deltaTime;
+            bool _isRising = true;
+
+            m_currentFlyUpDistance += _moveStep;
+
+            if (m_currentFlyUpDistance >= m_flyUpDistance)
+            {
+                _moveStep -= (m_currentFlyUpDistance - m_flyUpDistance);
+                _isRising = false;
+            }
+
+            m_currentVelocityY = _moveStep / Time.deltaTime;
+
+            return _isRising;
+        }
+        public void HandleFlightMove(Vector2 moveDir)
+        {
+            Transform _cam = Camera.main.transform;
+
+            Vector3 _forward = _cam.forward;   // 🔥 y 포함
+            Vector3 _right = _cam.right;
+
+            Vector3 _dir = _forward * moveDir.y + _right * moveDir.x;
+
+            // 정규화
+            if (_dir.sqrMagnitude < 0.01f)
+                _dir = Vector3.zero;
+            else
+                _dir.Normalize();
+
+            float speed = m_flightMoveSpeed;
+
+            m_currentDir = _dir;
+            m_currentVelocityXZ = new Vector3(_dir.x, 0, _dir.z) * speed;
+            m_currentVelocityY = _dir.y * speed;
+
+        }
+        public void HandleFlightRotation()
+        {
+            if (m_currentDir.sqrMagnitude < 0.01f) return;
+
+            Quaternion _targetRot = Quaternion.LookRotation(m_currentDir);
+
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                _targetRot,
+                Time.deltaTime * 10f
+            );
         }
     }
 }
