@@ -1,37 +1,60 @@
 // RootComposition : 조립(최상위)
-// Boundary : 입력/외부 이벤트
+// Boundary : 외부 이벤트 입력/출력(수행)
 // Flow : 흐름 제어
-// Module : 기능 수행
+// Module : 기능 연산 위주, 수행은 플젝 작을 경우 같이해도 무방
 
 using UnityEngine;
 using alpha.player.boundary;
 using alpha.player.module;
+using alpha.player.flow;
 
 // 플레이어의 전체적인 연결 관리
 namespace alpha.player
 {
+    [RequireComponent(typeof(PlayerCharacterControllerBoudary))]
     [RequireComponent(typeof(PlayerAnimationBoundary))]
+    [RequireComponent(typeof(PlayerStateMachineFlow))]
     [RequireComponent(typeof(PlayerLocomotionModule))]
     public class PlayerCore : MonoBehaviour
     {
-        // Event
-        private InputSystemBoundary m_inputSystemBoundary;
-        
-        [SerializeField] private PlayerAnimationBoundary m_aniBoundary;
+        // 외부 Bind
+        public InputSystemBoundary InputSystemBoundary { get; private set; }
 
-        [SerializeField] private PlayerLocomotionModule m_locomotionModule;
+        #region 내부
+        // Boundary
+        public PlayerAnimationBoundary AnimBoundary { get; private set; }
+        public PlayerCharacterControllerBoudary CharacterCtrlBoudary { get; private set; }
+
+        // Flow
+        public PlayerStateMachineFlow StateMachineFlow { get; private set; }
+
+        // Module
+        public PlayerLocomotionModule LocomotionModule { get; private set; }
+        #endregion
+
         private void Awake()
         {
-            m_aniBoundary = GetComponent<PlayerAnimationBoundary>();
+            // Boundary
+            AnimBoundary = GetComponent<PlayerAnimationBoundary>();
+            CharacterCtrlBoudary = GetComponent<PlayerCharacterControllerBoudary>();
+            
+            // Flow
+            StateMachineFlow = GetComponent<PlayerStateMachineFlow>();
 
-            m_locomotionModule = GetComponent<PlayerLocomotionModule>();
+            // Module
+            LocomotionModule = GetComponent<PlayerLocomotionModule>();
         }
 
         public void Bind(InputSystemBoundary inputSystemBoundary)
         {
-            m_inputSystemBoundary = inputSystemBoundary;
+            InputSystemBoundary = inputSystemBoundary;
 
-            m_locomotionModule.Bind(m_inputSystemBoundary, m_aniBoundary);
+            StateMachineFlow.Bind(this);
+        }
+
+        private void Start()
+        {
+            
         }
 
         // Update is called once per frame

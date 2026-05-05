@@ -14,6 +14,8 @@ GameObject:
   - component: {fileID: 7607785541208430536}
   - component: {fileID: 2191524596123845827}
   - component: {fileID: 7755682499213568396}
+  - component: {fileID: 8038352877082054449}
+  - component: {fileID: 4874161090121348083}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -97,8 +99,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a57a2cea67e7f9c489fdfc983e202128, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_aniBoundary: {fileID: 2191524596123845827}
-  m_locomotionModule: {fileID: 7755682499213568396}
 --- !u!114 &2191524596123845827
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124,21 +124,47 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3d580ec5ddd1fb947b078fd2d3387cba, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_characterController: {fileID: 3196930623124620514}
   m_baseMoveSpeed: 8
   m_combatMoveSpeed: 5
-  m_rotationSpeed: 0
+  m_rotationsmoothTime: 0.1
+  m_jumpPower: 3
+  m_jumpDirshorten: 0.5
+  m_fallMultiplier: 2
+  m_dashDistance: 10
+  m_dashDuration: 0.5
+  m_dashEndDuration: 0.2
+  m_flyUpPower: 0
+  m_gravityPower: -9.8
+--- !u!114 &8038352877082054449
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1181273884135749401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8dcb9ee05e6efcd4884a5c9ad8a25a7c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_characterCtrl: {fileID: 3196930623124620514}
   m_groundDistance: 0.25
   m_groundMask:
     serializedVersion: 2
     m_Bits: 64
-  m_jumpPower: 3
-  m_jumpDirshorten: 0.5
-  m_fallMultiplier: 2
-  m_landDuration: 0.3
-  m_dashPower: 0
-  m_flyUpPower: 0
-  m_gravityPower: -9.8
+--- !u!114 &4874161090121348083
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1181273884135749401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e02993076c5d054cac0416c88d383e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_locoStateText: {fileID: 0}
 --- !u!1 &3165884031288782390
 GameObject:
   m_ObjectHideFlags: 0
