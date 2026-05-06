@@ -6,12 +6,17 @@ namespace alpha.player.flow.locomotion
     {
         public override void Enter(PlayerCore playerCore)
         {
-            playerCore.AnimBoundary.FallAnim();
+            var _loco = playerCore.LocomotionModule;
+            var _anim = playerCore.AnimBoundary;
+            
+            _loco.SetupFall();
+            _anim.FallAnim();
         }
 
         public override void Update(PlayerCore playerCore)
         {
             var _loco = playerCore.LocomotionModule;
+            var _input = playerCore.InputSystemBoundary;
             var _ctrl = playerCore.CharacterCtrlBoudary;
             var _state = playerCore.StateMachineFlow;
 
@@ -35,6 +40,10 @@ namespace alpha.player.flow.locomotion
             if (_isGroundHit)
             {
                 _state.ChangeLocoState(LocomotionStateType.Land);
+            }
+            else if(_input.IsFlyInput)
+            {
+                _state.ChangeLocoState(LocomotionStateType.FlyUp);
             }
         }
 

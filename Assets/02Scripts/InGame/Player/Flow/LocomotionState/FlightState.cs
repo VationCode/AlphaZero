@@ -26,6 +26,11 @@ namespace alpha.player.flow.locomotion
             // 실제 이동
             _ctrl.SetMove(_finalVelocity);
             _anim.FlightAnim(_horizontal);
+
+            if(_input.IsFlyInput)
+            {
+                _state.ChangeLocoState(LocomotionStateType.Fall);
+            }
         }
 
         public override void Exit(PlayerCore playerCore)

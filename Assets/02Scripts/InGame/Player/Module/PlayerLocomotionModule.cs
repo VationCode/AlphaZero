@@ -196,6 +196,20 @@ namespace alpha.player.module
             // 수직 속도 설정
             m_currentVelocityY = Mathf.Sqrt(m_jumpPower * -2f * m_gravityPower);
         }
+        // ==================== Fall
+        public void SetupFall()
+        {
+            // 현재 바라보는 방향을 수평으로 보정
+            Vector3 dir = transform.forward;
+            dir.y = 0f;
+
+            if (dir.sqrMagnitude > 0.01f)
+            {
+                dir.Normalize();
+                m_currentDir = dir;
+                HandleRotation(true);
+            }
+        }
 
         // ==================== Dash 
         public void SetupDash(Vector3 inputDir)

@@ -34,6 +34,9 @@ namespace alpha.player.flow.locomotion
             // ==================== 연산
             bool isRising = _loco.UpdateFlyUp();
             Vector3 _finalVelocity = _loco.GetFinalVelocity();
+            // x,z 방향값 제거하여 수직 상승으로
+            _finalVelocity.x = 0;
+            _finalVelocity.z = 0;
 
             // ==================== 적용
             // 실제 이동
