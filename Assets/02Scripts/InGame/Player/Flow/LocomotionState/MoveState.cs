@@ -1,8 +1,8 @@
 using UnityEngine;
-using static UnityEditor.Searcher.SearcherWindow.Alignment;
+using alpha.player.state;
 
 
-namespace alpha.player.flow.locomotion
+namespace alpha.player.locomotion
 {
     public class MoveState : PlayerStateBase
     {
@@ -44,19 +44,19 @@ namespace alpha.player.flow.locomotion
             // ==================== 상태 전환
             if (_input.IsJumpInput)
             {
-                _state.ChangeLocoState(LocomotionStateType.JumpUp);
+                _state.ChangeLocoState(ELocomotionStateType.JumpUp);
             }
             else if (_input.IsDashInput)
             {
-                _state.ChangeLocoState(LocomotionStateType.Dash);
+                _state.ChangeLocoState(ELocomotionStateType.Dash);
             }
             else if (!_isGroundHit)
             {
-                _state.ChangeLocoState(LocomotionStateType.Fall);
+                _state.ChangeLocoState(ELocomotionStateType.Fall);
             }
             else if (_input.IsFlyInput)
             {
-                _state.ChangeLocoState(LocomotionStateType.FlyUp);
+                _state.ChangeLocoState(ELocomotionStateType.FlyUp);
             }
         }
 

@@ -1,5 +1,7 @@
 using UnityEngine;
-namespace alpha.player.flow.locomotion
+using alpha.player.state;
+
+namespace alpha.player.locomotion
 {
     public class DashState : PlayerStateBase
     {
@@ -40,7 +42,7 @@ namespace alpha.player.flow.locomotion
                 m_timer += Time.deltaTime;
                 if (m_waitingTime > m_timer)
                 {
-                    playerCore.StateMachineFlow.ChangeLocoState(LocomotionStateType.Move);
+                    playerCore.StateMachineFlow.ChangeLocoState(ELocomotionStateType.Move);
                 }
             }
 

@@ -1,6 +1,4 @@
-using alpha.camera.module;
-using alpha.player.boundary;
-using alpha.player.module;
+using alpha.input;
 using UnityEngine;
 
 namespace alpha.camera

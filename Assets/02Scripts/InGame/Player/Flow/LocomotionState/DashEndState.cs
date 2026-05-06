@@ -1,5 +1,7 @@
 using UnityEngine;
-namespace alpha.player.flow.locomotion
+using alpha.player.state;
+
+namespace alpha.player.locomotion
 {
     public class DashEndState : PlayerStateBase
     {

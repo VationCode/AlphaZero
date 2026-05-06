@@ -1,12 +1,16 @@
-// RootComposition : 조립(최상위)
-// Boundary : 외부 이벤트 입력/출력(수행)
-// Flow : 흐름 제어
-// Module : 기능 연산 위주, 수행은 플젝 작을 경우 같이해도 무방
+// RootComposition: 전체 조립 / DI
+// Boundary: 외부와 연결(입력 / 출력 전달만)
+// Domain : 데이터 / 개념
+// Flow: 상태 / 흐름 / 의사결정
+// Module: 기능 실행
 
 using UnityEngine;
-using alpha.player.boundary;
-using alpha.player.module;
-using alpha.player.flow;
+using alpha.input;
+using alpha.player.anim;
+using alpha.player.contorller;
+using alpha.player.state;
+using alpha.player.locomotion;
+using alpha.player.combat;
 
 // 플레이어의 전체적인 연결 관리
 namespace alpha.player
@@ -15,6 +19,7 @@ namespace alpha.player
     [RequireComponent(typeof(PlayerAnimationBoundary))]
     [RequireComponent(typeof(PlayerStateMachineFlow))]
     [RequireComponent(typeof(PlayerLocomotionModule))]
+    [RequireComponent(typeof(PlayerCombatModule))]
     public class PlayerCore : MonoBehaviour
     {
         // 외부 Bind
@@ -30,6 +35,7 @@ namespace alpha.player
 
         // Module
         public PlayerLocomotionModule LocomotionModule { get; private set; }
+        public PlayerCombatModule CombatModule { get; private set; }
         #endregion
 
         private void Awake()

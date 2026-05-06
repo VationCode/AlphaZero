@@ -1,5 +1,7 @@
 using UnityEngine;
-namespace alpha.player.flow.locomotion
+using alpha.player.state;
+
+namespace alpha.player.locomotion
 {
     public class IdleState : PlayerStateBase
     {
@@ -10,7 +12,7 @@ namespace alpha.player.flow.locomotion
         public override void Update(PlayerCore playerCore)
         {
             if (playerCore.InputSystemBoundary.MoveInputDir != Vector2.zero)
-                playerCore.StateMachineFlow.ChangeLocoState(LocomotionStateType.Move);
+                playerCore.StateMachineFlow.ChangeLocoState(ELocomotionStateType.Move);
         }
 
         public override void Exit(PlayerCore playerCore)

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace alpha.player.boundary
+namespace alpha.player.anim
 {
     public class PlayerAnimationBoundary : MonoBehaviour
     {

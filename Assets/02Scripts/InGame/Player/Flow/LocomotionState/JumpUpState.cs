@@ -1,6 +1,7 @@
 using UnityEngine;
+using alpha.player.state;
 
-namespace alpha.player.flow.locomotion
+namespace alpha.player.locomotion
 {
     public class JumpUpState : PlayerStateBase
     {
@@ -40,7 +41,7 @@ namespace alpha.player.flow.locomotion
             // ==================== 상태 전환
             if (_finalVelocity.y <= 0)
             {
-                _state.ChangeLocoState(LocomotionStateType.Fall);
+                _state.ChangeLocoState(ELocomotionStateType.Fall);
             }
         }
 

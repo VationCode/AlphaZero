@@ -1,7 +1,7 @@
 // Module : 기능 연산 위주
 using UnityEngine;
 
-namespace alpha.player.module
+namespace alpha.player.locomotion
 {
     // 플레이어의 이동과 관련된 기능들을 담당하는 모듈
     public class PlayerLocomotionModule : MonoBehaviour

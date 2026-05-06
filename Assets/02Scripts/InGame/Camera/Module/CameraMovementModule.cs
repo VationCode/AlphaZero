@@ -1,7 +1,7 @@
-using alpha.player.boundary;
+using alpha.input;
 using UnityEngine;
 
-namespace alpha.camera.module
+namespace alpha.camera
 {
     public class CameraMovementModule : MonoBehaviour
     {

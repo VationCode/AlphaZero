@@ -1,5 +1,7 @@
 using UnityEngine;
-namespace alpha.player.flow.locomotion
+using alpha.player.state;
+
+namespace alpha.player.locomotion
 {
     public class FlightState : PlayerStateBase
     {
@@ -29,7 +31,7 @@ namespace alpha.player.flow.locomotion
 
             if(_input.IsFlyInput)
             {
-                _state.ChangeLocoState(LocomotionStateType.Fall);
+                _state.ChangeLocoState(ELocomotionStateType.Fall);
             }
         }
 

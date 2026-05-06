@@ -1,6 +1,7 @@
 using UnityEngine;
+using alpha.player.state;
 
-namespace alpha.player.flow.locomotion
+namespace alpha.player.locomotion
 {
     public class DieState : PlayerStateBase
     {

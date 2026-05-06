@@ -1,6 +1,7 @@
 using UnityEngine;
+using alpha.player.state;
 
-namespace alpha.player.flow.locomotion
+namespace alpha.player.locomotion
 {
     public class LandState : PlayerStateBase
     {
@@ -19,7 +20,7 @@ namespace alpha.player.flow.locomotion
 
             if (m_timer >= m_waitingTime)
             {
-                playerCore.StateMachineFlow.ChangeLocoState(LocomotionStateType.Move);
+                playerCore.StateMachineFlow.ChangeLocoState(ELocomotionStateType.Move);
             }
         }
 

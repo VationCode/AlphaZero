@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace alpha.player.boundary
+namespace alpha.player.contorller
 {
     // 리지드바디와의 차이
     // 물리영향거의x, 직접스크립트제어 방식

@@ -1,6 +1,7 @@
 using UnityEngine;
+using alpha.player.state;
 
-namespace alpha.player.flow.locomotion
+namespace alpha.player.locomotion
 {
     public class FallState : PlayerStateBase
     {
@@ -39,11 +40,11 @@ namespace alpha.player.flow.locomotion
             // ==================== 상태 전환
             if (_isGroundHit)
             {
-                _state.ChangeLocoState(LocomotionStateType.Land);
+                _state.ChangeLocoState(ELocomotionStateType.Land);
             }
             else if(_input.IsFlyInput)
             {
-                _state.ChangeLocoState(LocomotionStateType.FlyUp);
+                _state.ChangeLocoState(ELocomotionStateType.FlyUp);
             }
         }
 

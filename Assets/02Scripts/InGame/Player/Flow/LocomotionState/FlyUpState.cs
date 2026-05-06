@@ -1,6 +1,7 @@
 using UnityEngine;
-using static Unity.Collections.AllocatorManager;
-namespace alpha.player.flow.locomotion
+using alpha.player.state;
+
+namespace alpha.player.locomotion
 {
     public class FlyUpState : PlayerStateBase
     {
@@ -44,7 +45,7 @@ namespace alpha.player.flow.locomotion
 
             if (!isRising)
             {
-                _state.ChangeLocoState(LocomotionStateType.Flight);
+                _state.ChangeLocoState(ELocomotionStateType.Flight);
             }
         }
 

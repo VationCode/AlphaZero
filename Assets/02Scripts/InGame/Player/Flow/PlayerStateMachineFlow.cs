@@ -1,15 +1,13 @@
-using alpha.player.flow.locomotion;
+using alpha.player.locomotion;
 using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
-using UnityEngine.InputSystem.LowLevel;
 
-namespace alpha.player.flow
+namespace alpha.player.state
 {
-    public enum LocomotionStateType
+    public enum ELocomotionStateType
     {
-        //Idle,
         Move,
         JumpUp,
         Fall,
@@ -17,6 +15,14 @@ namespace alpha.player.flow
         Dash,
         FlyUp,
         Flight
+    }
+
+    public enum ECombatStateType
+    {
+        None,
+        Swap,
+        InCombat,
+        Skill
     }
 
     public class PlayerStateMachineFlow : MonoBehaviour
@@ -28,10 +34,10 @@ namespace alpha.player.flow
 
         private PlayerStateBase m_locoState;
         private PlayerStateBase m_cobatState;
-        private Dictionary<LocomotionStateType, Func<PlayerStateBase>> m_locomotionStateCreateDic;
+        private Dictionary<ELocomotionStateType, Func<PlayerStateBase>> m_locomotionStateCreateDic;
 
 
-        public LocomotionStateType m_currentLocoStateType { get; private set; }
+        public ELocomotionStateType m_currentLocoStateType { get; private set; }
 
         public void Bind(PlayerCore playerCore)
         {
@@ -39,19 +45,19 @@ namespace alpha.player.flow
 
             // 일반 new로 작성시 상태가 현재 Dic 선언시에 객체로 저장이 되어져 그저 해당 상태를 재사용하는꼴임
             // Func을 통한 함수로써 객체를 만든다의 방식은 완전한 새로운 객체를 생성해내는 것
-            m_locomotionStateCreateDic = new Dictionary<LocomotionStateType, Func<PlayerStateBase>>()
+            m_locomotionStateCreateDic = new Dictionary<ELocomotionStateType, Func<PlayerStateBase>>()
             {
                 //{ LocomotionStateType.Idle, () => new IdleState() },
-                { LocomotionStateType.Move, () => new MoveState() },
-                { LocomotionStateType.JumpUp, () => new JumpUpState() },
-                { LocomotionStateType.Fall, () => new FallState() },
-                { LocomotionStateType.Land, () => new LandState() },
-                { LocomotionStateType.Dash, () => new DashState() },
-                { LocomotionStateType.FlyUp, () => new FlyUpState() },
-                { LocomotionStateType.Flight, () => new FlightState() }
+                { ELocomotionStateType.Move, () => new MoveState() },
+                { ELocomotionStateType.JumpUp, () => new JumpUpState() },
+                { ELocomotionStateType.Fall, () => new FallState() },
+                { ELocomotionStateType.Land, () => new LandState() },
+                { ELocomotionStateType.Dash, () => new DashState() },
+                { ELocomotionStateType.FlyUp, () => new FlyUpState() },
+                { ELocomotionStateType.Flight, () => new FlightState() }
             };
 
-            m_locoState = m_locomotionStateCreateDic[LocomotionStateType.Move]();
+            m_locoState = m_locomotionStateCreateDic[ELocomotionStateType.Move]();
             
         }
 
@@ -65,7 +71,7 @@ namespace alpha.player.flow
             //m_cobatState.Update(m_playerCore);
         }
 
-        public void ChangeLocoState(LocomotionStateType newState)
+        public void ChangeLocoState(ELocomotionStateType newState)
         {
             if (m_currentLocoStateType == newState) return;
 

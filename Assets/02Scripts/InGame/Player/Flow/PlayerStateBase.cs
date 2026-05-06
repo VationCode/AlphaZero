@@ -1,7 +1,6 @@
-using alpha.player.module;
 using UnityEngine;
 
-namespace alpha.player.flow
+namespace alpha.player.state
 {
     public abstract class PlayerStateBase
     {
