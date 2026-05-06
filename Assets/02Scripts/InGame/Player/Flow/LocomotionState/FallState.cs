@@ -6,12 +6,17 @@ namespace alpha.player.flow.locomotion
     {
         public override void Enter(PlayerCore playerCore)
         {
-            playerCore.AnimBoundary.FallAnim();
+            var _loco = playerCore.LocomotionModule;
+            var _anim = playerCore.AnimBoundary;
+            
+            _loco.SetupFall();
+            _anim.FallAnim();
         }
 
         public override void Update(PlayerCore playerCore)
         {
             var _loco = playerCore.LocomotionModule;
+            var _input = playerCore.InputSystemBoundary;
             var _ctrl = playerCore.CharacterCtrlBoudary;
             var _state = playerCore.StateMachineFlow;
 
@@ -28,13 +33,17 @@ namespace alpha.player.flow.locomotion
             Vector3 _finalVelocity = _loco.GetFinalVelocity();
 
             // ==================== 적용
-            // 물리
+            // 실제 이동
             _ctrl.SetMove(_finalVelocity);
 
             // ==================== 상태 전환
             if (_isGroundHit)
             {
                 _state.ChangeLocoState(LocomotionStateType.Land);
+            }
+            else if(_input.IsFlyInput)
+            {
+                _state.ChangeLocoState(LocomotionStateType.FlyUp);
             }
         }
 

@@ -9,12 +9,21 @@ namespace alpha.player.boundary
         private Animator m_animator;
         
         #region Config
-        private float m_moveAnismoothTime = 0.1f;
+        //Move
+        private float m_moveAnimsmoothTime = 0.1f;
+
+        //Flight
+        private float m_flightMoveAnimsmoothTime = 0.1f;
         #endregion
 
         #region RunTime
-        private float m_moveAniMagnitude;
-        private float m_moveAniVelocity;
+        //Move
+        private float m_moveAnimMagnitude;
+        private float m_moveAnimVelocity;
+
+        //Flight
+        private float m_flightMoveAnimMagnitude;
+        private float m_flightMoveAnimVelocity;
         #endregion
         private void Awake()
         {
@@ -23,23 +32,23 @@ namespace alpha.player.boundary
 
         public void UpdateGroundMove(Vector3 velocity)
         {
-            Vector3 horizontal = new Vector3(velocity.x, 0f, velocity.z);
+            Vector3 _horizontal = new Vector3(velocity.x, 0f, velocity.z);
 
             if (velocity == Vector3.zero)
             {
-                m_moveAniMagnitude = 0;
+                m_moveAnimMagnitude = 0;
             }
             else
             {
-                m_moveAniMagnitude = Mathf.SmoothDamp(
-                    m_moveAniMagnitude,
-                    horizontal.magnitude,
-                    ref m_moveAniVelocity,
-                    m_moveAnismoothTime
+                m_moveAnimMagnitude = Mathf.SmoothDamp(
+                    m_moveAnimMagnitude,
+                    _horizontal.magnitude,
+                    ref m_moveAnimVelocity,
+                    m_moveAnimsmoothTime
                 );
             }
 
-            m_animator.SetFloat("move", m_moveAniMagnitude);
+            m_animator.SetFloat("Move", m_moveAnimMagnitude);
         }
         public void JumpUpAnim()
         {
@@ -56,6 +65,30 @@ namespace alpha.player.boundary
         public void DashAnim()
         {
             m_animator.Play("Dash");
+        }
+        public void FlyUpAnim()
+        {
+            m_animator.Play("FlyUp");
+        }
+
+        public void FlightCrossFade()
+        {
+            m_animator.CrossFade("FlightTree", 0.2f);
+        }
+        public void FlightAnim(Vector3 velocity)
+        {
+            Vector3 _horizontal = new Vector3(velocity.x, 0f, velocity.z);
+
+
+            m_flightMoveAnimMagnitude = Mathf.SmoothDamp(
+                m_flightMoveAnimMagnitude,
+                _horizontal.magnitude,
+                ref m_flightMoveAnimVelocity,
+                m_flightMoveAnimsmoothTime
+            );
+
+
+            m_animator.SetFloat("FlightMove", m_flightMoveAnimMagnitude);
         }
     }
 }

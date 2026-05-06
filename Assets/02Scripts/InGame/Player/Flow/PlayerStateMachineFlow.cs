@@ -14,8 +14,9 @@ namespace alpha.player.flow
         JumpUp,
         Fall,
         Land,
-        DashStart,
-        DashEnd
+        Dash,
+        FlyUp,
+        Flight
     }
 
     public class PlayerStateMachineFlow : MonoBehaviour
@@ -45,8 +46,9 @@ namespace alpha.player.flow
                 { LocomotionStateType.JumpUp, () => new JumpUpState() },
                 { LocomotionStateType.Fall, () => new FallState() },
                 { LocomotionStateType.Land, () => new LandState() },
-                { LocomotionStateType.DashStart, () => new DashState() },
-                { LocomotionStateType.DashEnd, () => new DashEndState() }
+                { LocomotionStateType.Dash, () => new DashState() },
+                { LocomotionStateType.FlyUp, () => new FlyUpState() },
+                { LocomotionStateType.Flight, () => new FlightState() }
             };
 
             m_locoState = m_locomotionStateCreateDic[LocomotionStateType.Move]();

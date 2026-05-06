@@ -17,6 +17,9 @@ namespace alpha.player.boundary
 
         public bool IsDashInput => m_dashFrame == Time.frameCount;
         private int m_dashFrame;
+
+        public bool IsFlyInput => m_flyFrame == Time.frameCount;
+        private int m_flyFrame;
         //===== CombatInput
 
         #endregion
@@ -40,6 +43,8 @@ namespace alpha.player.boundary
                 m_inputAction.Player.Jump.performed += i => m_jumpFrame = Time.frameCount;
 
                 m_inputAction.Player.Dash.performed += i => m_dashFrame = Time.frameCount;
+
+                m_inputAction.Player.Fly.performed += i => m_flyFrame = Time.frameCount;
                 // 활성화해야 동작
                 m_inputAction.Enable();
             }

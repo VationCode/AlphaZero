@@ -16,7 +16,10 @@ namespace alpha.camera
         {
             m_movementModule = GetComponent<CameraMovementModule>();
         }
-
+        private void Start()
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+        }
         public void Bind(InputSystemBoundary inputSystemBoundary)
         {
             m_inputSystemBoundary = inputSystemBoundary;
