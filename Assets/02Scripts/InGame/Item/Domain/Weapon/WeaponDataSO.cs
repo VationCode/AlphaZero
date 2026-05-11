@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace alpha.ingame.Item.weapon
 {
+
     public enum EWeaponType
     {
         Melee,
@@ -12,10 +13,11 @@ namespace alpha.ingame.Item.weapon
 
     public enum EHandType
     {
-        OneHand,
-        TwoHand
+        Left,
+        Right
     }
 
+    [CreateAssetMenu(fileName = "WeaponData", menuName = "ScriptableObjects/Item/Weapon")]
     public class WeaponDataSO : ItemDataSO
     {
         [Header("[ Weapon ]")]

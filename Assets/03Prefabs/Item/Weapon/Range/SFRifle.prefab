@@ -30,7 +30,39 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 518531923747232954}
+  - {fileID: 7044830093688568780}
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6780513074993115842
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7044830093688568780}
+  m_Layer: 0
+  m_Name: LeftAttach
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7044830093688568780
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6780513074993115842}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.044, y: -0, z: 0.353}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6912780545697003933}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &815711758588300653
 PrefabInstance:
@@ -66,23 +98,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 892785352532857303, guid: 88e1b14468d4ff443aee551ebf0c482d, type: 3}
       propertyPath: m_LocalRotation.w
-      value: -0.019355655
+      value: 0.0032023985
       objectReference: {fileID: 0}
     - target: {fileID: 892785352532857303, guid: 88e1b14468d4ff443aee551ebf0c482d, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0.7235599
+      value: 0.7240135
       objectReference: {fileID: 0}
     - target: {fileID: 892785352532857303, guid: 88e1b14468d4ff443aee551ebf0c482d, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0.68954253
+      value: -0.6897701
       objectReference: {fileID: 0}
     - target: {fileID: 892785352532857303, guid: 88e1b14468d4ff443aee551ebf0c482d, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0.02485155
+      value: -0.0033613804
       objectReference: {fileID: 0}
     - target: {fileID: 892785352532857303, guid: 88e1b14468d4ff443aee551ebf0c482d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
-      value: -3.571
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 892785352532857303, guid: 88e1b14468d4ff443aee551ebf0c482d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y

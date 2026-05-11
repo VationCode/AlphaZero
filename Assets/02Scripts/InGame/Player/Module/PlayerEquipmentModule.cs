@@ -10,12 +10,13 @@ namespace alpha.player.equipment
         private Transform m_weaponHolderR;
 
         #region RunTime
-        private GameObject m_currentWeapon;
+        private int m_currentWeaponIndex;
         #endregion
 
         public void OnSwap(int swapNum)
         {
 
+            m_currentWeaponIndex = swapNum;
         }
     }
 }
