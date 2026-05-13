@@ -39,9 +39,9 @@ namespace alpha.player.state
 
         public ELocomotionStateType m_currentLocoStateType { get; private set; }
 
-        public void Bind(PlayerCore playerCore)
+        public void Bind(PlayerCore p_playerCore)
         {
-            m_playerCore = playerCore;
+            m_playerCore = p_playerCore;
 
             // 일반 new로 작성시 상태가 현재 Dic 선언시에 객체로 저장이 되어져 그저 해당 상태를 재사용하는꼴임
             // Func을 통한 함수로써 객체를 만든다의 방식은 완전한 새로운 객체를 생성해내는 것
@@ -71,13 +71,13 @@ namespace alpha.player.state
             //m_cobatState.Update(m_playerCore);
         }
 
-        public void ChangeLocoState(ELocomotionStateType newState)
+        public void ChangeLocoState(ELocomotionStateType p_newState)
         {
-            if (m_currentLocoStateType == newState) return;
+            if (m_currentLocoStateType == p_newState) return;
 
             m_locoState?.Exit(m_playerCore);
-            m_locoState = m_locomotionStateCreateDic[newState]();
-            m_currentLocoStateType = newState;
+            m_locoState = m_locomotionStateCreateDic[p_newState]();
+            m_currentLocoStateType = p_newState;
 
             m_locoState.Enter(m_playerCore);
         }

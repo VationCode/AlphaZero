@@ -23,9 +23,9 @@ namespace alpha.player.contorller
             m_characterCtrl = GetComponent<CharacterController>();
         }
 
-        public void SetMove(Vector3 finalVelocity)
+        public void SetMove(Vector3 p_finalVelocity)
         {
-            m_characterCtrl.Move(finalVelocity * Time.deltaTime);
+            m_characterCtrl.Move(p_finalVelocity * Time.deltaTime);
         }
 
         public bool CheckGround()

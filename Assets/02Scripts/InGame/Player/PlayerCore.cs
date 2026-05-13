@@ -51,9 +51,9 @@ namespace alpha.player
             LocomotionModule = GetComponent<PlayerLocomotionModule>();
         }
 
-        public void Bind(InputSystemBoundary inputSystemBoundary)
+        public void Bind(InputSystemBoundary p_inputSystemBoundary)
         {
-            InputSystemBoundary = inputSystemBoundary;
+            InputSystemBoundary = p_inputSystemBoundary;
 
             StateMachineFlow.Bind(this);
         }

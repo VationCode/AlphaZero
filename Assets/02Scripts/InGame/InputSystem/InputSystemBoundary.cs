@@ -59,9 +59,9 @@ namespace alpha.input
         }
 
         // Numpad 대응
-        private void OnSwap(InputAction.CallbackContext context)
+        private void OnSwap(InputAction.CallbackContext p_context)
         {
-            string key = context.control.displayName;
+            string key = p_context.control.displayName;
 
             if (int.TryParse(key, out int number))
             {

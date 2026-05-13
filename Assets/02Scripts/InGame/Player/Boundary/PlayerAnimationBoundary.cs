@@ -30,11 +30,11 @@ namespace alpha.player.anim
             m_animator = GetComponentInChildren<Animator>();
         }
 
-        public void UpdateGroundMove(Vector3 velocity)
+        public void UpdateGroundMove(Vector3 p_velocity)
         {
-            Vector3 _horizontal = new Vector3(velocity.x, 0f, velocity.z);
+            Vector3 horizontal = new Vector3(p_velocity.x, 0f, p_velocity.z);
 
-            if (velocity == Vector3.zero)
+            if (horizontal == Vector3.zero)
             {
                 m_moveAnimMagnitude = 0;
             }
@@ -42,7 +42,7 @@ namespace alpha.player.anim
             {
                 m_moveAnimMagnitude = Mathf.SmoothDamp(
                     m_moveAnimMagnitude,
-                    _horizontal.magnitude,
+                    horizontal.magnitude,
                     ref m_moveAnimVelocity,
                     m_moveAnimsmoothTime
                 );
@@ -75,14 +75,14 @@ namespace alpha.player.anim
         {
             m_animator.CrossFade("FlightTree", 0.2f);
         }
-        public void FlightAnim(Vector3 velocity)
+        public void FlightAnim(Vector3 p_velocity)
         {
-            Vector3 _horizontal = new Vector3(velocity.x, 0f, velocity.z);
+            Vector3 horizontal = new Vector3(p_velocity.x, 0f, p_velocity.z);
 
 
             m_flightMoveAnimMagnitude = Mathf.SmoothDamp(
                 m_flightMoveAnimMagnitude,
-                _horizontal.magnitude,
+                horizontal.magnitude,
                 ref m_flightMoveAnimVelocity,
                 m_flightMoveAnimsmoothTime
             );

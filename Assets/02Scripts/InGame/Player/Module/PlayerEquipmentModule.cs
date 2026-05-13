@@ -42,10 +42,10 @@ namespace alpha.player.equipment
             }
         }
 
-        public void OnSwap(int swapNum)
+        public void OnSwap(int p_swapNum)
         {
 
-            m_currentWeaponIndex = swapNum;
+            m_currentWeaponIndex = p_swapNum;
         }
     }
 }

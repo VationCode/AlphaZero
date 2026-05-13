@@ -8,23 +8,23 @@ namespace alpha.player.locomotion
         private float m_timer;
         private float m_waitingTime = 0.2f; // 애니 길이에 맞춤
 
-        public override void Enter(PlayerCore playerCore)
+        public override void Enter(PlayerCore p_playerCore)
         {
             m_timer = 0f;
-            playerCore.AnimBoundary.LandAnim();
+            p_playerCore.AnimBoundary.LandAnim();
         }
 
-        public override void Update(PlayerCore playerCore)
+        public override void Update(PlayerCore p_playerCore)
         {
             m_timer += Time.deltaTime;
 
             if (m_timer >= m_waitingTime)
             {
-                playerCore.StateMachineFlow.ChangeLocoState(ELocomotionStateType.Move);
+                p_playerCore.StateMachineFlow.ChangeLocoState(ELocomotionStateType.Move);
             }
         }
 
-        public override void Exit(PlayerCore playerCore)
+        public override void Exit(PlayerCore p_playerCore)
         {
 
         }
