@@ -11,10 +11,10 @@ namespace alpha.Item
         Material,       // 강화재료
         Quest
     }
+
     public class ItemDataSO : ScriptableObject
     {
         public string ItemName;
         public EItemType ItemType;
-        public GameObject itemObj;
     }
 }

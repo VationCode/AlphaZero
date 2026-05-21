@@ -10,10 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2a581dbf332d5904d931add769ec2e68, type: 3}
-  m_Name: KatanaL
+  m_Name: SFSniper
   m_EditorClassIdentifier: 
-  ItemName: DualSword
+  ItemName: SFSniper
   ItemType: 0
-  itemObj: {fileID: 9081512727185109091, guid: 0b067016f69dfea43944eb7ddef1632f, type: 3}
-  WeaponType: 0
-  HandType: 0
+  WeaponType: 2
+  WeaponHandType: 1
+  WeaponDatas:
+  - itemObj: {fileID: 6339225950026296182, guid: a2f64ea932076b64e90716aa8e51d426, type: 3}
+    WeaponHolderType: 0

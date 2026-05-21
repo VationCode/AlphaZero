@@ -7,8 +7,8 @@ namespace alpha.player.locomotion
     {
         private float m_startTimer;
         private float m_startWaitingTime = 0.3f;
-        private float m_nextTimer;
-        private float m_nextWaitingTime = 0.2f; // 애니 길이에 맞춤
+
+        public override EBlockedCombatAction BlockedCombatAction => EBlockedCombatAction.Swap | EBlockedCombatAction.InCombat | EBlockedCombatAction.Attack | EBlockedCombatAction.Skill;
         public override void Enter(PlayerCore p_playerCore)
         {
             m_startTimer = 0;

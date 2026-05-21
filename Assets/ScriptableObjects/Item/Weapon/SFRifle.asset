@@ -10,10 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2a581dbf332d5904d931add769ec2e68, type: 3}
-  m_Name: KatanaR
+  m_Name: SFRifle
   m_EditorClassIdentifier: 
-  ItemName: DualSword
+  ItemName: SFRifle
   ItemType: 0
-  itemObj: {fileID: 5315732624092499729, guid: 8208038e1e6c8ff4a99c6be587f59399, type: 3}
-  WeaponType: 0
-  HandType: 1
+  WeaponType: 1
+  WeaponHandType: 1
+  WeaponDatas:
+  - itemObj: {fileID: 8050416698865725801, guid: cdd55079b069bd546abbc85ba8035979, type: 3}
+    WeaponHolderType: 0

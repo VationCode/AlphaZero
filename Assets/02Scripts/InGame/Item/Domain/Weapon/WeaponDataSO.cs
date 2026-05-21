@@ -1,4 +1,5 @@
 using alpha.Item;
+using System;
 using UnityEngine;
 
 namespace alpha.ingame.Item.weapon
@@ -6,15 +7,29 @@ namespace alpha.ingame.Item.weapon
 
     public enum EWeaponType
     {
-        Melee,
-        Range,
-        Special
+        Melee = 0,
+        Range = 1,
+        Special = 2
     }
 
-    public enum EHandType
+    public enum EWeaponHandType
     {
+        OneHand,
+        TwoHand,
+        DualWield
+    }
+
+    public enum EWeaponHolderType
+    {
+        Right,
         Left,
-        Right
+    }
+
+    [Serializable]
+    public struct EWeaponData
+    {
+        public GameObject itemObj;
+        public EWeaponHolderType WeaponHolderType;
     }
 
     [CreateAssetMenu(fileName = "WeaponData", menuName = "ScriptableObjects/Item/Weapon")]
@@ -22,6 +37,7 @@ namespace alpha.ingame.Item.weapon
     {
         [Header("[ Weapon ]")]
         public EWeaponType WeaponType;
-        public EHandType HandType;
+        public EWeaponHandType WeaponHandType;
+        public EWeaponData[] WeaponDatas;
     }
 }

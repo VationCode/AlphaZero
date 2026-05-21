@@ -5,6 +5,8 @@ namespace alpha.player.locomotion
 {
     public class JumpUpState : PlayerStateBase
     {
+        public override EBlockedCombatAction BlockedCombatAction => EBlockedCombatAction.Swap | EBlockedCombatAction.InCombat | EBlockedCombatAction.Attack | EBlockedCombatAction.Skill;
+
         public override void Enter(PlayerCore p_playerCore)
         {
             var loco = p_playerCore.LocomotionModule;
