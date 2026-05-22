@@ -151,7 +151,7 @@ namespace alpha.player.state
         }
 
 
-        public void ChangeCobatState(ECombatStateType p_newState)
+        public void ChangeCombatState(ECombatStateType p_newState)
         {
             if (!CanChangeCombatState(p_newState))return;
 

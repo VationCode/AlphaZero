@@ -7,8 +7,10 @@ namespace alpha.player.anim
         // Ref
         [SerializeField]
         private Animator m_animator;
-        
+
         #region Config
+        [SerializeField] private float m_blendSpeed = 8f;
+
         //Move
         private float m_moveAnimsmoothTime = 0.1f;
 
@@ -24,10 +26,19 @@ namespace alpha.player.anim
         //Flight
         private float m_flightMoveAnimMagnitude;
         private float m_flightMoveAnimVelocity;
+
+
+        #endregion
+
+        #region RunTime
+        private int m_currentLayerIndex = 0;
+        private int m_targetLayerIndex = 0;
+
         #endregion
         private void Awake()
         {
             m_animator = GetComponentInChildren<Animator>();
+            m_currentLayerIndex = 0;
         }
 
         public void UpdateGroundMove(Vector3 p_velocity)
@@ -79,7 +90,6 @@ namespace alpha.player.anim
         {
             Vector3 horizontal = new Vector3(p_velocity.x, 0f, p_velocity.z);
 
-
             m_flightMoveAnimMagnitude = Mathf.SmoothDamp(
                 m_flightMoveAnimMagnitude,
                 horizontal.magnitude,
@@ -89,6 +99,37 @@ namespace alpha.player.anim
 
 
             m_animator.SetFloat("FlightMove", m_flightMoveAnimMagnitude);
+        }
+
+        // Combat
+        public void SwapAnim(int p_swapNum)
+        {
+            m_animator.CrossFade("Swap", 0.1f);
+            m_currentLayerIndex = p_swapNum;
+        }
+        public void ChangeLayer(int p_targetLayer)
+        {
+            m_targetLayerIndex = p_targetLayer;
+        }
+
+        public void BlendLayers(int p_targetLayerNum)
+        {
+            int layerCount = m_animator.layerCount;
+
+            for (int i = 0; i < layerCount; i++)
+            {
+                float currentWeight = m_animator.GetLayerWeight(i);
+
+                float targetWeight =
+                    i == p_targetLayerNum ? 1f : 0f;
+
+                float nextWeight = Mathf.Lerp(
+                    currentWeight,
+                    targetWeight,
+                    Time.deltaTime * m_blendSpeed);
+
+                m_animator.SetLayerWeight(i, nextWeight);
+            }
         }
     }
 }

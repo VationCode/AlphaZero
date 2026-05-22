@@ -11,6 +11,7 @@ using alpha.player.contorller;
 using alpha.player.state;
 using alpha.player.locomotion;
 using alpha.player.combat;
+using alpha.player.equipment;
 
 // 플레이어의 전체적인 연결 관리
 namespace alpha.player
@@ -18,6 +19,7 @@ namespace alpha.player
     [RequireComponent(typeof(PlayerCharacterControllerBoudary))]
     [RequireComponent(typeof(PlayerAnimationBoundary))]
     [RequireComponent(typeof(PlayerStateMachineFlow))]
+    [RequireComponent(typeof(PlayerEquipmentModule))]
     [RequireComponent(typeof(PlayerLocomotionModule))]
     [RequireComponent(typeof(PlayerCombatModule))]
     public class PlayerCore : MonoBehaviour
@@ -36,6 +38,7 @@ namespace alpha.player
         // Module
         public PlayerLocomotionModule LocomotionModule { get; private set; }
         public PlayerCombatModule CombatModule { get; private set; }
+        public PlayerEquipmentModule EquipmentModule { get; private set; }
         #endregion
 
         private void Awake()
@@ -49,6 +52,8 @@ namespace alpha.player
 
             // Module
             LocomotionModule = GetComponent<PlayerLocomotionModule>();
+            CombatModule = GetComponent<PlayerCombatModule>();
+            EquipmentModule = GetComponent<PlayerEquipmentModule>();
         }
 
         public void Bind(InputSystemBoundary p_inputSystemBoundary)

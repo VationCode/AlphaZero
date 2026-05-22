@@ -31,6 +31,15 @@ namespace alpha.player.equipment
             OnSwap(0);
         }
 
+        public int GetCurrentSwapNum()
+        {
+            return m_currentWeaponIndex;
+        }
+        public void SetSwapNum(int p_swapNum)
+        {
+            m_currentWeaponIndex = p_swapNum;
+        }
+
         public void OnSwap(int p_swapNum)
         {
             if (m_weaponSlotsR[p_swapNum].WeaponData == null) return;
@@ -43,7 +52,6 @@ namespace alpha.player.equipment
 
             m_weaponSlotsR[p_swapNum].gameObject.SetActive(true);
 
-            m_currentWeaponIndex = p_swapNum;
             m_currentWeaponData = m_weaponSlotsR[p_swapNum].WeaponData;
 
             if (m_weaponSlotsL[p_swapNum].WeaponData != null)
