@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2a581dbf332d5904d931add769ec2e68, type: 3}
+  m_Name: SFRifle
+  m_EditorClassIdentifier: 
+  ItemName: SFRifle
+  ItemType: 0
+  WeaponType: 1
+  WeaponHandType: 1
+  WeaponDatas:
+  - itemObj: {fileID: 8050416698865725801, guid: cdd55079b069bd546abbc85ba8035979, type: 3}
+    WeaponHolderType: 0

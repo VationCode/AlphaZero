@@ -1,16 +1,18 @@
 using alpha.camera;
-using alpha.player.boundary;
+using alpha.input;
 using UnityEngine;
-using static UnityEngine.InputManagerEntry;
 
-public class CameraInstaller : MonoBehaviour
+namespace alpha.installer
 {
-    [SerializeField]
-    private CameraCore m_cameraCore;
-    [SerializeField]
-    private InputSystemBoundary m_inputSystemBoundary;
-    public void Install()
+    public class CameraInstaller : MonoBehaviour
     {
-        m_cameraCore.Bind(m_inputSystemBoundary);
+        [SerializeField]
+        private CameraCore m_cameraCore;
+        [SerializeField]
+        private InputSystemBoundary m_inputSystemBoundary;
+        public void Install()
+        {
+            m_cameraCore.Bind(m_inputSystemBoundary);
+        }
     }
 }

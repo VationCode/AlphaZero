@@ -1,52 +1,56 @@
 using UnityEngine;
-namespace alpha.player.flow.locomotion
+using alpha.player.state;
+
+namespace alpha.player.locomotion
 {
     public class DashState : PlayerStateBase
     {
         private float m_timer;
         private float m_waitingTime = 0.2f; // 애니 길이에 맞춤
-        public override void Enter(PlayerCore playerCore)
+
+        public override EBlockedCombatAction BlockedCombatAction => EBlockedCombatAction.Swap | EBlockedCombatAction.InCombat | EBlockedCombatAction.Attack | EBlockedCombatAction.Skill;
+        public override void Enter(PlayerCore p_playerCore)
         {
             m_timer = 0;
 
-            var _loco = playerCore.LocomotionModule;
-            var _anim = playerCore.AnimBoundary;
+            var loco = p_playerCore.LocomotionModule;
+            var anim = p_playerCore.AnimBoundary;
 
-            Vector3 _dir = _loco.GetLastDirection();
-            _loco.SetupDash(_dir);
+            Vector3 dir = loco.GetLastDirection();
+            loco.SetupDash(dir);
 
-            _anim.DashAnim();
+            anim.DashAnim();
         }
 
-        public override void Update(PlayerCore playerCore)
+        public override void Update(PlayerCore p_playerCore)
         {
-            var _loco = playerCore.LocomotionModule;
-            var _ctrl = playerCore.CharacterCtrlBoudary;
-            var _state = playerCore.StateMachineFlow;
+            var loco = p_playerCore.LocomotionModule;
+            var ctrl = p_playerCore.CharacterCtrlBoudary;
+            var state = p_playerCore.StateMachineFlow;
 
             // ==================== 연산
             // 지정 방향으로의 프레임당 이동값
-            bool _isDashing = _loco.UpdateDash();
+            bool isDashing = loco.UpdateDash();
             
             // 최종 반영될 속도 
-            Vector3 _finalVelocity = _loco.GetFinalVelocity();
+            Vector3 finalVelocity = loco.GetFinalVelocity();
 
             // ==================== 적용
             // 실제 이동
-            _ctrl.SetMove(_finalVelocity);
+            ctrl.SetMove(finalVelocity);
 
-            if (!_isDashing)
+            if (!isDashing)
             {
                 m_timer += Time.deltaTime;
                 if (m_waitingTime > m_timer)
                 {
-                    playerCore.StateMachineFlow.ChangeLocoState(LocomotionStateType.Move);
+                    p_playerCore.StateMachineFlow.ChangeLocoState(ELocomotionStateType.Move);
                 }
             }
 
         }
 
-        public override void Exit(PlayerCore playerCore)
+        public override void Exit(PlayerCore p_playerCore)
         {
 
         }

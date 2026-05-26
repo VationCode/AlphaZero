@@ -127,6 +127,15 @@ public partial class @InputActionSystem: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Swap"",
+                    ""type"": ""Button"",
+                    ""id"": ""8f6d3a7c-5106-4466-b843-11f5f9e5e342"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -217,6 +226,39 @@ public partial class @InputActionSystem: IInputActionCollection2, IDisposable
                     ""action"": ""Fly"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""683b56d0-db9b-4295-aa99-e286b403683b"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Swap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""92e29796-5b2a-4723-81ec-918f2e799cb5"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Swap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""d563f43e-c1b5-4b27-94bc-4569043b37d8"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Swap"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -257,6 +299,7 @@ public partial class @InputActionSystem: IInputActionCollection2, IDisposable
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_Dash = m_Player.FindAction("Dash", throwIfNotFound: true);
         m_Player_Fly = m_Player.FindAction("Fly", throwIfNotFound: true);
+        m_Player_Swap = m_Player.FindAction("Swap", throwIfNotFound: true);
         // Camera
         m_Camera = asset.FindActionMap("Camera", throwIfNotFound: true);
         m_Camera_Look = m_Camera.FindAction("Look", throwIfNotFound: true);
@@ -345,6 +388,7 @@ public partial class @InputActionSystem: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_Dash;
     private readonly InputAction m_Player_Fly;
+    private readonly InputAction m_Player_Swap;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -372,6 +416,10 @@ public partial class @InputActionSystem: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Fly".
         /// </summary>
         public InputAction @Fly => m_Wrapper.m_Player_Fly;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/Swap".
+        /// </summary>
+        public InputAction @Swap => m_Wrapper.m_Player_Swap;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -410,6 +458,9 @@ public partial class @InputActionSystem: IInputActionCollection2, IDisposable
             @Fly.started += instance.OnFly;
             @Fly.performed += instance.OnFly;
             @Fly.canceled += instance.OnFly;
+            @Swap.started += instance.OnSwap;
+            @Swap.performed += instance.OnSwap;
+            @Swap.canceled += instance.OnSwap;
         }
 
         /// <summary>
@@ -433,6 +484,9 @@ public partial class @InputActionSystem: IInputActionCollection2, IDisposable
             @Fly.started -= instance.OnFly;
             @Fly.performed -= instance.OnFly;
             @Fly.canceled -= instance.OnFly;
+            @Swap.started -= instance.OnSwap;
+            @Swap.performed -= instance.OnSwap;
+            @Swap.canceled -= instance.OnSwap;
         }
 
         /// <summary>
@@ -597,6 +651,13 @@ public partial class @InputActionSystem: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnFly(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Swap" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSwap(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Camera" which allows adding and removing callbacks.

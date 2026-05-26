@@ -1,7 +1,7 @@
 // Module : 기능 연산 위주
 using UnityEngine;
 
-namespace alpha.player.module
+namespace alpha.player.locomotion
 {
     // 플레이어의 이동과 관련된 기능들을 담당하는 모듈
     public class PlayerLocomotionModule : MonoBehaviour
@@ -81,48 +81,48 @@ namespace alpha.player.module
         {
             return m_currentVelocityXZ + Vector3.up * m_currentVelocityY;
         }
-        public void SetHorizontalVelocity(Vector3 velocity)
+        public void SetHorizontalVelocity(Vector3 p_velocity)
         {
-            m_currentVelocityXZ = velocity;
+            m_currentVelocityXZ = p_velocity;
         }
         public Vector3 GetLastDirection()
         {
             return m_currentDir;
         }
 
-        public void HandleMove(bool isCombat, Vector2 moveDir)
+        public void HandleMove(bool p_isCombat, Vector2 p_moveInputDir)
         {
             // 카메라기준으로 캐릭터 이동
-            Vector3 _forward = Camera.main.transform.forward;
-            _forward.y = 0f;    // y값에 따라 높이가 변해버리기에 0으로 설정
-            Vector3 _right = Camera.main.transform.right;
+            Vector3 forward = Camera.main.transform.forward;
+            forward.y = 0f;    // y값에 따라 높이가 변해버리기에 0으로 설정
+            Vector3 right = Camera.main.transform.right;
 
             // 방향 계산
-            Vector2 _moveInputDir = moveDir;
-            Vector3 _Dir = _forward * _moveInputDir.y + _right * _moveInputDir.x;
+            Vector2 moveInputDir = p_moveInputDir;
+            Vector3 moveDir = forward * moveInputDir.y + right * moveInputDir.x;
 
             // 값 보정
-            if (_Dir.sqrMagnitude < 0.01f) _Dir = Vector2.zero;
-            else _Dir = Vector3.ClampMagnitude(_Dir, 1f);
+            if (moveDir.sqrMagnitude < 0.01f) moveDir = Vector2.zero;
+            else moveDir = Vector3.ClampMagnitude(moveDir, 1f);
 
             // 속력 계산
-            float _speed = isCombat ? m_combatMoveSpeed : m_baseMoveSpeed;
+            float speed = p_isCombat ? m_combatMoveSpeed : m_baseMoveSpeed;
 
             // 속도 계산
-            Vector3 _velocity = _Dir * _speed;
+            Vector3 velocity = moveDir * speed;
 
-            m_currentDir = _Dir;
-            m_currentMoveSpeed = _speed;
-            m_currentVelocityXZ = _velocity;
+            m_currentDir = moveDir;
+            m_currentMoveSpeed = speed;
+            m_currentVelocityXZ = velocity;
         }
 
-        public void HandleRotation(bool instant = false)
+        public void HandleRotation(bool p_instant = false)
         {
             if (m_currentDir == Vector3.zero) return;
 
             Quaternion targetRot = Quaternion.LookRotation(m_currentDir);
 
-            if (instant)
+            if (p_instant)
             {
                 transform.rotation = targetRot;
                 return;
@@ -141,13 +141,13 @@ namespace alpha.player.module
         }
 
         // 잠시 Ground체크 무시하는 시간
-        public void OnLeaveGround(float ignoreTime)
+        public void OnLeaveGround(float p_ignoreTime)
         {
             m_lastLeaveGroundTime = Time.time;
-            m_groundIgnoreDuration = ignoreTime;
+            m_groundIgnoreDuration = p_ignoreTime;
         }
 
-        public bool UpdateGround(bool isGroundDetected)
+        public bool UpdateGround(bool p_isGroundDetected)
         {
             if ((Time.time - m_lastLeaveGroundTime) < m_groundIgnoreDuration)
             {
@@ -155,7 +155,7 @@ namespace alpha.player.module
                 return m_isGrounded;
             }
 
-            if (isGroundDetected)
+            if (p_isGroundDetected)
             {
                 m_lastGroundTime = Time.time;
             }
@@ -182,7 +182,7 @@ namespace alpha.player.module
         }
 
         // ==================== Jump 
-        public void SetupJump(Vector3 inputDir)
+        public void SetupJump(Vector3 p_inputDir)
         {
             // Ground 무시 시작
             OnLeaveGround(m_jumpIgnoreGroundTime);
@@ -191,7 +191,7 @@ namespace alpha.player.module
             HandleRotation(true);
 
             // 수평 방향은 "입력 기반"으로 직접 결정
-            m_currentVelocityXZ = inputDir * m_baseMoveSpeed * m_jumpDirshorten;
+            m_currentVelocityXZ = p_inputDir * m_baseMoveSpeed * m_jumpDirshorten;
 
             // 수직 속도 설정
             m_currentVelocityY = Mathf.Sqrt(m_jumpPower * -2f * m_gravityPower);
@@ -212,15 +212,15 @@ namespace alpha.player.module
         }
 
         // ==================== Dash 
-        public void SetupDash(Vector3 inputDir)
+        public void SetupDash(Vector3 p_inputDir)
         {
-            if (inputDir.sqrMagnitude < 0.01f)
-                inputDir = transform.forward;
+            if (p_inputDir.sqrMagnitude < 0.01f)
+                p_inputDir = transform.forward;
 
-            inputDir.y = 0f;
-            inputDir.Normalize();
+            p_inputDir.y = 0f;
+            p_inputDir.Normalize();
 
-            m_currentDir = inputDir;
+            m_currentDir = p_inputDir;
 
             HandleRotation(true);
 
@@ -229,23 +229,23 @@ namespace alpha.player.module
 
         public bool UpdateDash()
         {
-            float _dashSpeed = m_dashDistance / m_dashDuration;
+            float dashSpeed = m_dashDistance / m_dashDuration;
 
             // 프레임당 이동 단위
-            float _moveStep = _dashSpeed * Time.deltaTime;
-            bool _isDashing = true;
+            float moveStep = dashSpeed * Time.deltaTime;
+            bool isDashing = true;
 
-            m_currentDashDistance += _moveStep;
+            m_currentDashDistance += moveStep;
 
             // 거리 초과 방지
             if (m_currentDashDistance >= m_dashDistance)
             {
-                _moveStep -= (m_currentDashDistance - m_dashDistance);
-                _isDashing = false;
+                moveStep -= (m_currentDashDistance - m_dashDistance);
+                isDashing = false;
             }
 
-            m_currentVelocityXZ = m_currentDir * (_moveStep / Time.deltaTime);
-            return _isDashing;
+            m_currentVelocityXZ = m_currentDir * (moveStep / Time.deltaTime);
+            return isDashing;
         }
 
         // ==================== Fly
@@ -256,53 +256,53 @@ namespace alpha.player.module
 
         public bool UpdateFlyUp()
         {
-            float _flyUpSpeed = m_flyUpDistance / m_flyUpDuration;
-            float _moveStep = _flyUpSpeed * Time.deltaTime;
-            bool _isRising = true;
+            float flyUpSpeed = m_flyUpDistance / m_flyUpDuration;
+            float moveStep = flyUpSpeed * Time.deltaTime;
+            bool isRising = true;
 
-            m_currentFlyUpDistance += _moveStep;
+            m_currentFlyUpDistance += moveStep;
 
             if (m_currentFlyUpDistance >= m_flyUpDistance)
             {
-                _moveStep -= (m_currentFlyUpDistance - m_flyUpDistance);
-                _isRising = false;
+                moveStep -= (m_currentFlyUpDistance - m_flyUpDistance);
+                isRising = false;
             }
 
-            m_currentVelocityY = _moveStep / Time.deltaTime;
+            m_currentVelocityY = moveStep / Time.deltaTime;
 
-            return _isRising;
+            return isRising;
         }
-        public void HandleFlightMove(Vector2 moveDir)
+        public void HandleFlightMove(Vector2 p_moveDir)
         {
-            Transform _cam = Camera.main.transform;
+            Transform cam = Camera.main.transform;
 
-            Vector3 _forward = _cam.forward;   // 🔥 y 포함
-            Vector3 _right = _cam.right;
+            Vector3 forward = cam.forward;   // y 포함
+            Vector3 right = cam.right;
 
-            Vector3 _dir = _forward * moveDir.y + _right * moveDir.x;
+            Vector3 dir = forward * p_moveDir.y + right * p_moveDir.x;
 
             // 정규화
-            if (_dir.sqrMagnitude < 0.01f)
-                _dir = Vector3.zero;
+            if (dir.sqrMagnitude < 0.01f)
+                dir = Vector3.zero;
             else
-                _dir.Normalize();
+                dir.Normalize();
 
             float speed = m_flightMoveSpeed;
 
-            m_currentDir = _dir;
-            m_currentVelocityXZ = new Vector3(_dir.x, 0, _dir.z) * speed;
-            m_currentVelocityY = _dir.y * speed;
+            m_currentDir = dir;
+            m_currentVelocityXZ = new Vector3(dir.x, 0, dir.z) * speed;
+            m_currentVelocityY = dir.y * speed;
 
         }
         public void HandleFlightRotation()
         {
             if (m_currentDir.sqrMagnitude < 0.01f) return;
 
-            Quaternion _targetRot = Quaternion.LookRotation(m_currentDir);
+            Quaternion targetRot = Quaternion.LookRotation(m_currentDir);
 
             transform.rotation = Quaternion.Slerp(
                 transform.rotation,
-                _targetRot,
+                targetRot,
                 Time.deltaTime * 10f
             );
         }

@@ -1,24 +1,24 @@
-using alpha.camera;
-using alpha.player;
+using alpha.installer;
 using UnityEngine;
-using static UnityEngine.InputManagerEntry;
 
-public class InGameManager : MonoBehaviour
+namespace alpha.ingame
 {
-    [SerializeField]
-    private PlayerInstaller m_playerInstaller;
-    [SerializeField]
-    private CameraInstaller m_cameraInstaller;
-
-    private void Awake()
+    public class InGameManager : MonoBehaviour
     {
-        m_playerInstaller.Install();
-        m_cameraInstaller.Install();
-    }
+        [SerializeField]
+        private PlayerInstaller m_playerInstaller;
+        [SerializeField]
+        private CameraInstaller m_cameraInstaller;
 
-    void Start()
-    {
-        
-    }
+        private void Awake()
+        {
+            m_playerInstaller.Install();
+            m_cameraInstaller.Install();
+        }
 
+        void Start()
+        {
+
+        }
+    }
 }

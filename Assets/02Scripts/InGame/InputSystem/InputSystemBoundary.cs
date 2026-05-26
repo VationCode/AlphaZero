@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 // 입력(외부) 신호 이벤트에 대한 전달을 받아들이는 클래스
-namespace alpha.player.boundary
+namespace alpha.input
 {
     public class InputSystemBoundary : MonoBehaviour
     {
@@ -21,6 +21,9 @@ namespace alpha.player.boundary
         public bool IsFlyInput => m_flyFrame == Time.frameCount;
         private int m_flyFrame;
         //===== CombatInput
+        public int SwapNum { get; private set; }
+        public bool IsSwapInput => m_swapFrame == Time.frameCount;
+        private int m_swapFrame;
 
         #endregion
 
@@ -34,6 +37,7 @@ namespace alpha.player.boundary
             {
                 m_inputAction = new InputActionSystem();
 
+                // Locomotion
                 m_inputAction.Player.Move.performed += i => MoveInputDir = i.ReadValue<Vector2>();
                 m_inputAction.Player.Move.canceled += i => MoveInputDir = Vector2.zero;
 
@@ -45,8 +49,24 @@ namespace alpha.player.boundary
                 m_inputAction.Player.Dash.performed += i => m_dashFrame = Time.frameCount;
 
                 m_inputAction.Player.Fly.performed += i => m_flyFrame = Time.frameCount;
+
+                // Combat
+                m_inputAction.Player.Swap.performed += OnSwap;
+
                 // 활성화해야 동작
                 m_inputAction.Enable();
+            }
+        }
+
+        // Numpad 대응
+        private void OnSwap(InputAction.CallbackContext p_context)
+        {
+            string key = p_context.control.displayName;
+
+            if (int.TryParse(key, out int number))
+            {
+                SwapNum = number - 1;
+                m_swapFrame = Time.frameCount;
             }
         }
     }

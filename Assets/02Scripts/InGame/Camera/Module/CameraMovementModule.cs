@@ -1,7 +1,7 @@
-using alpha.player.boundary;
+using alpha.input;
 using UnityEngine;
 
-namespace alpha.camera.module
+namespace alpha.camera
 {
     public class CameraMovementModule : MonoBehaviour
     {
@@ -38,9 +38,9 @@ namespace alpha.camera.module
         private float m_currentDistance;
         #endregion
 
-        public void Bind(InputSystemBoundary inputBoundary)
+        public void Bind(InputSystemBoundary p_inputBoundary)
         {
-            m_inputBoundary = inputBoundary;
+            m_inputBoundary = p_inputBoundary;
         }
         private void Start()
         {
