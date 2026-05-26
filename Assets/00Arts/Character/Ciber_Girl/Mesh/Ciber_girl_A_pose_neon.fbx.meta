@@ -647,7 +647,7 @@ ModelImporter:
     - name: c_pinky3.l
       parentName: c_pinky2.l
       position: {x: 0.0000000011920929, y: 0.016145634, z: 0.00000014282763}
-      rotation: {x: -0.0064816717, y: -0.00036432216, z: 0.020443022, w: 0.9997699}
+      rotation: {x: -0.0064816736, y: -0.00036432216, z: 0.02044303, w: 0.9997699}
       scale: {x: 1.000001, y: 1.0000023, z: 1.000001}
     - name: c_ring1.l
       parentName: hand.l
@@ -787,7 +787,7 @@ ModelImporter:
     - name: thigh_stretch.l
       parentName: root.x
       position: {x: -0.11237428, y: 0.00000007554919, z: 0.0000018579665}
-      rotation: {x: 0.71384907, y: -0.03989869, z: -0.69653386, w: 0.06056532}
+      rotation: {x: 0.7121953, y: -0.062840074, z: -0.698178, w: 0.03710186}
       scale: {x: 0.99999887, y: 1.0000035, z: 0.99999756}
     - name: leg_stretch.l
       parentName: thigh_stretch.l
@@ -817,7 +817,7 @@ ModelImporter:
     - name: thigh_stretch.r
       parentName: root.x
       position: {x: 0.11237427, y: 0.000000075101546, z: -0.0000018800199}
-      rotation: {x: 0.7138371, y: 0.039897643, z: 0.6965462, w: 0.060566008}
+      rotation: {x: 0.71218324, y: 0.06283944, z: 0.69819033, w: 0.037102953}
       scale: {x: 0.9999978, y: 1.0000036, z: 0.99999666}
     - name: leg_stretch.r
       parentName: thigh_stretch.r
