@@ -41,7 +41,7 @@ namespace alpha.player.anim
             m_currentLayerIndex = 0;
         }
 
-        public void UpdateGroundMove(Vector3 p_velocity)
+        public void UpdateGroundMove(Vector3 p_velocity, bool p_isInCombat = false)
         {
             Vector3 horizontal = new Vector3(p_velocity.x, 0f, p_velocity.z);
 

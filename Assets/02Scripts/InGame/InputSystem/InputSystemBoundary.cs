@@ -25,6 +25,8 @@ namespace alpha.input
         public bool IsSwapInput => m_swapFrame == Time.frameCount;
         private int m_swapFrame;
 
+        public bool IsAttackInput {get; private set; }
+
         #endregion
 
         #region Camera
@@ -52,6 +54,10 @@ namespace alpha.input
 
                 // Combat
                 m_inputAction.Player.Swap.performed += OnSwap;
+
+                m_inputAction.Player.Attack.performed += i => IsAttackInput = true;
+                m_inputAction.Player.Attack.canceled += i => IsAttackInput = false;
+
 
                 // 활성화해야 동작
                 m_inputAction.Enable();

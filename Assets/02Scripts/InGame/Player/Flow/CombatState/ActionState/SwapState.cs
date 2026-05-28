@@ -55,7 +55,7 @@ namespace alpha.player.combat
             // 종료
             if (m_nextTimer >= m_nextWaitingTime)
             {
-                p_playerCore.StateMachineFlow.ChangeCombatState(ECombatStateType.NoneCombat);
+                p_playerCore.StateMachineFlow.ChangeCombatActionState(ECombatActionStateType.None);
             }
         }
 

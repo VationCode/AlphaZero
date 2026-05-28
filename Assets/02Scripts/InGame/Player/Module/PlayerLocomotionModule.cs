@@ -92,8 +92,39 @@ namespace alpha.player.locomotion
 
         public void HandleMove(bool p_isCombat, Vector2 p_moveInputDir)
         {
+            Vector3 camForward = Camera.main.transform.forward;
+            Vector3 camRight = Camera.main.transform.right;
+
+            camForward.y = 0f;
+            camRight.y = 0f;
+
+            camForward.Normalize();
+            camRight.Normalize();
+
+            // 입력 방향 계산
+            Vector3 moveDir = camForward * p_moveInputDir.y + camRight * p_moveInputDir.x;
+
+            // 보정
+            if (moveDir.sqrMagnitude < 0.01f)
+            {
+                moveDir = Vector3.zero;
+            }
+            else
+            {
+                moveDir.Normalize();
+            }
+
+            // 속도
+            float speed = p_isCombat ? m_combatMoveSpeed : m_baseMoveSpeed;
+
+            Vector3 velocity = moveDir * speed;
+
+            m_currentDir = moveDir;
+            m_currentMoveSpeed = speed;
+            m_currentVelocityXZ = velocity;
+
             // 카메라기준으로 캐릭터 이동
-            Vector3 forward = Camera.main.transform.forward;
+            /*Vector3 forward = Camera.main.transform.forward;
             forward.y = 0f;    // y값에 따라 높이가 변해버리기에 0으로 설정
             Vector3 right = Camera.main.transform.right;
 
@@ -113,14 +144,37 @@ namespace alpha.player.locomotion
 
             m_currentDir = moveDir;
             m_currentMoveSpeed = speed;
-            m_currentVelocityXZ = velocity;
+            m_currentVelocityXZ = velocity;*/
         }
 
-        public void HandleRotation(bool p_instant = false)
+        // p_instant : 즉시 회전 여부 (점프 시 입력 방향으로 즉시 회전하기 위해)
+        public void HandleRotation(bool p_isCombat = false, bool p_instant = false)
         {
-            if (m_currentDir == Vector3.zero) return;
+            Vector3 lookDir;
 
-            Quaternion targetRot = Quaternion.LookRotation(m_currentDir);
+            // ==========================
+            // 전투 회전
+            // ==========================
+            if (p_isCombat)
+            {
+                lookDir = Camera.main.transform.forward;
+                lookDir.y = 0f;
+
+                if (lookDir.sqrMagnitude < 0.01f)
+                    return;
+            }
+            // ==========================
+            // 일반 회전
+            // ==========================
+            else
+            {
+                if (m_currentDir == Vector3.zero)
+                    return;
+
+                lookDir = m_currentDir;
+            }
+
+            Quaternion targetRot = Quaternion.LookRotation(lookDir);
 
             if (p_instant)
             {
@@ -130,12 +184,7 @@ namespace alpha.player.locomotion
 
             float targetAngle = targetRot.eulerAngles.y;
 
-            float smoothedAngle = Mathf.SmoothDampAngle(
-                transform.eulerAngles.y,
-                targetAngle,
-                ref m_rotationSmoothVelocity,
-                m_rotationsmoothTime
-            );
+            float smoothedAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref m_rotationSmoothVelocity, m_rotationsmoothTime);
 
             transform.rotation = Quaternion.Euler(0f, smoothedAngle, 0f);
         }

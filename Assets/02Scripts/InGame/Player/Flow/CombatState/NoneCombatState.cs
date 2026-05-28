@@ -11,17 +11,13 @@ namespace alpha.player.combat
         public override void Update(PlayerCore p_playerCore)
         {
             var input = p_playerCore.InputSystemBoundary;
-            var equip = p_playerCore.EquipmentModule;
-            var anim = p_playerCore.AnimBoundary;
+            var combatFlow = p_playerCore.CombatFlow;
 
-            if (input.IsSwapInput)
+            combatFlow.UpdateInput(input);
+
+            if(combatFlow.IsAttackPressed)
             {
-                if(equip.GetCurrentSwapNum() == input.SwapNum)
-                {
-                    return;
-                }
-                p_playerCore.StateMachineFlow.ChangeCombatState(ECombatStateType.Swap);
-                equip.SetSwapNum(input.SwapNum);
+                p_playerCore.StateMachineFlow.ChangeCombatState(ECombatStateType.InCombat);
             }
         }
 

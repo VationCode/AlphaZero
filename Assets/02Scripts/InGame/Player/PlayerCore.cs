@@ -19,6 +19,7 @@ namespace alpha.player
     [RequireComponent(typeof(PlayerCharacterControllerBoudary))]
     [RequireComponent(typeof(PlayerAnimationBoundary))]
     [RequireComponent(typeof(PlayerStateMachineFlow))]
+    [RequireComponent(typeof(PlayerCombatFlow))]
     [RequireComponent(typeof(PlayerEquipmentModule))]
     [RequireComponent(typeof(PlayerLocomotionModule))]
     [RequireComponent(typeof(PlayerCombatModule))]
@@ -34,6 +35,7 @@ namespace alpha.player
 
         // Flow
         public PlayerStateMachineFlow StateMachineFlow { get; private set; }
+        public PlayerCombatFlow CombatFlow { get; private set; }
 
         // Module
         public PlayerLocomotionModule LocomotionModule { get; private set; }
@@ -49,6 +51,7 @@ namespace alpha.player
             
             // Flow
             StateMachineFlow = GetComponent<PlayerStateMachineFlow>();
+            CombatFlow = GetComponent<PlayerCombatFlow>();
 
             // Module
             LocomotionModule = GetComponent<PlayerLocomotionModule>();
