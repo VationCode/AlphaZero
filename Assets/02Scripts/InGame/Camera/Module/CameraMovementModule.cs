@@ -6,7 +6,7 @@ namespace alpha.camera
     public class CameraMovementModule : MonoBehaviour
     {
         #region Ref Component
-        private InputSystemBoundary m_inputBoundary;
+        private AlphaInputSystem m_inputBoundary;
         #endregion
 
         #region Config 
@@ -38,7 +38,7 @@ namespace alpha.camera
         private float m_currentDistance;
         #endregion
 
-        public void Bind(InputSystemBoundary p_inputBoundary)
+        public void Bind(AlphaInputSystem p_inputBoundary)
         {
             m_inputBoundary = p_inputBoundary;
         }

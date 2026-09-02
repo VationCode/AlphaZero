@@ -7,63 +7,41 @@
 using UnityEngine;
 using alpha.input;
 using alpha.player.anim;
-using alpha.player.contorller;
-using alpha.player.state;
 using alpha.player.locomotion;
-using alpha.player.combat;
-using alpha.player.equipment;
+
 
 // 플레이어의 전체적인 연결 관리
 namespace alpha.player
 {
-    [RequireComponent(typeof(PlayerCharacterControllerBoudary))]
-    [RequireComponent(typeof(PlayerAnimationBoundary))]
-    [RequireComponent(typeof(PlayerStateMachineFlow))]
-    [RequireComponent(typeof(PlayerCombatFlow))]
-    [RequireComponent(typeof(PlayerEquipmentModule))]
-    [RequireComponent(typeof(PlayerLocomotionModule))]
-    [RequireComponent(typeof(PlayerCombatModule))]
     public class PlayerCore : MonoBehaviour
     {
         // 외부 Bind
-        public InputSystemBoundary InputSystemBoundary { get; private set; }
+        public AlphaInputSystem InputSystemBoundary { get; private set; }
 
-        #region 내부
-        // Boundary
-        public PlayerAnimationBoundary AnimBoundary { get; private set; }
-        public PlayerCharacterControllerBoudary CharacterCtrlBoudary { get; private set; }
+
+        public AnimationView AnimView { get; private set; }
 
         // Flow
-        public PlayerStateMachineFlow StateMachineFlow { get; private set; }
-        public PlayerCombatFlow CombatFlow { get; private set; }
+
 
         // Module
-        public PlayerLocomotionModule LocomotionModule { get; private set; }
-        public PlayerCombatModule CombatModule { get; private set; }
-        public PlayerEquipmentModule EquipmentModule { get; private set; }
-        #endregion
+        public LocomotionModule LocomotionModule { get; private set; }
+
 
         private void Awake()
         {
-            // Boundary
-            AnimBoundary = GetComponent<PlayerAnimationBoundary>();
-            CharacterCtrlBoudary = GetComponent<PlayerCharacterControllerBoudary>();
-            
-            // Flow
-            StateMachineFlow = GetComponent<PlayerStateMachineFlow>();
-            CombatFlow = GetComponent<PlayerCombatFlow>();
+            AnimView = GetComponent<AnimationView>();
+           
 
             // Module
-            LocomotionModule = GetComponent<PlayerLocomotionModule>();
-            CombatModule = GetComponent<PlayerCombatModule>();
-            EquipmentModule = GetComponent<PlayerEquipmentModule>();
+            LocomotionModule = GetComponent<LocomotionModule>();
+
         }
 
-        public void Bind(InputSystemBoundary p_inputSystemBoundary)
+        public void Bind(AlphaInputSystem p_inputSystemBoundary)
         {
             InputSystemBoundary = p_inputSystemBoundary;
 
-            StateMachineFlow.Bind(this);
         }
 
         private void Start()

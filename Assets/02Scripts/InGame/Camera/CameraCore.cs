@@ -6,7 +6,7 @@ namespace alpha.camera
     [RequireComponent(typeof(CameraMovementModule))]
     public class CameraCore : MonoBehaviour
     {
-        private InputSystemBoundary m_inputSystemBoundary;
+        private AlphaInputSystem m_inputSystemBoundary;
         [SerializeField]
         private CameraMovementModule m_movementModule;
 
@@ -18,7 +18,7 @@ namespace alpha.camera
         {
             Cursor.lockState = CursorLockMode.Locked;
         }
-        public void Bind(InputSystemBoundary inputSystemBoundary)
+        public void Bind(AlphaInputSystem inputSystemBoundary)
         {
             m_inputSystemBoundary = inputSystemBoundary;
 
