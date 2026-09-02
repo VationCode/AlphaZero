@@ -3,26 +3,26 @@ using UnityEngine;
 
 namespace alpha.camera
 {
-    [RequireComponent(typeof(CameraMovementModule))]
     public class CameraCore : MonoBehaviour
     {
-        private AlphaInputSystem m_inputSystemBoundary;
-        [SerializeField]
-        private CameraMovementModule m_movementModule;
+        private AlphaInputSystem _input;
+
+        private CameraMovementModule _movementModule;
 
         private void Awake()
         {
-            m_movementModule = GetComponent<CameraMovementModule>();
+            _movementModule = GetComponent<CameraMovementModule>();
         }
         private void Start()
         {
             Cursor.lockState = CursorLockMode.Locked;
-        }
-        public void Bind(AlphaInputSystem inputSystemBoundary)
-        {
-            m_inputSystemBoundary = inputSystemBoundary;
 
-            m_movementModule.Bind(m_inputSystemBoundary);
+            _movementModule.Bind(_input);
+        }
+
+        public void Bind(AlphaInputSystem p_input)
+        {
+            _input = p_input;
         }
     }
 }

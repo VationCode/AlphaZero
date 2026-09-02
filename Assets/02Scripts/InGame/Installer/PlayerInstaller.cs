@@ -10,13 +10,13 @@ namespace alpha.installer
         [SerializeField]
         private PlayerCore m_playerCore;
         [SerializeField]
-        private AlphaInputSystem m_inputSystemBoundary;
+        private AlphaInputSystem m_inputSystem;
         [SerializeField]
         private CameraCore m_cameraCore;
 
-        public void Install()
+        public void Awake()
         {
-            m_playerCore.Bind(m_inputSystemBoundary);
+            m_playerCore.Bind(m_inputSystem);
         }
     }
 }

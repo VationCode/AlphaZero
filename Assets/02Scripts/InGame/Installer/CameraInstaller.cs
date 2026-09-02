@@ -7,12 +7,13 @@ namespace alpha.installer
     public class CameraInstaller : MonoBehaviour
     {
         [SerializeField]
-        private CameraCore m_cameraCore;
+        private CameraCore _cameraCore;
         [SerializeField]
-        private AlphaInputSystem m_inputSystemBoundary;
-        public void Install()
+        private AlphaInputSystem _inputSystem;
+
+        public void Awake()
         {
-            m_cameraCore.Bind(m_inputSystemBoundary);
+            _cameraCore.Bind(_inputSystem);
         }
     }
 }

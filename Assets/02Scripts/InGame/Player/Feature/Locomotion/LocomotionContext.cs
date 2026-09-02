@@ -5,8 +5,8 @@ namespace alpha.player.locomotion
     // Locomotion의 정보 저장 및 전달을 담당하는 클래스(Domain)
     public class LocomotionContext
     {
-        public ELocomotionMode CurrentLocomotionMode { get; set; } = ELocomotionMode.Ground;
-        public Vector3 CurrentMoveDirection { get; set; } = Vector3.zero;
+        public ELocomotionStateType CurrentStateType { get; set; } = ELocomotionStateType.Idle;
+        public Vector3 CurrentMoveVelocity { get; set; } = Vector3.zero;
         public float CurrentMoveSpeed { get; set; } = 0f;
 
         public bool IsJumping { get; set; } = false;
@@ -14,32 +14,31 @@ namespace alpha.player.locomotion
 
         public void Reset()
         {
-            CurrentLocomotionMode = ELocomotionMode.Ground;
-            CurrentMoveDirection = Vector3.zero;
+            CurrentMoveVelocity = Vector3.zero;
             CurrentMoveSpeed = 0f;
             IsJumping = false;
             IsDashing = false;
         }
 
-        public void SetLocomotionMode(ELocomotionMode mode)
+        public void SetCurrentStateType(ELocomotionStateType p_stateType)
         {
-            CurrentLocomotionMode = mode;
+            CurrentStateType = p_stateType;
         }
-        public void SetMoveDirection(Vector3 direction)
+        public void SetMoveVelocity(Vector3 p_velocity)
         {
-            CurrentMoveDirection = direction;
+            CurrentMoveVelocity = p_velocity;
         }
-        public void SetMoveSpeed(float speed)
+        public void SetMoveSpeed(float p_speed)
         {
-            CurrentMoveSpeed = speed;
+            CurrentMoveSpeed = p_speed;
         }
-        public void SetJumping(bool isJumping)
+        public void SetJumping(bool p_isJumping)
         {
-            IsJumping = isJumping;
+            IsJumping = p_isJumping;
         }
-        public void SetDashing(bool isDashing)
+        public void SetDashing(bool p_isDashing)
         {
-            IsDashing = isDashing;
+            IsDashing = p_isDashing;
         }
     }
 }

@@ -16,13 +16,15 @@ namespace alpha.player
     public class PlayerCore : MonoBehaviour
     {
         // 외부 Bind
-        public AlphaInputSystem InputSystemBoundary { get; private set; }
+        public AlphaInputSystem Input { get; private set; }
 
 
         public AnimationView AnimView { get; private set; }
 
-        // Flow
+        public LocomotionContext LocomotionContext { get; private set; } = new();
 
+        // Flow
+        public LocomotionFlow LocomotionFlow { get; private set; }
 
         // Module
         public LocomotionModule LocomotionModule { get; private set; }
@@ -30,23 +32,22 @@ namespace alpha.player
 
         private void Awake()
         {
-            AnimView = GetComponent<AnimationView>();
-           
+            AnimView = GetComponentInChildren<AnimationView>(true);
 
-            // Module
-            LocomotionModule = GetComponent<LocomotionModule>();
+            LocomotionFlow = GetComponentInChildren<LocomotionFlow>(true);
 
+            LocomotionModule = GetComponentInChildren<LocomotionModule>(true);
         }
 
-        public void Bind(AlphaInputSystem p_inputSystemBoundary)
+        public void Bind(AlphaInputSystem p_inputSystem)
         {
-            InputSystemBoundary = p_inputSystemBoundary;
-
+            Input = p_inputSystem;
         }
 
         private void Start()
         {
-            
+            LocomotionFlow.Bind(this);
+            LocomotionModule.Bind(LocomotionContext);
         }
 
         // Update is called once per frame
