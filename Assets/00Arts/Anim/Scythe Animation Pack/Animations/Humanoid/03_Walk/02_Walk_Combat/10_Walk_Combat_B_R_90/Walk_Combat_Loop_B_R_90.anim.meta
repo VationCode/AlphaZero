@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e5a7422e498becc46b4e824f197fd43e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355538
+  packageName: Scythe Animation Pack
+  packageVersion: 1.0
+  assetPath: Assets/Scythe Animation Pack/Animations/Humanoid/03_Walk/02_Walk_Combat/10_Walk_Combat_B_R_90/Walk_Combat_Loop_B_R_90.anim
+  uploadId: 980002

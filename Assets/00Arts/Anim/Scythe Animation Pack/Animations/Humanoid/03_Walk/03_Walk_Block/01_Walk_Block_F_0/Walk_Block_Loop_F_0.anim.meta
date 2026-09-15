@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 039df2516de7849448aab27a7b3d94f0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355538
+  packageName: Scythe Animation Pack
+  packageVersion: 1.0
+  assetPath: Assets/Scythe Animation Pack/Animations/Humanoid/03_Walk/03_Walk_Block/01_Walk_Block_F_0/Walk_Block_Loop_F_0.anim
+  uploadId: 980002

@@ -6,136 +6,171 @@ namespace alpha.player.anim
     {
         // Ref
         [SerializeField]
-        private Animator m_animator;
+        private Animator _animator;
 
-        #region Config
-        [SerializeField] private float m_blendSpeed = 8f;
+        [SerializeField] private float _blendSpeed = 8f;
+
+        private int _currentMoveState = -1;
+        private readonly int MoveTreeHash = Animator.StringToHash("MoveTree");
+        private readonly int MoveXHash = Animator.StringToHash("MoveX");
+        private readonly int MoveYHash = Animator.StringToHash("MoveY");
+
+        private readonly int MoveMagnitudeHash = Animator.StringToHash("MoveMagnitude");
+
+        private readonly int DashHash = Animator.StringToHash("Dash");
+        
+        private readonly int DodgeXHash = Animator.StringToHash("DodgeX");
+        private readonly int DodgeYHash = Animator.StringToHash("DodgeY");
+        private readonly int DodgeTimeHash = Animator.StringToHash("DodgeTime");
+
+
+        private readonly int SprintHash = Animator.StringToHash("Sprint");
+        private readonly int CombatSprintHash = Animator.StringToHash("CombatSprint");
+        private readonly int DodgeTreeHash = Animator.StringToHash("DodgeTree");
 
         //Move
-        private float m_moveAnimsmoothTime = 0.1f;
+        private float _moveAnimsmoothTime = 0.1f;
+        private float _moveAnimMagnitude;
+        private float _moveAnimVelocity;
 
         //Flight
-        private float m_flightMoveAnimsmoothTime = 0.1f;
-        #endregion
+        private float _flightMoveAnimsmoothTime = 0.1f;
+        private float _flightMoveAnimMagnitude;
+        private float _flightMoveAnimVelocity;
 
-        #region RunTime
-        //Move
-        private float m_moveAnimMagnitude;
-        private float m_moveAnimVelocity;
-        private bool m_wasSprint;
+        private int _currentLayerIndex = 0;
+        private int _targetLayerIndex = 0;
 
-        //Flight
-        private float m_flightMoveAnimMagnitude;
-        private float m_flightMoveAnimVelocity;
-
-
-        #endregion
-
-        #region RunTime
-        private int m_currentLayerIndex = 0;
-        private int m_targetLayerIndex = 0;
-
-        #endregion
         private void Awake()
         {
-            m_animator = GetComponentInChildren<Animator>();
-            m_currentLayerIndex = 0;
+            _animator = GetComponentInChildren<Animator>();
+            _currentLayerIndex = 0;
         }
 
-        public void UpdateGroundMove(Vector2 p_velocity, bool p_isSprint = false, bool p_isInCombat = false)
+        public void ActivateLootMotion(bool p_isActivate)
         {
-            Vector3 horizontal = new Vector3(p_velocity.x, 0f, p_velocity.y);
+            _animator.applyRootMotion = p_isActivate;
+        }
 
-            if (horizontal == Vector3.zero)
+        public void UpdateGroundMove(Vector2 p_localVelocity, bool p_isSprint = false, bool p_isInCombat = false)
+        {
+            float magnitude = p_localVelocity.magnitude;
+
+            if (magnitude < 0.01f)
             {
-                m_moveAnimMagnitude = 0;
+                _moveAnimMagnitude = 0f;
             }
             else
             {
-                m_moveAnimMagnitude = 
-                    Mathf.SmoothDamp(m_moveAnimMagnitude, horizontal.magnitude, ref m_moveAnimVelocity, m_moveAnimsmoothTime);
+                _moveAnimMagnitude = 
+                    Mathf.SmoothDamp(_moveAnimMagnitude, magnitude, ref _moveAnimVelocity, _moveAnimsmoothTime);
             }
 
-            if (p_isSprint != m_wasSprint)
+            int targetState;
+
+            if (p_isSprint)
             {
-                if (p_isSprint)
-                {
-                    m_animator.CrossFade("Sprint", 0.2f);
-                }
-                else
-                {
-                    m_animator.CrossFade("MoveTree", 0.2f);
-                }
-
-                m_wasSprint = p_isSprint;
+                targetState = p_isInCombat? CombatSprintHash : SprintHash;
+            }
+            else
+            {
+                targetState = MoveTreeHash;
             }
 
-            m_animator.SetFloat("MoveMagnitude", m_moveAnimMagnitude);
+            if (_currentMoveState != targetState)
+            {
+                _animator.CrossFadeInFixedTime(targetState, 0.05f, 0, 0f);
+                _currentMoveState = targetState;
+            }
+
+            _animator.SetFloat(MoveXHash, p_localVelocity.x);
+            _animator.SetFloat(MoveYHash, p_localVelocity.y);
+            _animator.SetFloat(MoveMagnitudeHash, _moveAnimMagnitude);
         }
 
-        public void DodgeAnim()
+        public void DodgeAnim(Vector2 p_localDirection)
         {
-            m_animator.CrossFade("Dodge", 0.1f);
+            // DodgeState에서 확정한 방향을 그대로 사용한다. 무입력은 정면 회피.
+            Vector2 dodgeDirection = p_localDirection.sqrMagnitude > 0.01f
+                ? p_localDirection.normalized : Vector2.up;
+
+            _animator.SetFloat(DodgeXHash, dodgeDirection.x);
+            _animator.SetFloat(DodgeYHash, dodgeDirection.y);
+            //_animator.SetFloat(DodgeTimeHash, 0f);
+
+            // 이전 이동 클립 길이에 영향받지 않는 짧은 전환으로 시작한다.
+            _animator.CrossFadeInFixedTime(DodgeTreeHash, 0.05f, 0, 0f);
+
+            _currentMoveState = DodgeTreeHash;
+        }
+
+        public void UpdateDodgeAnim(float p_normalizedTime)
+        {
+            _animator.SetFloat(DodgeTimeHash, Mathf.Clamp01(p_normalizedTime));
         }
 
         public void JumpUpAnim()
         {
-            m_animator.Play("JumpUp");
+            _animator.Play("JumpUp");
         }
+
         public void FallAnim()
         {
-            m_animator.CrossFade("Fall", 0.2f);
+            _animator.CrossFade("Fall", 0.2f);
         }
+
         public void LandAnim()
         {
-            m_animator.CrossFade("Landing", 0.143f, 0, 0.443f);
+            _animator.CrossFade("Landing", 0.143f, 0, 0.443f);
         }
+
         public void DashAnim()
         {
-            m_animator.Play("Dash");
+            _animator.CrossFadeInFixedTime(DashHash, 0.05f, 0, 0f);
         }
+
         public void FlyUpAnim()
         {
-            m_animator.Play("FlyUp");
+            _animator.Play("FlyUp");
         }
 
         public void FlightCrossFade()
         {
-            m_animator.CrossFade("FlightTree", 0.2f);
+            _animator.CrossFade("FlightTree", 0.2f);
         }
         public void FlightAnim(Vector3 p_velocity)
         {
             Vector3 horizontal = new Vector3(p_velocity.x, 0f, p_velocity.z);
 
-            m_flightMoveAnimMagnitude = Mathf.SmoothDamp(
-                m_flightMoveAnimMagnitude,
+            _flightMoveAnimMagnitude = Mathf.SmoothDamp(
+                _flightMoveAnimMagnitude,
                 horizontal.magnitude,
-                ref m_flightMoveAnimVelocity,
-                m_flightMoveAnimsmoothTime
+                ref _flightMoveAnimVelocity,
+                _flightMoveAnimsmoothTime
             );
 
 
-            m_animator.SetFloat("FlightMove", m_flightMoveAnimMagnitude);
+            _animator.SetFloat("FlightMove", _flightMoveAnimMagnitude);
         }
 
         // Combat
         public void SwapAnim(int p_swapNum)
         {
-            m_animator.CrossFade("Swap", 0.1f);
-            m_currentLayerIndex = p_swapNum;
+            _animator.CrossFade("Swap", 0.1f);
+            _currentLayerIndex = p_swapNum;
         }
         public void ChangeLayer(int p_targetLayer)
         {
-            m_targetLayerIndex = p_targetLayer;
+            _targetLayerIndex = p_targetLayer;
         }
 
         public void BlendLayers(int p_targetLayerNum)
         {
-            int layerCount = m_animator.layerCount;
+            int layerCount = _animator.layerCount;
 
             for (int i = 0; i < layerCount; i++)
             {
-                float currentWeight = m_animator.GetLayerWeight(i);
+                float currentWeight = _animator.GetLayerWeight(i);
 
                 float targetWeight =
                     i == p_targetLayerNum ? 1f : 0f;
@@ -143,9 +178,9 @@ namespace alpha.player.anim
                 float nextWeight = Mathf.Lerp(
                     currentWeight,
                     targetWeight,
-                    Time.deltaTime * m_blendSpeed);
+                    Time.deltaTime * _blendSpeed);
 
-                m_animator.SetLayerWeight(i, nextWeight);
+                _animator.SetLayerWeight(i, nextWeight);
             }
         }
     }

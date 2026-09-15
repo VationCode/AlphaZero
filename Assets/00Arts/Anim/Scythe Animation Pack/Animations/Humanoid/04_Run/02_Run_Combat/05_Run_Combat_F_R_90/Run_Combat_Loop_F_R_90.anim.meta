@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b0b13d2828ced004583e371c63625ab6
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355538
+  packageName: Scythe Animation Pack
+  packageVersion: 1.0
+  assetPath: Assets/Scythe Animation Pack/Animations/Humanoid/04_Run/02_Run_Combat/05_Run_Combat_F_R_90/Run_Combat_Loop_F_R_90.anim
+  uploadId: 980002

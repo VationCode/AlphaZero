@@ -12,26 +12,26 @@ namespace alpha.input
         #region Player
         //===== LocomotionInput
         public Vector2 MoveInputDir { get; private set; }
+        
         public bool IsSprint;
+        public bool IsDodge => _dodgeFrame == Time.frameCount;
+        private int _dodgeFrame;
 
-        public bool IsDodge => m_dodgeFrame == Time.frameCount;
-        private int m_dodgeFrame;
-
-        public bool IsJumpInput => m_jumpFrame == Time.frameCount;   // 다음 프레임에서 false로 변환해줌
-        private int m_jumpFrame;
+        public bool IsJumpInput => _jumpFrame == Time.frameCount;   // 다음 프레임에서 false로 변환해줌
+        private int _jumpFrame;
 
 
-        public bool IsDashInput => m_dashFrame == Time.frameCount;
-        private int m_dashFrame;
+        public bool IsDash => _dashFrame == Time.frameCount;
+        private int _dashFrame;
 
-        public bool IsFlyInput => m_flyFrame == Time.frameCount;
-        private int m_flyFrame;
+        public bool IsFlyInput => _flyFrame == Time.frameCount;
+        private int _flyFrame;
         //===== CombatInput
         public int SwapNum { get; private set; }
-        public bool IsSwapInput => m_swapFrame == Time.frameCount;
-        private int m_swapFrame;
+        public bool IsSwapInput => _swapFrame == Time.frameCount;
+        private int _swapFrame;
 
-        public bool IsAttackInput {get; private set; }
+        public bool IsAttack {get; private set; }
 
         #endregion
 
@@ -49,43 +49,23 @@ namespace alpha.input
                 _inputAction.Player.Move.performed += i => MoveInputDir = i.ReadValue<Vector2>();
                 _inputAction.Player.Move.canceled += i => MoveInputDir = Vector2.zero;
 
-                _inputAction.Player.Dodge.performed += i => m_dodgeFrame = Time.frameCount;
-
-                _inputAction.Player.Sprint.performed += i =>
-                {
-                    if (IsDodge)
-                    {
-                        IsSprint = false;
-                        return;
-                    }
-                    IsSprint = true;
-                };
-
+                _inputAction.Player.Sprint.performed += i => IsSprint = true;
                 _inputAction.Player.Sprint.canceled += i => IsSprint = false;
 
+                _inputAction.Player.Dodge.performed += i => _dodgeFrame = Time.frameCount;
+                _inputAction.Player.Jump.performed += i => _jumpFrame = Time.frameCount;
+                _inputAction.Player.Dash.performed += i => _dashFrame = Time.frameCount;
+                _inputAction.Player.Fly.performed += i => _flyFrame = Time.frameCount;
+
+                // Camera
                 _inputAction.Camera.Look.performed += i => LookInputDir = i.ReadValue<Vector2>();
                 _inputAction.Camera.Look.canceled += i => LookInputDir = Vector2.zero;
-
-                _inputAction.Player.Jump.performed += i =>
-                {
-                    if(IsDodge)
-                    {
-                        m_jumpFrame = 0;
-                        return;
-                    }
-                    m_jumpFrame = Time.frameCount;
-                };
-
-
-                _inputAction.Player.Dash.performed += i => m_dashFrame = Time.frameCount;
-
-                _inputAction.Player.Fly.performed += i => m_flyFrame = Time.frameCount;
 
                 // Combat
                 _inputAction.Player.Swap.performed += OnSwap;
 
-                _inputAction.Player.Attack.performed += i => IsAttackInput = true;
-                _inputAction.Player.Attack.canceled += i => IsAttackInput = false;
+                _inputAction.Player.Attack.performed += i => IsAttack = true;
+                _inputAction.Player.Attack.canceled += i => IsAttack = false;
 
 
                 // 활성화해야 동작
@@ -101,7 +81,7 @@ namespace alpha.input
             if (int.TryParse(key, out int number))
             {
                 SwapNum = number - 1;
-                m_swapFrame = Time.frameCount;
+                _swapFrame = Time.frameCount;
             }
         }
     }

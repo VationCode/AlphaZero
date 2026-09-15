@@ -18,9 +18,13 @@ namespace alpha.player.locomotion
     {
         private PlayerCore _core;
 
+        public LocomotionState CurrentState => _currentState;
         private LocomotionState _currentState;
+
+        public ELocomotionStateType CurrentStateType => _currentStateType;
         private ELocomotionStateType _currentStateType;
-        private Dictionary<ELocomotionStateType, LocomotionState> _states;
+
+        private Dictionary<ELocomotionStateType, LocomotionState> _stateDict;
 
         public void Bind(PlayerCore p_core)
         {
@@ -30,14 +34,14 @@ namespace alpha.player.locomotion
 
         private void Initialize()
         {
-            _states = new Dictionary<ELocomotionStateType, LocomotionState>
+            _stateDict = new Dictionary<ELocomotionStateType, LocomotionState>
             {
                 { ELocomotionStateType.Idle, new IdleState(_core) },
                 { ELocomotionStateType.Move, new MoveState(_core) },
                 //{ ELocomotionStateType.Jump, new JumpState(_core) },
                 //{ ELocomotionStateType.Fall, new FallState(_core) },
                 //{ ELocomotionStateType.Land, new LandState(_core) },
-                //{ ELocomotionStateType.Dash, new DashState(_core) },
+                { ELocomotionStateType.Dash, new DashState(_core) },
                 { ELocomotionStateType.Dodge, new DodgeState(_core) }
             };
 
@@ -54,9 +58,8 @@ namespace alpha.player.locomotion
         {
             if(_currentState == null)
             {
-                _currentState = _states[p_newStateType];
+                _currentState = _stateDict[p_newStateType];
                 _currentStateType = p_newStateType;
-                _core.LocomotionContext.SetCurrentStateType(p_newStateType);
                 _currentState.Enter();
                 return;
             }
@@ -65,9 +68,8 @@ namespace alpha.player.locomotion
 
             _currentState?.Exit();
             
-            _currentState = _states[p_newStateType];
+            _currentState = _stateDict[p_newStateType];
             _currentStateType = p_newStateType;
-            _core.LocomotionContext.SetCurrentStateType(p_newStateType);
 
             _currentState.Enter();
         }

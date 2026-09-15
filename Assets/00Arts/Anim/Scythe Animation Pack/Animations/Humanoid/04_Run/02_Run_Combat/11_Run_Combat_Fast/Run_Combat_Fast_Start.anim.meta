@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3c2c0269271d1e340b62ba08c2cc655e
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355538
+  packageName: Scythe Animation Pack
+  packageVersion: 1.0
+  assetPath: Assets/Scythe Animation Pack/Animations/Humanoid/04_Run/02_Run_Combat/11_Run_Combat_Fast/Run_Combat_Fast_Start.anim
+  uploadId: 980002

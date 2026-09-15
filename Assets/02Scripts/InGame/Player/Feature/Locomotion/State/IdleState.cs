@@ -16,14 +16,27 @@ namespace alpha.player.locomotion
         }
         public override void Update()
         {
-            // 키 입력에 따른 상태 전환
-            if(_InputSystem.IsDodge)
+            // 중력 적용
+            Vector3 velocity = Vector3.zero;
+            velocity.y = _Core.LocomotionContext.VerticalVelocity;
+            _LocomotionModule.FinalMoveDirection(velocity);
+
+            
+            if (_Input.IsDodge)
             {
-                _LocomotionFlow.ChangeState(ELocomotionStateType.Dodge);
+                    _Core.LocomotionContext.SetDodgeInput(_Input.MoveInputDir);
+
+                    _LocomotionFlow.ChangeState(ELocomotionStateType.Dodge);
                 return;
             }
 
-            if (_InputSystem.MoveInputDir != Vector2.zero)
+            if (_Input.IsDash)
+            {
+                _LocomotionFlow.ChangeState(ELocomotionStateType.Dash);
+                return;
+            }
+
+            if (_Input.MoveInputDir != Vector2.zero)
             {
                 _LocomotionFlow.ChangeState(ELocomotionStateType.Move);
             }

@@ -244,37 +244,15 @@
                     "isPartOfComposite": false
                 },
                 {
-                    "name": "One Modifier",
-                    "id": "82387785-8972-44f8-9433-9f0a98091b1c",
-                    "path": "OneModifier",
+                    "name": "",
+                    "id": "88254fd4-efeb-4764-a782-4f050f5ab2cd",
+                    "path": "<Keyboard>/capsLock",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Dodge",
-                    "isComposite": true,
+                    "isComposite": false,
                     "isPartOfComposite": false
-                },
-                {
-                    "name": "modifier",
-                    "id": "a1c76eb8-8464-4b11-b238-f6c010b51933",
-                    "path": "<Keyboard>/leftShift",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Dodge",
-                    "isComposite": false,
-                    "isPartOfComposite": true
-                },
-                {
-                    "name": "binding",
-                    "id": "3f7024cf-e40d-42ba-b306-a258b646dd53",
-                    "path": "<Keyboard>/space",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Dodge",
-                    "isComposite": false,
-                    "isPartOfComposite": true
                 }
             ]
         },

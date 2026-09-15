@@ -7,7 +7,7 @@ namespace alpha.player.locomotion
     public abstract class LocomotionState
     {
         protected PlayerCore _Core;
-        protected AlphaInputSystem _InputSystem => _Core.Input;
+        protected AlphaInputSystem _Input => _Core.Input;
         protected LocomotionModule _LocomotionModule => _Core.LocomotionModule;
         protected LocomotionFlow _LocomotionFlow => _Core.LocomotionFlow;
         protected AnimationView _AnimView => _Core.AnimView;
@@ -19,7 +19,7 @@ namespace alpha.player.locomotion
 
         public virtual void Enter()
         {
-            Debug.Log(_Core.LocomotionContext.CurrentStateType);
+            //Debug.Log(_Core.LocomotionContext.CurrentStateType);
         }
         public abstract void Update();
         public abstract void Exit();
