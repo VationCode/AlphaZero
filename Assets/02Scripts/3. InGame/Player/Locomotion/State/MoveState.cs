@@ -20,8 +20,9 @@ namespace alpha.ingame.player
             // Turn 판정 전에 현재 이동 타입을 저장한다.
             _LocomotionModule.SetMoveType(moveInput, isSprint, isWalk, isCombat);
 
-            // Combat Turn 클립은 현재 구성에 없으므로 제외한다.
-            if (_AnimationView.CanTurn(_LocomotionModule.MoveType) &&
+            // 현재 Animator의 Move 상태에서만 Turn 전환을 요청한다.
+            if (_LocomotionModule.MoveType != EMoveType.Combat &&
+                _AnimationView.CanTurn() &&
                 _LocomotionModule.IsOppositeDirection(moveInput))
             {
                 _StateMachine.ChangeState(ELocomotionState.Turn);

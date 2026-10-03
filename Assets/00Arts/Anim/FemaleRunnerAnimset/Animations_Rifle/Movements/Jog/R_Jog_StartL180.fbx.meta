@@ -1,7 +1,14 @@
 fileFormatVersion: 2
 guid: 3af7e80fe5a7da44b808afd5e86c584a
+AssetOrigin:
+  serializedVersion: 1
+  productId: 303120
+  packageName: Female Rifle Animset - Free Walk&Jog
+  packageVersion: 1.2
+  assetPath: Assets/FemaleRunnerAnimset/Animations_Rifle/Movements/Jog/R_Jog_StartL180.fbx
+  uploadId: 907614
 ModelImporter:
-  serializedVersion: 21300
+  serializedVersion: 22200
   internalIDToNameTable:
   - first:
       74: -2070916421543805343
@@ -19,8 +26,6 @@ ModelImporter:
     optimizeGameObjects: 0
     removeConstantScaleCurves: 1
     motionNodeName: root
-    rigImportErrors: 
-    rigImportWarnings: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
@@ -208,6 +213,7 @@ ModelImporter:
     addColliders: 0
     useSRGBMaterialColor: 1
     sortHierarchyByName: 1
+    importPhysicalCameras: 1
     importVisibility: 1
     importBlendShapes: 1
     importCameras: 1
@@ -235,6 +241,7 @@ ModelImporter:
     secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
@@ -768,8 +775,7 @@ ModelImporter:
     - name: index_03_l
       parentName: index_02_l
       position: {x: -0.021126784, y: 0, z: 0}
-      rotation: {x: -0.000000037261646, y: -0.0000000074067517, z: -0.0011764629,
-        w: 0.99999934}
+      rotation: {x: -0.000000037261646, y: -0.0000000074067517, z: -0.0011764629, w: 0.99999934}
       scale: {x: 1, y: 1, z: 1}
     - name: middle_01_l
       parentName: hand_l
@@ -1028,22 +1034,15 @@ ModelImporter:
     hasTranslationDoF: 0
     hasExtraRoot: 1
     skeletonHasParents: 1
-  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: c0426d61788399a4aa9702989176ee68,
-    type: 3}
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: c0426d61788399a4aa9702989176ee68, type: 3}
   autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 3
   humanoidOversampling: 1
   avatarSetup: 2
   addHumanoidExtraRootOnlyWhenUsingAvatar: 1
+  importBlendShapeDeformPercent: 0
   remapMaterialsIfMaterialImportModeIsNone: 0
   additionalBone: 0
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 303120
-  packageName: Female Rifle Animset - Free Walk&Jog
-  packageVersion: 1.2
-  assetPath: Assets/FemaleRunnerAnimset/Animations_Rifle/Movements/Jog/R_Jog_StartL180.fbx
-  uploadId: 907614

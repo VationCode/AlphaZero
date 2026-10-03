@@ -8,8 +8,8 @@ namespace alpha.ingame.player
 
         public override void EnterState()
         {
-            // LocomotionModule에 저장된 이동 타입으로 클립을 선택한다.
-            _AnimationView.TurnAnim(_LocomotionModule.MoveType);
+            // 현재 Animator의 Move 상태에 연결된 Turn을 트리거한다.
+            _AnimationView.TurnAnim();
         }
         public override void UpdateState()
         {

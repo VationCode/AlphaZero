@@ -33,7 +33,6 @@ namespace alpha.ingame.player
                                 && _animator.runtimeAnimatorController != null;
 
         private readonly int _turnTrigger = Animator.StringToHash("Turn");
-        private readonly int _turnType = Animator.StringToHash("TurnType");
 
         private void Awake()
         {
@@ -95,29 +94,31 @@ namespace alpha.ingame.player
             _currentMoveState = nextState;
             _animator.CrossFadeInFixedTime(nextState, _moveBlendTime, 0, 0f);
         }
-        public bool CanTurn(EMoveType p_moveType)
+        public bool CanTurn()
         {
-            int turnState = GetTurnState(p_moveType);
-            return IsReady && _characterRoot != null &&
-                   turnState != 0 && _animator.HasState(0, turnState);
+            if (!IsReady || _characterRoot == null || _animator.IsInTransition(0))
+                return false;
+
+            // 새 입력 타입이 아닌 현재 재생 중인 Move 상태를 기준으로 판정한다.
+            int moveState = _animator.GetCurrentAnimatorStateInfo(0).fullPathHash;
+            int turnState = GetTurnState(moveState);
+            return turnState != 0 && _animator.HasState(0, turnState);
         }
 
-        private int GetTurnState(EMoveType p_moveType)
+        private int GetTurnState(int p_moveState)
         {
-            switch (p_moveType)
-            {
-                case EMoveType.Walk: return _walkTurn;
-                case EMoveType.Jog: return _jogTurn;
-                case EMoveType.Sprint: return _sprintTurn;
-                default: return 0; // Idle과 Combat Turn 없음
-            }
+            if (p_moveState == _walk) return _walkTurn;
+            if (p_moveState == _jog) return _jogTurn;
+            if (p_moveState == _sprint) return _sprintTurn;
+            return 0; // Idle과 Combat Turn 없음
         }
 
-        public void TurnAnim(EMoveType p_moveType)
+        public void TurnAnim()
         {
-            if (!CanTurn(p_moveType)) return;
+            if (!CanTurn()) return;
 
-            int turnState = GetTurnState(p_moveType);
+            int moveState = _animator.GetCurrentAnimatorStateInfo(0).fullPathHash;
+            int turnState = GetTurnState(moveState);
 
             // Animator에 연결한 Transition을 통해 Turn으로 진입한다.
             SetTurnRootMotion(true);
@@ -125,7 +126,6 @@ namespace alpha.ingame.player
             _currentMoveState = 0;
             _turnStateSeen = false;
 
-            _animator.SetInteger(_turnType, (int)p_moveType);
             _animator.ResetTrigger(_turnTrigger);
             _animator.SetTrigger(_turnTrigger);
         }

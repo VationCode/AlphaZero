@@ -318,7 +318,7 @@ MonoBehaviour:
   _sprintSpeed: 6
   _combatSpeed: 3
   _speedSmoothTime: 0.12
-  _rotationSpeed: 800
+  _rotationSpeed: 500
   _gravity: -20
 --- !u!1 &237356201
 GameObject:
