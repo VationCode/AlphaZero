@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e58bb4458ff180a47a4d9267dcb28dfc
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 303121
+  packageName: Female Rifle Animset - Free Run&Sprint
+  packageVersion: 1.2
+  assetPath: Assets/00Arts/Anim/FemaleRunnerAnimset/Scripts/WallrunCheck.cs
+  uploadId: 893656
