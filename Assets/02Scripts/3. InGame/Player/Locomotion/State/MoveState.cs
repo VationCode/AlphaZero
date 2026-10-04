@@ -8,7 +8,7 @@ namespace alpha.ingame.player
 
         public override void EnterState()
         {
-
+            Debug.Log("Enter MoveState");
         }
         public override void UpdateState()
         {
@@ -17,26 +17,25 @@ namespace alpha.ingame.player
             bool isWalk = AlphaInput.Instance.IsWalk;
             bool isCombat = AlphaInput.Instance.IsCombat;
 
-            // Turn 판정 전에 현재 이동 타입을 저장한다.
+            // Turn 판정 전에 타겟 이동 타입을 저장한다.
             _LocomotionModule.SetMoveType(moveInput, isSprint, isWalk, isCombat);
 
-            // 현재 Animator의 Move 상태에서만 Turn 전환을 요청한다.
-            if (_LocomotionModule.MoveType != EMoveType.Combat &&
-                _AnimationView.CanTurn() &&
-                _LocomotionModule.IsOppositeDirection(moveInput))
+            if(_LocomotionModule.IsOppositeDirection(moveInput))
             {
-                _StateMachine.ChangeState(ELocomotionState.Turn);
+                _StateMachine.ChangeState(ELocomotionState.Turn);                
                 return;
             }
 
             _LocomotionModule.Move(moveInput);
 
             if (moveInput.sqrMagnitude <= 0.0001f)
+            {
                 _StateMachine.ChangeState(ELocomotionState.Idle);
+                return; // 한 프레임 입력이 없어도 이전 이동 타입은 유지
+            }
+
+            _LocomotionModule.SetPrevMoveType(_LocomotionModule.MoveType);
         }
-        public override void ExitState()
-        {
-            
-        }
+        public override void ExitState(){}
     }
 }

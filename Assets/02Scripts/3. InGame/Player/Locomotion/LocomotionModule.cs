@@ -35,8 +35,9 @@ namespace alpha.ingame.player
         public Vector3 MoveDirection { get; private set; }
         public float CurrentSpeed { get; private set; }
         public EMoveType MoveType { get; private set; } = EMoveType.Idle;
+        public EMoveType PrevMoveType { get; private set; } = EMoveType.Idle;
 
-        public event Action<Vector3, EMoveType> OnMove;
+        public event Action<Vector3, EMoveType, float> OnMove;
 
         private Vector3 _velocityXZ;
         private float _velocityY;
@@ -45,30 +46,24 @@ namespace alpha.ingame.player
         {
             _characterCtrl = GetComponentInParent<CharacterController>(true);
         }
-        public void SetMoveType(Vector2 input, bool isSprint, bool isWalk, bool isCombat)
+        public void SetMoveType(Vector2 p_input, bool p_isSprint, bool p_isWalk, bool p_isCombat)
         {
             // Combat Tree는 입력이 없어도 중앙의 대기 애니메이션을 사용한다.
-            MoveType = isCombat ? EMoveType.Combat
-                     : input.sqrMagnitude <= 0.0001f ? EMoveType.Idle
-                     : isSprint ? EMoveType.Sprint
-                     : isWalk ? EMoveType.Walk : EMoveType.Jog;
+            MoveType = p_isCombat ? EMoveType.Combat
+                     : p_input.sqrMagnitude <= 0.0001f ? EMoveType.Idle
+                     : p_isSprint ? EMoveType.Sprint
+                     : p_isWalk ? EMoveType.Walk : EMoveType.Jog;
         }
-        // 반대 방향 입력 확인
+
+        public void SetPrevMoveType(EMoveType p_moveType)
+        {
+            PrevMoveType = p_moveType;
+        }
+
+        // 캐릭터 반대 방향 입력시
         public bool IsOppositeDirection(Vector2 p_input)
         {
-            Camera mainCamera = Camera.main;
-            if (mainCamera == null)
-                return false;
-
-            // 입력을 Move()와 같은 카메라 기준 월드 방향으로 변환
-            Vector3 forward = mainCamera.transform.forward;
-            Vector3 right = mainCamera.transform.right;
-            forward.y = 0f;
-            right.y = 0f;
-            forward.Normalize();
-            right.Normalize();
-
-            Vector3 desiredDirection = forward * p_input.y + right * p_input.x;
+            Vector3 desiredDirection = GetWorldMoveDirection(p_input);
             if (desiredDirection.sqrMagnitude <= 0.0001f)
                 return false;
 
@@ -81,13 +76,8 @@ namespace alpha.ingame.player
 
         public void Move(Vector2 p_input)
         {
-            if (_characterCtrl == null) return;
-
-            Camera mainCamera = Camera.main;
-            if (mainCamera == null) return;
-
             // 우선순위 유지: Combat > Sprint > Walk > Jog
-            float selectedSpeed = MoveType switch
+            float targetSpeed = MoveType switch
             {
                 EMoveType.Idle => 0f,
                 EMoveType.Walk => _walkSpeed,
@@ -97,11 +87,27 @@ namespace alpha.ingame.player
                 _ => 0f
             };
 
-            Vector2 input = Vector2.ClampMagnitude(p_input, 1f);
-            float movementTargetSpeed = input.sqrMagnitude > 0.0001f ? selectedSpeed : 0f;
-
             // 이동 속도 값을 부드럽게 전환
-            CurrentSpeed = Mathf.Lerp(CurrentSpeed, movementTargetSpeed, Time.deltaTime / _speedSmoothTime);
+            CurrentSpeed = Mathf.Lerp(CurrentSpeed, targetSpeed, Time.deltaTime / _speedSmoothTime);
+
+            // 카메라 기준 이동 방향을 저장해 애니메이션에도 전달
+            MoveDirection = GetWorldMoveDirection(p_input);
+
+            _velocityXZ = MoveDirection * targetSpeed;
+
+            Rotation(MoveDirection, MoveType == EMoveType.Combat);
+
+            Vector3 velocity = _velocityXZ;
+            velocity.y = CalculateGravity(Time.deltaTime);
+            _characterCtrl.Move(velocity * Time.deltaTime);
+
+            // 이동 타입과 월드 방향을 애니메이션에 전달한다.
+            OnMove?.Invoke(MoveDirection, MoveType, CurrentSpeed);
+        }
+        private Vector3 GetWorldMoveDirection(Vector2 p_input)
+        {
+            Camera mainCamera = Camera.main;
+            if (mainCamera == null || p_input.sqrMagnitude <= 0.0001f) return Vector3.zero;
 
             Vector3 forward = mainCamera.transform.forward;
             Vector3 right = mainCamera.transform.right;
@@ -113,22 +119,9 @@ namespace alpha.ingame.player
             forward.Normalize();
             right.Normalize();
 
-            // 카메라 기준 이동 방향을 저장해 애니메이션에도 전달
-            MoveDirection = Vector3.ClampMagnitude((forward * input.y) + (right * input.x), 1f);
+            //Vector2 input = Vector2.ClampMagnitude(p_input, 1f);
 
-            // 수평 속도 자체를 보간해 출발과 정지를 부드럽게 처리
-            Vector3 targetVelocityXZ = MoveDirection * movementTargetSpeed;
-            _velocityXZ = Vector3.Lerp(_velocityXZ, targetVelocityXZ, Time.deltaTime / _speedSmoothTime);
-
-            bool isCombat = MoveType == EMoveType.Combat;
-            Rotation(MoveDirection, isCombat);
-
-            Vector3 velocity = _velocityXZ;
-            velocity.y = CalculateGravity(Time.deltaTime);
-            _characterCtrl.Move(velocity * Time.deltaTime);
-
-            // 이동 타입과 월드 방향을 애니메이션에 전달한다.
-            OnMove?.Invoke(MoveDirection, MoveType);
+            return ((forward * p_input.y) + (right * p_input.x)).normalized; // 현재는 입력량으로 하는게 없기에 1로 정규화
         }
 
         public void Rotation(Vector3 p_direction, bool p_isimmediately = false)

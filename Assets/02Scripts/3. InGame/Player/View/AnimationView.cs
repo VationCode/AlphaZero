@@ -4,7 +4,7 @@ namespace alpha.ingame.player
 {
     public class AnimationView : MonoBehaviour
     {
-        [Header("References")]
+        [Header("Ref")]
         [SerializeField] private Transform _characterRoot;
         [SerializeField] private Animator _animator;
         [SerializeField] private RuntimeAnimatorController[] _animCtrls;
@@ -12,27 +12,27 @@ namespace alpha.ingame.player
         [Header("Blend Time")]
         [SerializeField] private float _moveBlendTime = 0.12f;
 
-        // Animation Layer Names
-        private readonly int _idle = Animator.StringToHash("Base Layer.Idle");
-        private readonly int _walk = Animator.StringToHash("Base Layer.Walk");
-        private readonly int _jog = Animator.StringToHash("Base Layer.Jog");
-        private readonly int _sprint = Animator.StringToHash("Base Layer.Sprint");
+        // Animator 상태
+        private readonly int _moveTree = Animator.StringToHash("Base Layer.Move Tree");
         private readonly int _combatMoveTree = Animator.StringToHash("Base Layer.CombatMove Tree");
 
+        private readonly int _idleWalkQuickTurn = Animator.StringToHash("Base Layer.Idle Walk Quick Turn");
+        private readonly int _idleJogQuickTurn = Animator.StringToHash("Base Layer.Idle Jog Quick Turn");
+        private readonly int _idleSprintQuickTurn = Animator.StringToHash("Base Layer.Idle Sprint Quick Turn");
+        private readonly int _walkQuickTurn = Animator.StringToHash("Base Layer.Walk Quick Turn");
+        private readonly int _jogQuickTurn = Animator.StringToHash("Base Layer.Jog Quick Turn");
+        private readonly int _sprintQuickTurn = Animator.StringToHash("Base Layer.Sprint Quick Turn");
+
+        // Blend Tree 파라미터
         private readonly int _inputX = Animator.StringToHash("InputX");
         private readonly int _inputY = Animator.StringToHash("InputY");
-        private readonly int _walkTurn = Animator.StringToHash("Base Layer.Walk Turn");
-        private readonly int _jogTurn = Animator.StringToHash("Base Layer.Jog Turn");
-        private readonly int _sprintTurn = Animator.StringToHash("Base Layer.Sprint Turn");
+        private readonly int _moveSpeed = Animator.StringToHash("MoveSpeed");
 
         private int _currentMoveState;
         private int _currentTurnState;
+        private float _turnBlendTime;
         private bool _useTurnRootMotion;
-        private bool _turnStateSeen;
-        public bool IsReady => _animator != null && _animator.isActiveAndEnabled
-                                && _animator.runtimeAnimatorController != null;
 
-        private readonly int _turnTrigger = Animator.StringToHash("Turn");
 
         private void Awake()
         {
@@ -54,100 +54,99 @@ namespace alpha.ingame.player
                 return;
 
             _animator.runtimeAnimatorController = _animCtrls[index];
+
             _currentMoveState = 0;
             _currentTurnState = 0;
-            _turnStateSeen = false;
+            _useTurnRootMotion = false;
         }
 
-        public void MoveAnim(Vector3 p_moveDirection, EMoveType p_moveType)
+        public void MoveAnim(Vector3 p_moveDirection, EMoveType p_moveType, float p_currentSpeed)
         {
-            if (!IsReady || _useTurnRootMotion) return;
+            if (_animator == null || !_animator.isActiveAndEnabled ||
+                _animator.runtimeAnimatorController == null || _useTurnRootMotion)
+                return;
 
-            int nextState = p_moveType switch
-            {
-                EMoveType.Idle => _idle,
-                EMoveType.Walk => _walk,
-                EMoveType.Jog => _jog,
-                EMoveType.Sprint => _sprint,
-                EMoveType.Combat => _combatMoveTree,
-                _ => _idle
-            };
+            int nextState = p_moveType == EMoveType.Combat ? _combatMoveTree : _moveTree;
 
-            if (!_animator.HasState(0, nextState)) return;
 
             if (p_moveType == EMoveType.Combat)
             {
-                if (_characterRoot == null) return;
+                // Combat Tree에는 캐릭터 기준 방향을 전달한다.
+                Vector3 localDirection = _characterRoot != null ? 
+                                         _characterRoot.InverseTransformDirection(p_moveDirection) : p_moveDirection;
 
-                // Combat Tree에는 캐릭터 기준 이동 방향을 전달한다.
-                Vector3 localDirection = _characterRoot.InverseTransformDirection(p_moveDirection);
-
-                Vector2 blend = Vector2.ClampMagnitude(new Vector2(localDirection.x, localDirection.z), 1f);
-
-                _animator.SetFloat(_inputX, blend.x);
-                _animator.SetFloat(_inputY, blend.y);
+                _animator.SetFloat(_inputX, p_moveDirection.x);
+                _animator.SetFloat(_inputY, p_moveDirection.z);
+                return;
             }
+            else
+                _animator.SetFloat(_moveSpeed, p_currentSpeed);
 
-            // 일반 이동 상태가 바뀔 때만 블렌딩한다.
-            if (_currentMoveState == nextState) return;
+            // 턴 직후 첫 호출은 같은 Move Tree라도 전환한다.
+            if (_currentMoveState == nextState && _currentTurnState == 0)
+                return;
 
             _currentMoveState = nextState;
+            _currentTurnState = 0;
             _animator.CrossFadeInFixedTime(nextState, _moveBlendTime, 0, 0f);
         }
-        public bool CanTurn()
+
+        public void TurnAnim(EMoveType p_preType, EMoveType p_nextType)
         {
-            if (!IsReady || _characterRoot == null || _animator.IsInTransition(0))
-                return false;
+            _currentTurnState = GetTurnState(p_preType, p_nextType);
+            
+            // Walk → Quick Turn에만 긴 진입 블렌드를 적용한다.(해당 클립들 트랜지션 저 값들로 설정해야 부드럽게 연결)
+            _turnBlendTime = p_preType == EMoveType.Walk ? 0.25f : 0.05f;
 
-            // 새 입력 타입이 아닌 현재 재생 중인 Move 상태를 기준으로 판정한다.
-            int moveState = _animator.GetCurrentAnimatorStateInfo(0).fullPathHash;
-            int turnState = GetTurnState(moveState);
-            return turnState != 0 && _animator.HasState(0, turnState);
-        }
-
-        private int GetTurnState(int p_moveState)
-        {
-            if (p_moveState == _walk) return _walkTurn;
-            if (p_moveState == _jog) return _jogTurn;
-            if (p_moveState == _sprint) return _sprintTurn;
-            return 0; // Idle과 Combat Turn 없음
-        }
-
-        public void TurnAnim()
-        {
-            if (!CanTurn()) return;
-
-            int moveState = _animator.GetCurrentAnimatorStateInfo(0).fullPathHash;
-            int turnState = GetTurnState(moveState);
-
-            // Animator에 연결한 Transition을 통해 Turn으로 진입한다.
             SetTurnRootMotion(true);
-            _currentTurnState = turnState;
-            _currentMoveState = 0;
-            _turnStateSeen = false;
 
-            _animator.ResetTrigger(_turnTrigger);
-            _animator.SetTrigger(_turnTrigger);
+            _animator.CrossFadeInFixedTime(_currentTurnState, _turnBlendTime, 0, 0f);
         }
 
-        public bool IsTurnFinished()
+        private int GetTurnState(EMoveType p_previousType, EMoveType p_nextType)
         {
-            if (!IsReady || _currentTurnState == 0)
+            // Idle에서 시작하면 이번 이동 타입으로 턴을 고른다.
+            if (p_previousType == EMoveType.Idle)
+            {
+                return p_nextType switch
+                {
+                    EMoveType.Walk => _idleWalkQuickTurn,
+                    EMoveType.Jog => _idleJogQuickTurn,
+                    EMoveType.Sprint => _idleSprintQuickTurn,
+                    _ => 0
+                };
+            }
+
+            // 이동 중이면 이전 이동 타입으로 턴을 고른다.
+            return p_previousType switch
+            {
+                EMoveType.Walk => _walkQuickTurn,
+                EMoveType.Jog => _jogQuickTurn,
+                EMoveType.Sprint => _sprintQuickTurn,
+                _ => 0
+            };
+        }
+
+        // 턴 종료 확인
+        public bool ShouldReturnFromTurn()
+        {
+            if (_animator == null || _currentTurnState == 0 || _animator.IsInTransition(0))
                 return false;
 
-            AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(0);
+            AnimatorStateInfo turn = _animator.GetCurrentAnimatorStateInfo(0);
 
-            if (state.fullPathHash == _currentTurnState)
-                _turnStateSeen = true;
-
-            // Turn을 실제로 재생하고 복귀 전환까지 마쳐야 종료한다.
-            if (!_turnStateSeen || _animator.IsInTransition(0))
+            if (turn.fullPathHash != _currentTurnState)
                 return false;
 
-            // Turn에서 해당 이동 상태로 돌아온 뒤 종료한다.
-            return state.fullPathHash == _walk ||
-                   state.fullPathHash == _jog ||
-                   state.fullPathHash == _sprint;
+            // 복귀 블렌드 시간만큼 턴이 남으면 이동을 재개한다.
+            float remainingTime = (1f - turn.normalizedTime) * turn.length;
+
+            if (remainingTime > _moveBlendTime)
+                return false;
+
+                SetTurnRootMotion(false);
+
+            return true;
         }
 
         public void SetTurnRootMotion(bool enabled)
@@ -156,18 +155,9 @@ namespace alpha.ingame.player
                 return;
 
             _useTurnRootMotion = enabled;
-            _animator.applyRootMotion = enabled;
-
-            if (!enabled)
-            {
-                _currentTurnState = 0;
-                _turnStateSeen = false;
-                // applyRootMotion 변경으로 Animator가 재초기화될 수 있다.
-                _currentMoveState = 0;
-            }
         }
 
-        /*private void OnAnimatorMove()
+        private void OnAnimatorMove()
         {
             if (!_useTurnRootMotion || _animator == null || _characterRoot == null)
                 return;
@@ -175,6 +165,6 @@ namespace alpha.ingame.player
             // Turn 중 Animator의 이동과 회전을 Player 루트에 적용한다.
             _characterRoot.position += _animator.deltaPosition;
             _characterRoot.rotation *= _animator.deltaRotation;
-        }*/
+        }
     }
 }

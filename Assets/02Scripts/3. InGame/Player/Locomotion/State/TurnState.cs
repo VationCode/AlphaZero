@@ -8,22 +8,22 @@ namespace alpha.ingame.player
 
         public override void EnterState()
         {
+            Debug.Log("Enter TurnState");
             // 현재 Animator의 Move 상태에 연결된 Turn을 트리거한다.
-            _AnimationView.TurnAnim();
+
+            EMoveType prev = _LocomotionModule.PrevMoveType;
+            EMoveType current = _LocomotionModule.MoveType;
+
+            _AnimationView.TurnAnim(prev, current);
         }
         public override void UpdateState()
         {
-            // Turn 중에는 일반 Move()와 Rotation()을 호출하지 않는다.
-            if (!_AnimationView.IsTurnFinished())
-                return;
-
-            bool hasInput = AlphaInput.Instance.MoveInput.sqrMagnitude > 0.0001f;
-
-            _StateMachine.ChangeState(hasInput ? ELocomotionState.Move : ELocomotionState.Idle);
+            if(_AnimationView.ShouldReturnFromTurn())
+            {
+                _StateMachine.ChangeState(ELocomotionState.Move);
+            }
+            
         }
-        public override void ExitState()
-        {
-            _AnimationView.SetTurnRootMotion(false);
-        }
+        public override void ExitState(){ }
     }
 }

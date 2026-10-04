@@ -9,7 +9,8 @@ namespace alpha.ingame.player
 
         public override void EnterState()
         {
-            
+            Debug.Log("Enter IdleState");
+            _LocomotionModule.SetMoveType(Vector2.zero,false, false, false);
         }
         public override void UpdateState()
         {
@@ -22,14 +23,12 @@ namespace alpha.ingame.player
                 return;
             }
 
-            _LocomotionModule.SetMoveType(Vector2.zero, AlphaInput.Instance.IsSprint, AlphaInput.Instance.IsWalk, AlphaInput.Instance.IsCombat);
-
             // 정지 중에도 감속과 중력을 계속 처리한다.
             _LocomotionModule.Move(Vector2.zero);
+
+            if (_LocomotionModule.CurrentSpeed <= 0.1f)
+                _LocomotionModule.SetPrevMoveType(EMoveType.Idle);
         }
-        public override void ExitState()
-        {
-            
-        }
+        public override void ExitState(){}
     }
 }
