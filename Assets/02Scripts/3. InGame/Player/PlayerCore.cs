@@ -36,7 +36,7 @@ namespace alpha.ingame.player
             OnPlayerSetup?.Invoke(GameManager.Instance.AreteType);
 
             LocomotionModule.OnMove += AnimationView.MoveAnim;
-
+            LocomotionModule.OnJump += AnimationView.JumpAnim;
         }
 
     }

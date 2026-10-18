@@ -1042,8 +1042,8 @@ ModelImporter:
   assetBundleVariant: 
 AssetOrigin:
   serializedVersion: 1
-  productId: 303121
-  packageName: Female Rifle Animset - Free Run&Sprint
-  packageVersion: 1.2
-  assetPath: Assets/FemaleRunnerAnimset/Animations_Rifle/Movements/Run/R_Run_Rfoot.fbx
-  uploadId: 893656
+  productId: 340068
+  packageName: Female Rifle Animset - Jumps
+  packageVersion: 1.0
+  assetPath: Assets/00Arts/Anim/FemaleRunnerAnimset/Animations_Rifle/Movements/Run/R_Run_Rfoot.fbx
+  uploadId: 806044

@@ -6,9 +6,8 @@ namespace alpha.ingame.player
     {
         Idle = 0,
         Walk = 1,
-        Jog = 2,
-        Sprint = 3,
-        Combat = 4
+        Run = 2,
+        Combat = 3
     }
 
     public class LocomotionModule : MonoBehaviour
@@ -18,8 +17,7 @@ namespace alpha.ingame.player
 
         [Header("Move")]
         [SerializeField] private float _walkSpeed = 2f;
-        [SerializeField] private float _jogSpeed = 4f;
-        [SerializeField] private float _sprintSpeed = 6f;
+        [SerializeField] private float _runSpeed = 6f;
         [SerializeField] private float _combatSpeed = 3f;
 
         [Header("Speed Transition")]
@@ -29,49 +27,40 @@ namespace alpha.ingame.player
         [Header("Rotation")]
         [SerializeField] private float _rotationSpeed = 800f;
 
+        [Header("Air")]
+        [SerializeField, Min(0.01f)] private float _jumpHeight = 2f;
+        [SerializeField, Min(0f)] private float _airSpeed = 3f;
+        [SerializeField, Min(0f)] private float _airAcceleration = 8f;
+
         [Header("Gravity")]
         [SerializeField] private float _gravity = -20f;
 
         public Vector3 MoveDirection { get; private set; }
         public float CurrentSpeed { get; private set; }
         public EMoveType MoveType { get; private set; } = EMoveType.Idle;
-        public EMoveType PrevMoveType { get; private set; } = EMoveType.Idle;
 
         public event Action<Vector3, EMoveType, float> OnMove;
+        public event Action<EMoveType, int> OnJump;
+
+        public void ResetJumpCount() => _jumpCount = 0;
 
         private Vector3 _velocityXZ;
+        public float VelocityY => _velocityY;
         private float _velocityY;
-
+        private int _jumpCount;
+        public bool IsGrounded => _characterCtrl.isGrounded;
+        public bool CanGroundJump => IsGrounded && _jumpCount == 0;
+        public bool CanAirJump => !IsGrounded && _jumpCount == 1;
         private void Awake()
         {
             _characterCtrl = GetComponentInParent<CharacterController>(true);
         }
-        public void SetMoveType(Vector2 p_input, bool p_isSprint, bool p_isWalk, bool p_isCombat)
+        public void SetMoveType(Vector2 p_input, bool p_isWalk, bool p_isCombat)
         {
             // Combat Tree는 입력이 없어도 중앙의 대기 애니메이션을 사용한다.
             MoveType = p_isCombat ? EMoveType.Combat
                      : p_input.sqrMagnitude <= 0.0001f ? EMoveType.Idle
-                     : p_isSprint ? EMoveType.Sprint
-                     : p_isWalk ? EMoveType.Walk : EMoveType.Jog;
-        }
-
-        public void SetPrevMoveType(EMoveType p_moveType)
-        {
-            PrevMoveType = p_moveType;
-        }
-
-        // 캐릭터 반대 방향 입력시
-        public bool IsOppositeDirection(Vector2 p_input)
-        {
-            Vector3 desiredDirection = GetWorldMoveDirection(p_input);
-            if (desiredDirection.sqrMagnitude <= 0.0001f)
-                return false;
-
-            // Move() 호출 전 캐릭터가 실제로 바라보는 방향
-            Vector3 facingDirection = _characterCtrl.transform.forward;
-            facingDirection.y = 0f;
-
-            return Vector3.Angle(facingDirection, desiredDirection) >= 175f;
+                     : p_isWalk ? EMoveType.Walk :  EMoveType.Run;
         }
 
         public void Move(Vector2 p_input)
@@ -81,8 +70,7 @@ namespace alpha.ingame.player
             {
                 EMoveType.Idle => 0f,
                 EMoveType.Walk => _walkSpeed,
-                EMoveType.Jog => _jogSpeed,
-                EMoveType.Sprint => _sprintSpeed,
+                EMoveType.Run => _runSpeed,
                 EMoveType.Combat => _combatSpeed,
                 _ => 0f
             };
@@ -148,6 +136,46 @@ namespace alpha.ingame.player
             Quaternion targetRotation = Quaternion.LookRotation(p_direction.normalized, Vector3.up);
 
             playerTransform.rotation = Quaternion.RotateTowards(playerTransform.rotation, targetRotation, _rotationSpeed * Time.deltaTime);
+        }
+
+        public void Jump()
+        {
+            // 진입 가능 여부는 상태에서 확인한다.
+            _velocityY = Mathf.Sqrt(_jumpHeight * -2f * _gravity);
+            _jumpCount++;
+            OnJump?.Invoke(MoveType, _jumpCount);
+        }
+
+        public void AirMove(Vector2 p_moveInput)
+        {
+            float deltaTime = Time.deltaTime;
+
+            MoveDirection = GetWorldMoveDirection(p_moveInput);
+            Vector3 targetVelocityXZ = MoveDirection * _airSpeed;
+            _velocityXZ = Vector3.MoveTowards(_velocityXZ, targetVelocityXZ, _airAcceleration * deltaTime);
+
+            CurrentSpeed = _velocityXZ.magnitude;
+            Rotation(MoveDirection, MoveType == EMoveType.Combat);
+
+            // 공중에서도 중력과 CharacterController 이동을 매 프레임 처리한다.
+            Vector3 velocity = _velocityXZ;
+            velocity.y = CalculateGravity(deltaTime);
+            CollisionFlags collision = _characterCtrl.Move(velocity * deltaTime);
+
+            // 천장에 닿으면 상승을 종료한다.
+            if ((collision & CollisionFlags.Above) != 0 && _velocityY > 0f)
+                _velocityY = 0f;
+        }
+
+        public void HoldGround()
+        {
+            MoveDirection = Vector3.zero;
+            _velocityXZ = Vector3.zero;
+            CurrentSpeed = 0f;
+
+            // OnMove를 발생시키지 않아 착지 애니메이션을 유지한다.
+            _velocityY = -2f;
+            _characterCtrl.Move(Vector3.up * (_velocityY * Time.deltaTime));
         }
 
         // 수직 속도 계산

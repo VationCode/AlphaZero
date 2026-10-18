@@ -15,9 +15,6 @@ namespace alpha.ingame.input
         public bool IsWalk => _isWalk;
         bool _isWalk;
 
-        public bool IsSprint => _isSprint;
-        bool _isSprint;
-
         public bool IsJump => _jumpFrame == Time.frameCount;  // 한 프레임 단위만 True로 이후 False
         private int _jumpFrame = -1;
 
@@ -30,6 +27,13 @@ namespace alpha.ingame.input
 
         public bool IsCombat => _isCombat;
         private bool _isCombat;
+
+        // Camera
+        public Vector2 LookInput => _lookInput;
+        private Vector2 _lookInput;
+
+        public Vector2 ZoomInput => _zoomInput;
+        private Vector2 _zoomInput;
         private void Awake()
         {
             if (Instance == null)
@@ -51,11 +55,7 @@ namespace alpha.ingame.input
             _action.PlayerLocomotion.Move.performed += i => _moveInput = i.ReadValue<Vector2>();
             _action.PlayerLocomotion.Move.canceled += i => _moveInput = Vector2.zero;
 
-            _action.PlayerLocomotion.Walk.performed += i => _isWalk = true;
-            _action.PlayerLocomotion.Walk.canceled += i => _isWalk = false;
-
-            _action.PlayerLocomotion.Sprint.performed += i => _isSprint = true;
-            _action.PlayerLocomotion.Sprint.canceled += i => _isSprint = false;
+            _action.PlayerLocomotion.Walk.performed += _ => _isWalk = !_isWalk;
 
             _action.PlayerLocomotion.Jump.performed += i => _jumpFrame = Time.frameCount;
             _action.PlayerLocomotion.Dash.performed += i => _dashFrame = Time.frameCount;
@@ -65,6 +65,13 @@ namespace alpha.ingame.input
             _action.PlayerCombat.Attack.performed += i => _isCombat = true;
             _action.PlayerCombat.Attack.canceled += i => _isCombat = false;
 
+            // Camera
+            _action.Camera.Look.performed += i => _lookInput = i.ReadValue<Vector2>();
+            _action.Camera.Look.canceled += i => _lookInput = Vector2.zero;
+
+            _action.Camera.Zoom.performed += i => _zoomInput = i.ReadValue<Vector2>();
+            _action.Camera.Zoom.canceled += i => _zoomInput = Vector2.zero;
+
             _action.Enable();
         }
 
@@ -73,11 +80,7 @@ namespace alpha.ingame.input
             _action.PlayerLocomotion.Move.performed -= i => _moveInput = i.ReadValue<Vector2>();
             _action.PlayerLocomotion.Move.canceled -= i => _moveInput = Vector2.zero;
 
-            _action.PlayerLocomotion.Walk.performed -= i => _isWalk = true;
-            _action.PlayerLocomotion.Walk.canceled -= i => _isWalk = false;
-
-            _action.PlayerLocomotion.Sprint.performed -= i => _isSprint = true;
-            _action.PlayerLocomotion.Sprint.canceled -= i => _isSprint = false;
+            _action.PlayerLocomotion.Walk.performed -= i => _isWalk = !_isWalk;
 
             _action.PlayerLocomotion.Jump.performed -= i => _jumpFrame = Time.frameCount;
             _action.PlayerLocomotion.Dash.performed -= i => _dashFrame = Time.frameCount;
@@ -86,6 +89,13 @@ namespace alpha.ingame.input
             // Combat
             _action.PlayerCombat.Attack.performed -= i => _isCombat = true;
             _action.PlayerCombat.Attack.canceled -= i => _isCombat = false;
+
+            // Camera
+            _action.Camera.Look.performed -= i => _lookInput = i.ReadValue<Vector2>();
+            _action.Camera.Look.canceled -= i => _lookInput = Vector2.zero;
+
+            _action.Camera.Zoom.performed -= i => _zoomInput = i.ReadValue<Vector2>();
+            _action.Camera.Zoom.canceled -= i => _zoomInput = Vector2.zero;
 
             _action.Disable();
 

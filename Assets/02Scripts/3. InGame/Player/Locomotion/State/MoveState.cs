@@ -12,18 +12,21 @@ namespace alpha.ingame.player
         }
         public override void UpdateState()
         {
-            Vector2 moveInput = AlphaInput.Instance.MoveInput;
-            bool isSprint = AlphaInput.Instance.IsSprint;
-            bool isWalk = AlphaInput.Instance.IsWalk;
-            bool isCombat = AlphaInput.Instance.IsCombat;
+            AlphaInput input = AlphaInput.Instance;
+            Vector2 moveInput = input.MoveInput;
+            bool isWalk = input.IsWalk;
+            bool isCombat = input.IsCombat;
+            bool isJump = input.IsJump;
 
-            // Turn 판정 전에 타겟 이동 타입을 저장한다.
-            _LocomotionModule.SetMoveType(moveInput, isSprint, isWalk, isCombat);
+            _LocomotionModule.SetMoveType(moveInput, isWalk, isCombat);
 
-            if(_LocomotionModule.IsOppositeDirection(moveInput))
+            if (isJump)
             {
-                _StateMachine.ChangeState(ELocomotionState.Turn);                
-                return;
+                if (input.IsJump && _LocomotionModule.CanGroundJump)
+                {
+                    _StateMachine.ChangeState(ELocomotionState.Jump);
+                    return;
+                }
             }
 
             _LocomotionModule.Move(moveInput);
@@ -34,7 +37,6 @@ namespace alpha.ingame.player
                 return; // 한 프레임 입력이 없어도 이전 이동 타입은 유지
             }
 
-            _LocomotionModule.SetPrevMoveType(_LocomotionModule.MoveType);
         }
         public override void ExitState(){}
     }

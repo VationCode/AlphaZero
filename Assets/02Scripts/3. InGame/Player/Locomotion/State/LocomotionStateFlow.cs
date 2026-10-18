@@ -7,7 +7,6 @@ namespace alpha.ingame.player
     {
         Idle,
         Move,
-        Turn,
         Jump,
         Fall,
         Land,
@@ -32,7 +31,6 @@ namespace alpha.ingame.player
             {
                 { ELocomotionState.Idle, new IdleState(_playerCore) },
                 { ELocomotionState.Move, new MoveState(_playerCore) },
-                { ELocomotionState.Turn, new TurnState(_playerCore) },
                 { ELocomotionState.Jump, new JumpState(_playerCore) },
                 { ELocomotionState.Fall, new FallState(_playerCore) },
                 { ELocomotionState.Land, new LandState(_playerCore) },
