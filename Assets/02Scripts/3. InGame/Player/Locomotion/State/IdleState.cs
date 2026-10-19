@@ -35,7 +35,6 @@ namespace alpha.ingame.player
 
             // 정지 중에도 감속과 중력을 계속 처리한다.
             _LocomotionModule.Move(Vector2.zero);
-
         }
         public override void ExitState(){}
     }

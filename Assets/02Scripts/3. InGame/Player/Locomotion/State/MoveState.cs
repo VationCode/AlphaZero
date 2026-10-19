@@ -34,9 +34,8 @@ namespace alpha.ingame.player
             if (moveInput.sqrMagnitude <= 0.0001f)
             {
                 _StateMachine.ChangeState(ELocomotionState.Idle);
-                return; // 한 프레임 입력이 없어도 이전 이동 타입은 유지
+                return;
             }
-
         }
         public override void ExitState(){}
     }

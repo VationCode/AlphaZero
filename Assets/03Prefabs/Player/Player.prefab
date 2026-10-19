@@ -118,7 +118,7 @@ CharacterController:
   m_Height: 1.9
   m_Radius: 0.25
   m_SlopeLimit: 45
-  m_StepOffset: 0.3
+  m_StepOffset: 0.06
   m_SkinWidth: 0.1
   m_MinMoveDistance: 0.001
   m_Center: {x: 0, y: 1.05, z: 0}
@@ -812,11 +812,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8be273b94ca89fc468aa8ef1a60e7b0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _characterRoot: {fileID: 0}
   _animator: {fileID: 5274442106574373197}
   _animCtrls:
   - {fileID: 9100000, guid: 5dfd35d24ed321c429accc44e9b90bcc, type: 2}
   - {fileID: 9100000, guid: 5da7a3657f8a641448ccff944013cbe3, type: 2}
   - {fileID: 9100000, guid: a47c636ca02d24245a91ac331ef1f999, type: 2}
+  _moveBlendTime: 0.12
 --- !u!4 &2293099609650060087 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5102726477017899899, guid: 5e2b39f4b92285c40bbaef155dd44b01, type: 3}
