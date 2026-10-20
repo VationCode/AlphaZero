@@ -25,7 +25,7 @@ namespace alpha.ingame.player
 
         [Header("Mobility")]
         [SerializeField, Min(0f)] private float _boostSpeed = 10f;
-        [SerializeField, Min(0f)] private float _leapSpeed = 10f;
+        [SerializeField, Min(0f)] private float _leapSpeed = 12f;
         [SerializeField, Min(0.01f)] private float _leapDuration = 0.18f;
         [SerializeField, Min(0.01f)] private float _leapHeight = 1.4f;
 
@@ -56,6 +56,8 @@ namespace alpha.ingame.player
         public void ResetJumpCount() => _jumpCount = 0;
 
         private Vector3 _velocityXZ;
+        private float _airEntrySpeed;
+        private bool _isAirMoving;
         private Vector3 _leapDirection;
         public float VelocityY => _velocityY;
         private float _velocityY;
@@ -72,8 +74,9 @@ namespace alpha.ingame.player
 
         private void LateUpdate()
         {
-            // 전투 또는 락온 중에만 카메라/대상 회전을 계속 따라간다.
-            if (MoveType == EMoveType.Combat || MoveType == EMoveType.BoostCombat || LockOnTarget != null)
+            // 공중에서는 이동 입력 방향 회전을 유지하고, 락온만 대상 회전을 우선한다.
+            if (LockOnTarget != null ||
+                (!_isAirMoving && (MoveType == EMoveType.Combat || MoveType == EMoveType.BoostCombat)))
                 UpdateFacing(MoveDirection, true);
         }
         public void SetMoveType(Vector2 p_input, bool p_isWalk, bool p_isCombat)
@@ -84,8 +87,8 @@ namespace alpha.ingame.player
                      : p_isWalk ? EMoveType.Walk :  EMoveType.Run;
         }
 
-        public void SetBoostMoveType(bool isCombat) =>
-            MoveType = isCombat ? EMoveType.BoostCombat : EMoveType.Boost;
+        public void SetBoostMoveType(bool p_isCombat) =>
+            MoveType = p_isCombat ? EMoveType.BoostCombat : EMoveType.Boost;
 
         public void Move(Vector2 p_input)
         {
@@ -110,6 +113,7 @@ namespace alpha.ingame.player
             CurrentSpeed = Mathf.Lerp(CurrentSpeed, targetSpeed * inputStrength, Time.deltaTime / _speedSmoothTime);
 
             _velocityXZ = MoveDirection * targetSpeed * inputStrength;
+            _isAirMoving = false;
 
             Vector3 velocity = _velocityXZ;
             velocity.y = CalculateGravity(Time.deltaTime);
@@ -135,9 +139,9 @@ namespace alpha.ingame.player
             return (forward * p_input.y + right * p_input.x).normalized;
         }
 
-        public void SetLockOnTarget(Transform target)
+        public void SetLockOnTarget(Transform p_target)
         {
-            LockOnTarget = target;
+            LockOnTarget = p_target;
             UpdateFacing(MoveDirection, MoveType == EMoveType.Combat);
         }
 
@@ -189,6 +193,7 @@ namespace alpha.ingame.player
 
             MoveDirection = _leapDirection;
             _velocityXZ = _leapDirection * _leapSpeed;
+            _isAirMoving = false;
             _velocityY = Mathf.Sqrt(_leapHeight * -2f * _gravity);
             _jumpCount = 1;
             UpdateFacing(_leapDirection, false);
@@ -210,12 +215,26 @@ namespace alpha.ingame.player
         {
             float deltaTime = Time.deltaTime;
 
+            if (!_isAirMoving)
+            {
+                // 도약 또는 낙하 직전의 속도를 공중 방향 전환의 기준으로 사용한다.
+                _airEntrySpeed = Mathf.Max(_airSpeed, _velocityXZ.magnitude);
+                _isAirMoving = true;
+            }
+
             MoveDirection = GetWorldMoveDirection(p_moveInput);
-            Vector3 targetVelocityXZ = MoveDirection * _airSpeed;
-            _velocityXZ = Vector3.MoveTowards(_velocityXZ, targetVelocityXZ, _airAcceleration * deltaTime);
+            float inputStrength = Mathf.Clamp01(p_moveInput.magnitude);
+
+            if (inputStrength > 0f)
+            {
+                // 기존 관성에서 입력 방향의 속도로 서서히 전환해 실제 이동에 반영한다.
+                Vector3 targetVelocityXZ = MoveDirection * (_airEntrySpeed * inputStrength);
+                _velocityXZ = Vector3.MoveTowards(
+                    _velocityXZ, targetVelocityXZ, _airAcceleration * deltaTime);
+            }
 
             CurrentSpeed = _velocityXZ.magnitude;
-            UpdateFacing(MoveDirection, MoveType == EMoveType.Combat);
+            UpdateFacing(inputStrength > 0f ? MoveDirection : _velocityXZ, false);
 
             // 공중에서도 중력과 CharacterController 이동을 매 프레임 처리한다.
             Vector3 velocity = _velocityXZ;
@@ -231,6 +250,7 @@ namespace alpha.ingame.player
         {
             MoveDirection = Vector3.zero;
             _velocityXZ = Vector3.zero;
+            _isAirMoving = false;
             CurrentSpeed = 0f;
 
             // OnMove를 발생시키지 않아 착지 애니메이션을 유지한다.

@@ -28,11 +28,17 @@ namespace alpha.ingame.input
         private bool _isMobilityHeld;
         private int _mobilityFrame = -1;
 
-        public bool IsCombat => _isCombat;
+        public bool IsCombat => !_isQuickSlotOpen && _isCombat;
         private bool _isCombat;
 
+        // Interaction
+        public bool IsQuickSlotPressed => _quickSlotFrame == Time.frameCount;
+        public bool IsQuickSlotOpen => _isQuickSlotOpen;
+        private int _quickSlotFrame = -1;
+        private bool _isQuickSlotOpen;
+
         // Camera
-        public Vector2 LookInput => _lookInput;
+        public Vector2 LookInput => _isQuickSlotOpen ? Vector2.zero : _lookInput;
         private Vector2 _lookInput;
 
         public Vector2 ZoomInput => _zoomInput;
@@ -55,6 +61,8 @@ namespace alpha.ingame.input
         private void OnEnable()
         {
             _action = new AlphaInputAction();
+            // 생성된 입력 래퍼가 갱신되기 전에도 Tab 바인딩을 적용한다.
+            _action.PlayerInteraction.QuickSlot.ApplyBindingOverride("<Keyboard>/tab");
 
             // Locomotion
             _action.PlayerLocomotion.Move.performed += i => _moveInput = i.ReadValue<Vector2>();
@@ -70,6 +78,9 @@ namespace alpha.ingame.input
             // Combat
             _action.PlayerCombat.Attack.performed += OnAttackPerformed;
             _action.PlayerCombat.Attack.canceled += OnAttackCanceled;
+
+            // Interaction
+            _action.PlayerInteraction.QuickSlot.performed += OnQuickSlotPerformed;
 
             // Camera
             _action.Camera.Look.performed += i => _lookInput = i.ReadValue<Vector2>();
@@ -90,13 +101,20 @@ namespace alpha.ingame.input
             _action.PlayerLocomotion.Walk.performed -= i => _isWalk = !_isWalk;
 
             _action.PlayerLocomotion.Jump.performed -= i => _jumpFrame = Time.frameCount;
+
             _action.PlayerLocomotion.Mobility.performed -= OnMobilityPerformed;
             _action.PlayerLocomotion.Mobility.canceled -= OnMobilityCanceled;
+
             _action.PlayerLocomotion.Dodge.performed -= i => _dodgeFrame = Time.frameCount;
+
+            // Interaction
+            _action.PlayerInteraction.QuickSlot.performed -= OnQuickSlotPerformed;
 
             // Combat
             _action.PlayerCombat.Attack.performed -= OnAttackPerformed;
             _action.PlayerCombat.Attack.canceled -= OnAttackCanceled;
+
+
 
             // Camera
             _action.Camera.Look.performed -= i => _lookInput = i.ReadValue<Vector2>();
@@ -111,6 +129,8 @@ namespace alpha.ingame.input
 
             _action = null;
             _isCombat = false;
+            _isQuickSlotOpen = false;
+            _quickSlotFrame = -1;
             _isMobilityHeld = false;
         }
 
@@ -127,11 +147,26 @@ namespace alpha.ingame.input
 
         private void OnAttackPerformed(InputAction.CallbackContext context)
         {
-            _isCombat = true;
+            if (!_isQuickSlotOpen) _isCombat = true;
         }
 
         private void OnAttackCanceled(InputAction.CallbackContext context)
         {
+            _isCombat = false;
+        }
+
+        private void OnQuickSlotPerformed(InputAction.CallbackContext context)
+        {
+            _quickSlotFrame = Time.frameCount;
+        }
+
+        public void SetQuickSlotOpen(bool isOpen)
+        {
+            _isQuickSlotOpen = isOpen;
+            _lookInput = Vector2.zero;
+            if (!isOpen) return;
+
+            // 열리는 순간 이미 누르고 있던 공격과 마우스 회전량도 지운다.
             _isCombat = false;
         }
 

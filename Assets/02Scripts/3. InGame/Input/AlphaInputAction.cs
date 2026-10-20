@@ -280,6 +280,15 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""QuickSlot"",
+                    ""type"": ""Button"",
+                    ""id"": ""fcbccac2-00b1-433a-bd4e-d8fc41f665af"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -291,6 +300,17 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Interaction"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""8fca6f4c-298e-4654-9d90-eeb948be89e9"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""QuickSlot"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -360,6 +380,7 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         // PlayerInteraction
         m_PlayerInteraction = asset.FindActionMap("PlayerInteraction", throwIfNotFound: true);
         m_PlayerInteraction_Interaction = m_PlayerInteraction.FindAction("Interaction", throwIfNotFound: true);
+        m_PlayerInteraction_QuickSlot = m_PlayerInteraction.FindAction("QuickSlot", throwIfNotFound: true);
         // Camera
         m_Camera = asset.FindActionMap("Camera", throwIfNotFound: true);
         m_Camera_Look = m_Camera.FindAction("Look", throwIfNotFound: true);
@@ -684,6 +705,7 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_PlayerInteraction;
     private List<IPlayerInteractionActions> m_PlayerInteractionActionsCallbackInterfaces = new List<IPlayerInteractionActions>();
     private readonly InputAction m_PlayerInteraction_Interaction;
+    private readonly InputAction m_PlayerInteraction_QuickSlot;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerInteraction".
     /// </summary>
@@ -699,6 +721,10 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "PlayerInteraction/Interaction".
         /// </summary>
         public InputAction @Interaction => m_Wrapper.m_PlayerInteraction_Interaction;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerInteraction/QuickSlot".
+        /// </summary>
+        public InputAction @QuickSlot => m_Wrapper.m_PlayerInteraction_QuickSlot;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -728,6 +754,9 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
             @Interaction.started += instance.OnInteraction;
             @Interaction.performed += instance.OnInteraction;
             @Interaction.canceled += instance.OnInteraction;
+            @QuickSlot.started += instance.OnQuickSlot;
+            @QuickSlot.performed += instance.OnQuickSlot;
+            @QuickSlot.canceled += instance.OnQuickSlot;
         }
 
         /// <summary>
@@ -742,6 +771,9 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
             @Interaction.started -= instance.OnInteraction;
             @Interaction.performed -= instance.OnInteraction;
             @Interaction.canceled -= instance.OnInteraction;
+            @QuickSlot.started -= instance.OnQuickSlot;
+            @QuickSlot.performed -= instance.OnQuickSlot;
+            @QuickSlot.canceled -= instance.OnQuickSlot;
         }
 
         /// <summary>
@@ -954,6 +986,13 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnInteraction(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "QuickSlot" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnQuickSlot(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Camera" which allows adding and removing callbacks.

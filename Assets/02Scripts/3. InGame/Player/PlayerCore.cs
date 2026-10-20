@@ -19,7 +19,7 @@ namespace alpha.ingame.player
 
 
         public LocomotionModule LocomotionModule { get; private set; }
-        public EquipmentManager EquipmentManager {  get; private set; }
+        public EquipmentModule EquipmentModule { get; private set; }
 
 
         public event Action<EAreteType> OnPlayerSetup;
@@ -31,7 +31,7 @@ namespace alpha.ingame.player
             LocomotionStateFlow = GetComponentInChildren<LocomotionStateFlow>(true);
             LocomotionModule = GetComponentInChildren<LocomotionModule>(true);
 
-            EquipmentManager = GetComponentInChildren<EquipmentManager>(true);
+            EquipmentModule = GetComponentInChildren<EquipmentModule>(true);
 
             AnimationView = GetComponentInChildren<AnimationView>(true);
         }
@@ -51,7 +51,7 @@ namespace alpha.ingame.player
                 AnimationView.Initialize(CurrentModel.GetComponentInChildren<Animator>(true), areteType);
             }
 
-            if (EquipmentManager != null) OnPlayerSetup += EquipmentManager.HandlePlayerSetup;
+            EquipmentModule?.Initialize(areteType, CurrentModel);
             OnPlayerSetup?.Invoke(areteType);
 
             if (LocomotionModule != null && AnimationView != null)
@@ -61,10 +61,10 @@ namespace alpha.ingame.player
             }
         }
 
-        private bool CreateModel(EAreteType areteType)
+        private bool CreateModel(EAreteType p_areteType)
         {
             // 선택한 아레테 모델 하나만 Player/Model 아래에 배치한다.
-            GameObject prefab = areteType switch
+            GameObject prefab = p_areteType switch
             {
                 EAreteType.Heruna => _hernaPrefab,
                 EAreteType.Arin => _arinPrefab,
@@ -74,8 +74,16 @@ namespace alpha.ingame.player
 
             if (_modelRoot == null || prefab == null)
             {
-                Debug.LogWarning($"{nameof(PlayerCore)}: Model 또는 {areteType} 프리팹 참조가 없습니다.", this);
+                Debug.LogWarning($"{nameof(PlayerCore)}: Model 또는 {p_areteType} 프리팹 참조가 없습니다.", this);
                 return false;
+            }
+
+            // 씬의 편집용 모델이 있으면 런타임 모델과 겹치지 않게 제거한다.
+            for (int i = _modelRoot.childCount - 1; i >= 0; i--)
+            {
+                GameObject existingModel = _modelRoot.GetChild(i).gameObject;
+                existingModel.SetActive(false);
+                Destroy(existingModel);
             }
 
             CurrentModel = Instantiate(prefab, _modelRoot);

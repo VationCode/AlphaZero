@@ -57,17 +57,17 @@ namespace alpha.ingame.player
             }
         }
 
-        public void Initialize(Animator animator, EAreteType areteType)
+        public void Initialize(Animator p_animator, EAreteType p_areteType)
         {
-            if (animator == null)
+            if (p_animator == null)
             {
-                Debug.LogWarning($"{nameof(AnimationView)}: {areteType} 모델에 Animator가 없습니다.", this);
+                Debug.LogWarning($"{nameof(AnimationView)}: {p_areteType} 모델에 Animator가 없습니다.", this);
                 return;
             }
 
             // 생성된 모델의 Animator에 해당 아레테 컨트롤러를 적용한다.
-            _animator = animator;
-            HandlePlayerSetup(areteType);
+            _animator = p_animator;
+            HandlePlayerSetup(p_areteType);
         }
 
         public void HandlePlayerSetup(EAreteType p_type)
@@ -126,11 +126,11 @@ namespace alpha.ingame.player
             _animator.CrossFadeInFixedTime(nextState, _moveBlendTime, 0, 0f);
         }
 
-        public void JumpAnim(int jumpCount)
+        public void JumpAnim(int p_jumpCount)
         {
             if (_animator == null || !_animator.isActiveAndEnabled) return;
 
-            int state = jumpCount == 2 ? _doubleJump : _jump;
+            int state = p_jumpCount == 2 ? _doubleJump : _jump;
             if (!_animator.HasState(0, state)) return;
 
             _currentMoveState = 0;
