@@ -1,4 +1,5 @@
 using System;
+using alpha.ingame.item;
 using UnityEngine;
 
 namespace alpha.ingame.player
@@ -20,6 +21,7 @@ namespace alpha.ingame.player
 
         public LocomotionModule LocomotionModule { get; private set; }
         public EquipmentModule EquipmentModule { get; private set; }
+        public InventoryModule InventoryModule { get; private set; }
 
 
         public event Action<EAreteType> OnPlayerSetup;
@@ -32,6 +34,7 @@ namespace alpha.ingame.player
             LocomotionModule = GetComponentInChildren<LocomotionModule>(true);
 
             EquipmentModule = GetComponentInChildren<EquipmentModule>(true);
+            InventoryModule = GetComponentInChildren<InventoryModule>(true);
 
             AnimationView = GetComponentInChildren<AnimationView>(true);
         }
@@ -51,7 +54,8 @@ namespace alpha.ingame.player
                 AnimationView.Initialize(CurrentModel.GetComponentInChildren<Animator>(true), areteType);
             }
 
-            EquipmentModule?.Initialize(areteType, CurrentModel);
+            InventoryModule?.InitializeStartingWeapons(areteType);
+            EquipmentModule?.Initialize(areteType, CurrentModel, InventoryModule);
             OnPlayerSetup?.Invoke(areteType);
 
             if (LocomotionModule != null && AnimationView != null)

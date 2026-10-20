@@ -12,10 +12,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2a581dbf332d5904d931add769ec2e68, type: 3}
   m_Name: SFSniper
   m_EditorClassIdentifier: 
+  ItemId: silyon_sniper
   ItemName: SFSniper
   ItemType: 0
+  ItemIcon: {fileID: 0}
+  MaxStack: 1
+  AllowedAretes: 02000000
   WeaponType: 2
   WeaponHandType: 1
   WeaponDatas:
   - itemObj: {fileID: 6339225950026296182, guid: a2f64ea932076b64e90716aa8e51d426, type: 3}
-    WeaponHolderType: 0
+    WeaponHolderType: 1

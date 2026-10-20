@@ -13,7 +13,9 @@ MonoBehaviour:
   m_Name: DualKatana
   m_EditorClassIdentifier: 
   ItemName: DualSword
+  ItemId: dual_katana
   ItemType: 0
+  MaxStack: 1
   WeaponType: 0
   WeaponHandType: 2
   WeaponDatas:

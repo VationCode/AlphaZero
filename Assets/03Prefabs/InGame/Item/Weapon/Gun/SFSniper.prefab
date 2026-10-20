@@ -71,6 +71,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6855771728599148588}
+  - component: {fileID: 7000000000000000002}
   m_Layer: 0
   m_Name: SFSniper
   m_TagString: Untagged
@@ -97,6 +98,32 @@ Transform:
   - {fileID: 1718552167823379146}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7000000000000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6339225950026296182}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 84634da3bb3b45c0bc6b8ec9f0296c6f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _weaponData: {fileID: 11400000, guid: e4f9400e8cc84ba41acb583e8245e8d5, type: 2}
+  _firePoint: {fileID: 1533853973587315930}
+  _muzzleEffectPoint: {fileID: 1141787693000507974}
+  _fireMode: 0
+  _shotMode: 1
+  _fireInterval: 1.2
+  _projectilePrefab: {fileID: 8213964935800047582, guid: 96b615f1667b40a886d5288b34477b06, type: 3}
+  _initialPoolSize: 8
+  _impactData: {fileID: 11400000, guid: f27c32348cfd401d8e0367d600104d59, type: 2}
+  _damage: 60
+  _aimDistance: 300
+  _chargeDuration: 1.5
+  _minimumChargeTime: 0.2
+  _fullChargeDamageMultiplier: 2
 --- !u!1 &6614242528160432478
 GameObject:
   m_ObjectHideFlags: 0

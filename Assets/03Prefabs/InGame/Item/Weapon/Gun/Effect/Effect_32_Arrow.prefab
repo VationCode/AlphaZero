@@ -34367,6 +34367,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4116285548265114538}
+  - component: {fileID: 8213964935800047582}
+  - component: {fileID: 3262745811621416497}
   m_Layer: 0
   m_Name: Effect_32_Arrow
   m_TagString: Untagged
@@ -34392,3 +34394,31 @@ Transform:
   - {fileID: 7652162249332188880}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8213964935800047582
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7579633284073917657}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dccbc1a883c24c3db3c0e1f09e5e53ce, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  _speed: 70
+  _lifetime: 3
+  _collisionCollider: {fileID: 3262745811621416497}
+--- !u!135 &3262745811621416497
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7579633284073917657}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 25
+  m_Center: {x: 0, y: 0, z: 0}

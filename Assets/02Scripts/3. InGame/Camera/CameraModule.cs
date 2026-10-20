@@ -30,6 +30,7 @@ public class CameraModule : MonoBehaviour
     [SerializeField, Min(0f)] private float _collisionPadding = 0.1f;
 
     public Camera Cam { get; private set; }
+    public bool IsZoomed { get; private set; }
 
     private Vector3 _followVelocity;
     private float _mouseX;
@@ -53,6 +54,7 @@ public class CameraModule : MonoBehaviour
         _zoom.localPosition = new Vector3(0f, 0f, -p_distance);
 
         _currentZoom = p_distance;
+        IsZoomed = false;
     }
 
     private void FollowTarget()
@@ -71,6 +73,10 @@ public class CameraModule : MonoBehaviour
 
     private void Zoom(float p_wheel)
     {
+        // 휠 방향으로 일반/확대 시점을 선택한다. 카메라 거리와는 별도로 유지한다.
+        if (p_wheel > 0f) IsZoomed = true;
+        else if (p_wheel < 0f) IsZoomed = false;
+
         // 휠 입력으로 원하는 거리 변경
         _currentZoom = Mathf.Clamp(_currentZoom - (p_wheel * _sensitivityZoom), _zoomMin, _zoomMax);
 

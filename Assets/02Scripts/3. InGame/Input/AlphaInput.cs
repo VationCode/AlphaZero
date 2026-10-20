@@ -30,6 +30,12 @@ namespace alpha.ingame.input
 
         public bool IsCombat => !_isQuickSlotOpen && _isCombat;
         private bool _isCombat;
+        // 발사 방식에 따라 누름/유지/해제를 각각 사용한다.
+        public bool IsAttackPressed => !_isQuickSlotOpen && _attackPressedFrame == Time.frameCount;
+        public bool IsAttackHeld => IsCombat;
+        public bool IsAttackReleased => !_isQuickSlotOpen && _attackReleasedFrame == Time.frameCount;
+        private int _attackPressedFrame = -1;
+        private int _attackReleasedFrame = -1;
 
         // Interaction
         public bool IsQuickSlotPressed => _quickSlotFrame == Time.frameCount;
@@ -129,6 +135,8 @@ namespace alpha.ingame.input
 
             _action = null;
             _isCombat = false;
+            _attackPressedFrame = -1;
+            _attackReleasedFrame = -1;
             _isQuickSlotOpen = false;
             _quickSlotFrame = -1;
             _isMobilityHeld = false;
@@ -147,11 +155,14 @@ namespace alpha.ingame.input
 
         private void OnAttackPerformed(InputAction.CallbackContext context)
         {
-            if (!_isQuickSlotOpen) _isCombat = true;
+            if (_isQuickSlotOpen) return;
+            _isCombat = true;
+            _attackPressedFrame = Time.frameCount;
         }
 
         private void OnAttackCanceled(InputAction.CallbackContext context)
         {
+            if (_isCombat && !_isQuickSlotOpen) _attackReleasedFrame = Time.frameCount;
             _isCombat = false;
         }
 
@@ -168,6 +179,8 @@ namespace alpha.ingame.input
 
             // 열리는 순간 이미 누르고 있던 공격과 마우스 회전량도 지운다.
             _isCombat = false;
+            _attackPressedFrame = -1;
+            _attackReleasedFrame = -1;
         }
 
     }
