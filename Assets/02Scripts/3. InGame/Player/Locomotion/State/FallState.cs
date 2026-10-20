@@ -8,7 +8,8 @@ namespace alpha.ingame.player
 
         public override void EnterState()
         {
-
+            if (_AnimationView != null)
+                _AnimationView.FallAnim();
         }
         public override void UpdateState()
         {

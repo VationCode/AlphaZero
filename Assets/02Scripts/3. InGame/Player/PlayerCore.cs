@@ -5,6 +5,14 @@ namespace alpha.ingame.player
 {
     public class PlayerCore : MonoBehaviour
     {
+        [Header("Model")]
+        [SerializeField] private Transform _modelRoot;
+        [SerializeField] private GameObject _hernaPrefab;
+        [SerializeField] private GameObject _arinPrefab;
+        [SerializeField] private GameObject _silyonPrefab;
+
+        public GameObject CurrentModel { get; private set; }
+        public EAreteType CurrentAreteType { get; private set; }
         public AnimationView AnimationView { get; private set; }
         
         public LocomotionStateFlow LocomotionStateFlow { get; private set; }
@@ -18,6 +26,8 @@ namespace alpha.ingame.player
 
         private void Awake()
         {
+            if (_modelRoot == null) _modelRoot = transform.Find("Model");
+
             LocomotionStateFlow = GetComponentInChildren<LocomotionStateFlow>(true);
             LocomotionModule = GetComponentInChildren<LocomotionModule>(true);
 
@@ -30,13 +40,49 @@ namespace alpha.ingame.player
         private void Start()
         {
             if (GameManager.Instance == null) return;
-            OnPlayerSetup += EquipmentManager.HandlePlayerSetup;
-            OnPlayerSetup += AnimationView.HandlePlayerSetup;
 
-            OnPlayerSetup?.Invoke(GameManager.Instance.AreteType);
+            EAreteType areteType = GameManager.Instance.AreteType;
+            CurrentAreteType = areteType;
+            if (!CreateModel(areteType)) return;
 
-            LocomotionModule.OnMove += AnimationView.MoveAnim;
-            LocomotionModule.OnJump += AnimationView.JumpAnim;
+            if (AnimationView != null)
+            {
+                // 모델 생성 후 Animator와 아레테 컨트롤러를 함께 설정한다.
+                AnimationView.Initialize(CurrentModel.GetComponentInChildren<Animator>(true), areteType);
+            }
+
+            if (EquipmentManager != null) OnPlayerSetup += EquipmentManager.HandlePlayerSetup;
+            OnPlayerSetup?.Invoke(areteType);
+
+            if (LocomotionModule != null && AnimationView != null)
+            {
+                LocomotionModule.OnMove += AnimationView.MoveAnim;
+                LocomotionModule.OnJump += AnimationView.JumpAnim;
+            }
+        }
+
+        private bool CreateModel(EAreteType areteType)
+        {
+            // 선택한 아레테 모델 하나만 Player/Model 아래에 배치한다.
+            GameObject prefab = areteType switch
+            {
+                EAreteType.Heruna => _hernaPrefab,
+                EAreteType.Arin => _arinPrefab,
+                EAreteType.Silyon => _silyonPrefab,
+                _ => null
+            };
+
+            if (_modelRoot == null || prefab == null)
+            {
+                Debug.LogWarning($"{nameof(PlayerCore)}: Model 또는 {areteType} 프리팹 참조가 없습니다.", this);
+                return false;
+            }
+
+            CurrentModel = Instantiate(prefab, _modelRoot);
+            CurrentModel.transform.localPosition = Vector3.zero;
+            CurrentModel.transform.localRotation = Quaternion.identity;
+            CurrentModel.transform.localScale = Vector3.one;
+            return true;
         }
 
     }

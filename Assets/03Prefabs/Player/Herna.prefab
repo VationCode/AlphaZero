@@ -322,7 +322,7 @@ MonoBehaviour:
       mode: 1
       friction: 0.05
       colliderList:
-      - {fileID: 8222389160986638308}
+      - {fileID: 0}
       - {fileID: 0}
       - {fileID: 0}
       collisionBones: []
@@ -1829,7 +1829,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8478958791247795921}
-  - component: {fileID: 8222389160986638308}
+  - component: {fileID: 1218541924716475252}
   m_Layer: 0
   m_Name: MC2_Head
   m_TagString: Untagged
@@ -1845,14 +1845,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 523131451280581380}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.00000004656613, y: 2.4644525e-14, z: 6.966927e-15, w: -1}
+  m_LocalRotation: {x: -0.19802368, y: -2.8552244e-15, z: -7.93446e-15, w: 0.98019725}
   m_LocalPosition: {x: -0, y: 0.0007, z: 0.000132}
   m_LocalScale: {x: 0.01, y: 0.0100000035, z: 0.010000002}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8302338954166818706}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8222389160986638308
+  m_LocalEulerAnglesHint: {x: -22.843, y: 0, z: 0}
+--- !u!114 &1218541924716475252
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1861,13 +1861,17 @@ MonoBehaviour:
   m_GameObject: {fileID: 523131451280581380}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f2b68b2c7953ebb479b78627f19a6ccb, type: 3}
+  m_Script: {fileID: 11500000, guid: e6f5338a96461264fb9a1132c8509672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   center: {x: 0, y: 0, z: 0}
-  size: {x: 0.07, y: 0, z: 0}
+  size: {x: 0.078, y: 0.053, z: 0.2}
   symmetryMode: 0
   symmetryTarget: {fileID: 0}
+  direction: 1
+  reverseDirection: 0
+  radiusSeparation: 1
+  alignedOnCenter: 1
 --- !u!1 &1875706604978483436
 GameObject:
   m_ObjectHideFlags: 0
@@ -1927,7 +1931,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3963903474815050691}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.000000010018084, y: 0.9999689, z: -0.00000008592906, w: 0.007887932}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -1.6734707e-10, y: 0.0018786323, z: 9.363249e-10}
   m_LocalScale: {x: 0.010000002, y: 0.0100000035, z: 0.010000004}
   m_ConstrainProportionsScale: 0
@@ -1947,12 +1951,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   center: {x: 0, y: 0, z: 0}
-  size: {x: 0.065, y: 0.065, z: 0.3193672}
+  size: {x: 0.046, y: 0.065, z: 0.3193672}
   symmetryMode: 0
   symmetryTarget: {fileID: 0}
   direction: 1
   reverseDirection: 0
-  radiusSeparation: 0
+  radiusSeparation: 1
   alignedOnCenter: 1
 --- !u!1 &5644364105439119817
 GameObject:
@@ -2280,9 +2284,7 @@ MonoBehaviour:
       mode: 1
       friction: 0.05
       colliderList:
-      - {fileID: 8222389160986638308}
-      - {fileID: 0}
-      - {fileID: 0}
+      - {fileID: 1218541924716475252}
       collisionBones: []
       limitDistance:
         value: 0.05
@@ -3161,15 +3163,15 @@ MonoBehaviour:
         z: 0.06736779
       attributes:
       - Value: 1
-      - Value: 2
-      - Value: 2
-      - Value: 2
-      - Value: 2
-      - Value: 2
+      - Value: 1
+      - Value: 1
       - Value: 1
       - Value: 2
       - Value: 2
-      - Value: 2
+      - Value: 1
+      - Value: 1
+      - Value: 1
+      - Value: 1
       - Value: 2
       - Value: 2
       - Value: 1
@@ -3188,7 +3190,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       maxConnectionDistance: 0.22148591
-      userEdit: 0
+      userEdit: 1
     preBuildData:
       enabled: 0
       buildId: 01ea61be
@@ -6065,12 +6067,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   center: {x: 0, y: 0, z: 0}
-  size: {x: 0.065, y: 0.065, z: 0.31936732}
+  size: {x: 0.046, y: 0.065, z: 0.3193672}
   symmetryMode: 0
   symmetryTarget: {fileID: 0}
   direction: 1
   reverseDirection: 0
-  radiusSeparation: 0
+  radiusSeparation: 1
   alignedOnCenter: 1
 --- !u!1001 &2702561630571712065
 PrefabInstance:
@@ -6126,7 +6128,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: d41d0126389103246838575228d73979, type: 3}
       propertyPath: m_Name
-      value: Soldier11_UnityReady
+      value: Herna
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: d41d0126389103246838575228d73979, type: 3}
       propertyPath: m_Controller

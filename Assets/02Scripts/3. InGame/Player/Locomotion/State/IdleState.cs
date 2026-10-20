@@ -27,14 +27,22 @@ namespace alpha.ingame.player
                 }
             }
 
-            if (moveInput.sqrMagnitude > 0.0001f)
+            if (_StateMachine.TryEnterMobility())
+                return;
+
+            // 정지 중에도 중력을 적용한 뒤 발밑이 사라졌는지 확인한다.
+            _LocomotionModule.Move(Vector2.zero);
+            if (_LocomotionModule.IsFalling)
+            {
+                _StateMachine.ChangeState(ELocomotionState.Fall);
+                return;
+            }
+
+            if (moveInput.sqrMagnitude > 0.0001f || input.IsCombat)
             {
                 _StateMachine.ChangeState(ELocomotionState.Move);
                 return;
             }
-
-            // 정지 중에도 감속과 중력을 계속 처리한다.
-            _LocomotionModule.Move(Vector2.zero);
         }
         public override void ExitState(){}
     }

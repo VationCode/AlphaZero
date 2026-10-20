@@ -111,7 +111,7 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Dash"",
+                    ""name"": ""Mobility"",
                     ""type"": ""Button"",
                     ""id"": ""d3dd90d3-6a58-48cc-9182-9c3971eac4fe"",
                     ""expectedControlType"": """",
@@ -197,11 +197,11 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""e293479c-6fe4-4b51-8a3a-3470e8c4b75c"",
-                    ""path"": ""<Keyboard>/e"",
+                    ""path"": ""<Keyboard>/leftShift"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Dash"",
+                    ""action"": ""Mobility"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -351,7 +351,7 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         m_PlayerLocomotion = asset.FindActionMap("PlayerLocomotion", throwIfNotFound: true);
         m_PlayerLocomotion_Move = m_PlayerLocomotion.FindAction("Move", throwIfNotFound: true);
         m_PlayerLocomotion_Walk = m_PlayerLocomotion.FindAction("Walk", throwIfNotFound: true);
-        m_PlayerLocomotion_Dash = m_PlayerLocomotion.FindAction("Dash", throwIfNotFound: true);
+        m_PlayerLocomotion_Mobility = m_PlayerLocomotion.FindAction("Mobility", throwIfNotFound: true);
         m_PlayerLocomotion_Dodge = m_PlayerLocomotion.FindAction("Dodge", throwIfNotFound: true);
         m_PlayerLocomotion_Jump = m_PlayerLocomotion.FindAction("Jump", throwIfNotFound: true);
         // PlayerCombat
@@ -449,7 +449,7 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
     private List<IPlayerLocomotionActions> m_PlayerLocomotionActionsCallbackInterfaces = new List<IPlayerLocomotionActions>();
     private readonly InputAction m_PlayerLocomotion_Move;
     private readonly InputAction m_PlayerLocomotion_Walk;
-    private readonly InputAction m_PlayerLocomotion_Dash;
+    private readonly InputAction m_PlayerLocomotion_Mobility;
     private readonly InputAction m_PlayerLocomotion_Dodge;
     private readonly InputAction m_PlayerLocomotion_Jump;
     /// <summary>
@@ -472,9 +472,9 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Walk => m_Wrapper.m_PlayerLocomotion_Walk;
         /// <summary>
-        /// Provides access to the underlying input action "PlayerLocomotion/Dash".
+        /// Provides access to the underlying input action "PlayerLocomotion/Mobility".
         /// </summary>
-        public InputAction @Dash => m_Wrapper.m_PlayerLocomotion_Dash;
+        public InputAction @Mobility => m_Wrapper.m_PlayerLocomotion_Mobility;
         /// <summary>
         /// Provides access to the underlying input action "PlayerLocomotion/Dodge".
         /// </summary>
@@ -515,9 +515,9 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
             @Walk.started += instance.OnWalk;
             @Walk.performed += instance.OnWalk;
             @Walk.canceled += instance.OnWalk;
-            @Dash.started += instance.OnDash;
-            @Dash.performed += instance.OnDash;
-            @Dash.canceled += instance.OnDash;
+            @Mobility.started += instance.OnMobility;
+            @Mobility.performed += instance.OnMobility;
+            @Mobility.canceled += instance.OnMobility;
             @Dodge.started += instance.OnDodge;
             @Dodge.performed += instance.OnDodge;
             @Dodge.canceled += instance.OnDodge;
@@ -541,9 +541,9 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
             @Walk.started -= instance.OnWalk;
             @Walk.performed -= instance.OnWalk;
             @Walk.canceled -= instance.OnWalk;
-            @Dash.started -= instance.OnDash;
-            @Dash.performed -= instance.OnDash;
-            @Dash.canceled -= instance.OnDash;
+            @Mobility.started -= instance.OnMobility;
+            @Mobility.performed -= instance.OnMobility;
+            @Mobility.canceled -= instance.OnMobility;
             @Dodge.started -= instance.OnDodge;
             @Dodge.performed -= instance.OnDodge;
             @Dodge.canceled -= instance.OnDodge;
@@ -904,12 +904,12 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnWalk(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "Dash" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "Mobility" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnDash(InputAction.CallbackContext context);
+        void OnMobility(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "Dodge" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>

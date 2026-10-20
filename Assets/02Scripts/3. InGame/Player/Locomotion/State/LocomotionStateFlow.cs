@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using alpha.ingame.input;
 using UnityEngine;
 
 namespace alpha.ingame.player
@@ -10,7 +11,7 @@ namespace alpha.ingame.player
         Jump,
         Fall,
         Land,
-        Dash
+        Mobility
     }
 
     public class LocomotionStateFlow : MonoBehaviour
@@ -34,7 +35,7 @@ namespace alpha.ingame.player
                 { ELocomotionState.Jump, new JumpState(_playerCore) },
                 { ELocomotionState.Fall, new FallState(_playerCore) },
                 { ELocomotionState.Land, new LandState(_playerCore) },
-                { ELocomotionState.Dash, new DashState(_playerCore) }
+                { ELocomotionState.Mobility, new MobilityState(_playerCore) }
             };
             ChangeState(ELocomotionState.Idle);
         }
@@ -51,6 +52,22 @@ namespace alpha.ingame.player
             _currentState?.ExitState();
             _currentState = _stateDict[newState];
             _currentState?.EnterState();
+        }
+
+        public bool TryEnterMobility()
+        {
+            AlphaInput input = AlphaInput.Instance;
+            if (input == null || !input.IsMobilityPressed ||
+                _playerCore.CurrentModel == null || !_playerCore.LocomotionModule.IsGrounded)
+                return false;
+
+            // 아린은 기동 방식이 정해질 때까지 입력을 소비하지 않는다.
+            EAreteType areteType = _playerCore.CurrentAreteType;
+            if (areteType != EAreteType.Heruna && areteType != EAreteType.Silyon)
+                return false;
+
+            ChangeState(ELocomotionState.Mobility);
+            return true;
         }
     }
 }

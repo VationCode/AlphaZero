@@ -25,13 +25,13 @@ namespace alpha.ingame.player
 
             if (_LocomotionModule.IsGrounded)
             {
-                // 정점 전에 접지한 경우의 처리. 착지 상태 구현 시 옮길 부분.
-                _LocomotionModule.ResetJumpCount();
-                _StateMachine.ChangeState(moveInput.sqrMagnitude > 0.0001f? ELocomotionState.Move : ELocomotionState.Idle);
+                _StateMachine.ChangeState(ELocomotionState.Land);
                 return;
             }
 
-            if (_LocomotionModule.VelocityY <= 0f)
+            // 상승이 끝나고 현재 점프 클립의 낙하 구간에 도달하면 Fall로 전환한다.
+            if (_LocomotionModule.VelocityY <= 0f &&
+                (_AnimationView == null || _AnimationView.CanEnterFallFromJump()))
                 _StateMachine.ChangeState(ELocomotionState.Fall);
         }
         public override void ExitState()

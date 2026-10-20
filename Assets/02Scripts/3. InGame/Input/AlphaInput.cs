@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace alpha.ingame.input
 {
@@ -21,9 +22,11 @@ namespace alpha.ingame.input
         public bool IsDodge => _dodgeFrame == Time.frameCount;
         private int _dodgeFrame = -1;
 
-        public bool IsDash => _isDash;
-        private bool _isDash => _dashFrame == Time.frameCount;
-        private int _dashFrame = -1;
+        // 기동: 눌림과 유지 입력은 아레테별로 다르게 해석한다.
+        public bool IsMobilityPressed => _mobilityFrame == Time.frameCount;
+        public bool IsMobilityHeld => _isMobilityHeld;
+        private bool _isMobilityHeld;
+        private int _mobilityFrame = -1;
 
         public bool IsCombat => _isCombat;
         private bool _isCombat;
@@ -34,6 +37,8 @@ namespace alpha.ingame.input
 
         public Vector2 ZoomInput => _zoomInput;
         private Vector2 _zoomInput;
+
+
         private void Awake()
         {
             if (Instance == null)
@@ -58,12 +63,13 @@ namespace alpha.ingame.input
             _action.PlayerLocomotion.Walk.performed += _ => _isWalk = !_isWalk;
 
             _action.PlayerLocomotion.Jump.performed += i => _jumpFrame = Time.frameCount;
-            _action.PlayerLocomotion.Dash.performed += i => _dashFrame = Time.frameCount;
+            _action.PlayerLocomotion.Mobility.performed += OnMobilityPerformed;
+            _action.PlayerLocomotion.Mobility.canceled += OnMobilityCanceled;
             _action.PlayerLocomotion.Dodge.performed += i => _dodgeFrame = Time.frameCount;
 
             // Combat
-            _action.PlayerCombat.Attack.performed += i => _isCombat = true;
-            _action.PlayerCombat.Attack.canceled += i => _isCombat = false;
+            _action.PlayerCombat.Attack.performed += OnAttackPerformed;
+            _action.PlayerCombat.Attack.canceled += OnAttackCanceled;
 
             // Camera
             _action.Camera.Look.performed += i => _lookInput = i.ReadValue<Vector2>();
@@ -71,6 +77,7 @@ namespace alpha.ingame.input
 
             _action.Camera.Zoom.performed += i => _zoomInput = i.ReadValue<Vector2>();
             _action.Camera.Zoom.canceled += i => _zoomInput = Vector2.zero;
+
 
             _action.Enable();
         }
@@ -83,12 +90,13 @@ namespace alpha.ingame.input
             _action.PlayerLocomotion.Walk.performed -= i => _isWalk = !_isWalk;
 
             _action.PlayerLocomotion.Jump.performed -= i => _jumpFrame = Time.frameCount;
-            _action.PlayerLocomotion.Dash.performed -= i => _dashFrame = Time.frameCount;
+            _action.PlayerLocomotion.Mobility.performed -= OnMobilityPerformed;
+            _action.PlayerLocomotion.Mobility.canceled -= OnMobilityCanceled;
             _action.PlayerLocomotion.Dodge.performed -= i => _dodgeFrame = Time.frameCount;
 
             // Combat
-            _action.PlayerCombat.Attack.performed -= i => _isCombat = true;
-            _action.PlayerCombat.Attack.canceled -= i => _isCombat = false;
+            _action.PlayerCombat.Attack.performed -= OnAttackPerformed;
+            _action.PlayerCombat.Attack.canceled -= OnAttackCanceled;
 
             // Camera
             _action.Camera.Look.performed -= i => _lookInput = i.ReadValue<Vector2>();
@@ -97,9 +105,35 @@ namespace alpha.ingame.input
             _action.Camera.Zoom.performed -= i => _zoomInput = i.ReadValue<Vector2>();
             _action.Camera.Zoom.canceled -= i => _zoomInput = Vector2.zero;
 
+
+
             _action.Disable();
 
             _action = null;
+            _isCombat = false;
+            _isMobilityHeld = false;
         }
+
+        private void OnMobilityPerformed(InputAction.CallbackContext context)
+        {
+            _mobilityFrame = Time.frameCount;
+            _isMobilityHeld = true;
+        }
+
+        private void OnMobilityCanceled(InputAction.CallbackContext context)
+        {
+            _isMobilityHeld = false;
+        }
+
+        private void OnAttackPerformed(InputAction.CallbackContext context)
+        {
+            _isCombat = true;
+        }
+
+        private void OnAttackCanceled(InputAction.CallbackContext context)
+        {
+            _isCombat = false;
+        }
+
     }
 }

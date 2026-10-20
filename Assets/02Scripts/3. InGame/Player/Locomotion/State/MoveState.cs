@@ -29,9 +29,20 @@ namespace alpha.ingame.player
                 }
             }
 
+            if (_StateMachine.TryEnterMobility())
+                return;
+
             _LocomotionModule.Move(moveInput);
 
-            if (moveInput.sqrMagnitude <= 0.0001f)
+            // 지상 이동 중 턱을 벗어나면 입력 상태보다 낙하를 우선한다.
+            if (_LocomotionModule.IsFalling)
+            {
+                _StateMachine.ChangeState(ELocomotionState.Fall);
+                return;
+            }
+
+            // 전투 입력 중에는 방향 입력이 없어도 CombatMove Tree의 대기를 유지한다.
+            if (moveInput.sqrMagnitude <= 0.0001f && !isCombat)
             {
                 _StateMachine.ChangeState(ELocomotionState.Idle);
                 return;
