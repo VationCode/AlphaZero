@@ -12,7 +12,7 @@ import shutil
 
 PROJECT = r"D:\Portfolio\AlphaZero"
 SOURCE_DIR = os.path.join(PROJECT, "ModelSources", "Soldier11")
-ASSET_DIR = os.path.join(PROJECT, "Assets", "00Arts", "Character", "Soldier11")
+ASSET_DIR = os.path.join(PROJECT, "Assets", "00Arts", "InGame", "Character", "Soldier11")
 TEXTURE_DIR = os.path.join(ASSET_DIR, "Textures")
 FBX_PATH = os.path.join(ASSET_DIR, "Soldier11_UnityReady.fbx")
 BLEND_PATH = os.path.join(SOURCE_DIR, "Soldier11_UnityReady.blend")
@@ -282,6 +282,8 @@ bpy.ops.export_scene.fbx(
     axis_forward="-Z",
     axis_up="Y",
     apply_unit_scale=True,
+    # Unity에 100배 로컬 Transform 대신 미터 단위를 기록한다.
+    apply_scale_options="FBX_SCALE_UNITS",
     use_mesh_modifiers=False,
     add_leaf_bones=False,
     use_armature_deform_only=True,

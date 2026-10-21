@@ -17,9 +17,11 @@ namespace alpha.ingame.player
         public AnimationView AnimationView { get; private set; }
         
         public LocomotionStateFlow LocomotionStateFlow { get; private set; }
+        public CombatStateFlow CombatStateFlow { get; private set; }
 
 
         public LocomotionModule LocomotionModule { get; private set; }
+        public CombatModule CombatModule { get; private set; }
         public EquipmentModule EquipmentModule { get; private set; }
         public InventoryModule InventoryModule { get; private set; }
 
@@ -32,6 +34,8 @@ namespace alpha.ingame.player
 
             LocomotionStateFlow = GetComponentInChildren<LocomotionStateFlow>(true);
             LocomotionModule = GetComponentInChildren<LocomotionModule>(true);
+            CombatStateFlow = GetComponentInChildren<CombatStateFlow>(true);
+            CombatModule = GetComponentInChildren<CombatModule>(true);
 
             EquipmentModule = GetComponentInChildren<EquipmentModule>(true);
             InventoryModule = GetComponentInChildren<InventoryModule>(true);

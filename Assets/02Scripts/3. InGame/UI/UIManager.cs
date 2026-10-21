@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using alpha.ingame.input;
+using alpha.ingame.player;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -32,8 +33,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private List<UITransitionRule> _uiTransitions = new();
 
     private readonly List<EUIType> _openedUIs = new();
-    private CursorLockMode _previousLockState;
-    private bool _previousCursorVisible;
 
     private void Awake()
     {
@@ -72,6 +71,16 @@ public class UIManager : MonoBehaviour
     {
         if (GetUI(type) == null) return;
 
+        // 공격 중에는 키 입력과 외부 호출 모두 퀵슬롯 열기를 거부한다.
+        if (type == EUIType.QuickSlot && isActive)
+        {
+            CombatStateFlow combatFlow = FindFirstObjectByType<CombatStateFlow>();
+            // 공격키를 놓은 프레임에도 입력 순서에 따라 창이 열리지 않게 한다.
+            bool attackJustEnded = AlphaInput.Instance != null && AlphaInput.Instance.IsAttackReleased;
+            if (attackJustEnded || (combatFlow != null && combatFlow.CurrentState == ECombatState.Attack))
+                return;
+        }
+
         bool wasOpen = _openedUIs.Remove(type);
         if (isActive)
         {
@@ -107,23 +116,10 @@ public class UIManager : MonoBehaviour
     {
         if (QuickSlot == null || QuickSlot.activeSelf == isVisible) return;
 
-        if (isVisible)
-        {
-            _previousLockState = Cursor.lockState;
-            _previousCursorVisible = Cursor.visible;
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
-
         // UI 표시와 같은 시점에 전투 및 카메라 입력 상태를 갱신한다.
         AlphaInput.Instance?.SetQuickSlotOpen(isVisible);
         QuickSlot.SetActive(isVisible);
-
-        if (!isVisible)
-        {
-            Cursor.lockState = _previousLockState;
-            Cursor.visible = _previousCursorVisible;
-        }
+        MouseManger.Instance?.RefreshLockState();
     }
 
     private GameObject GetUI(EUIType type)

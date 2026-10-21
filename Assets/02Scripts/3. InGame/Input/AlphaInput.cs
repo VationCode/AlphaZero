@@ -28,12 +28,11 @@ namespace alpha.ingame.input
         private bool _isMobilityHeld;
         private int _mobilityFrame = -1;
 
-        public bool IsCombat => !_isQuickSlotOpen && _isCombat;
-        private bool _isCombat;
         // 발사 방식에 따라 누름/유지/해제를 각각 사용한다.
         public bool IsAttackPressed => !_isQuickSlotOpen && _attackPressedFrame == Time.frameCount;
-        public bool IsAttackHeld => IsCombat;
+        public bool IsAttackHeld => !_isQuickSlotOpen && _isAttackHeld;
         public bool IsAttackReleased => !_isQuickSlotOpen && _attackReleasedFrame == Time.frameCount;
+        private bool _isAttackHeld;
         private int _attackPressedFrame = -1;
         private int _attackReleasedFrame = -1;
 
@@ -44,12 +43,16 @@ namespace alpha.ingame.input
         private bool _isQuickSlotOpen;
 
         // Camera
-        public Vector2 LookInput => _isQuickSlotOpen ? Vector2.zero : _lookInput;
+        public Vector2 LookInput => (_isQuickSlotOpen || _isMouseLock) ? Vector2.zero : _lookInput;
         private Vector2 _lookInput;
 
         public Vector2 ZoomInput => _zoomInput;
         private Vector2 _zoomInput;
 
+        // Mouse
+        // 누르고 있는 동안 커서를 표시하고 잠금을 해제한다.
+        public bool IsMouseLock => _isMouseLock;
+        private bool _isMouseLock;
 
         private void Awake()
         {
@@ -95,6 +98,9 @@ namespace alpha.ingame.input
             _action.Camera.Zoom.performed += i => _zoomInput = i.ReadValue<Vector2>();
             _action.Camera.Zoom.canceled += i => _zoomInput = Vector2.zero;
 
+            // Mouse
+            _action.Mouse.Lock.performed += OnMouseLockPerformed;
+            _action.Mouse.Lock.canceled += OnMouseLockCanceled;
 
             _action.Enable();
         }
@@ -121,7 +127,6 @@ namespace alpha.ingame.input
             _action.PlayerCombat.Attack.canceled -= OnAttackCanceled;
 
 
-
             // Camera
             _action.Camera.Look.performed -= i => _lookInput = i.ReadValue<Vector2>();
             _action.Camera.Look.canceled -= i => _lookInput = Vector2.zero;
@@ -129,17 +134,24 @@ namespace alpha.ingame.input
             _action.Camera.Zoom.performed -= i => _zoomInput = i.ReadValue<Vector2>();
             _action.Camera.Zoom.canceled -= i => _zoomInput = Vector2.zero;
 
-
+            // Mouse
+            _action.Mouse.Lock.performed -= OnMouseLockPerformed;
+            _action.Mouse.Lock.canceled -= OnMouseLockCanceled;
 
             _action.Disable();
 
             _action = null;
-            _isCombat = false;
+            _moveInput = Vector2.zero;
+            _isAttackHeld = false;
+            _jumpFrame = -1;
+            _dodgeFrame = -1;
             _attackPressedFrame = -1;
             _attackReleasedFrame = -1;
             _isQuickSlotOpen = false;
             _quickSlotFrame = -1;
             _isMobilityHeld = false;
+            _zoomInput = Vector2.zero;
+            _isMouseLock = false;
         }
 
         private void OnMobilityPerformed(InputAction.CallbackContext context)
@@ -156,19 +168,32 @@ namespace alpha.ingame.input
         private void OnAttackPerformed(InputAction.CallbackContext context)
         {
             if (_isQuickSlotOpen) return;
-            _isCombat = true;
+            _isAttackHeld = true;
             _attackPressedFrame = Time.frameCount;
         }
 
         private void OnAttackCanceled(InputAction.CallbackContext context)
         {
-            if (_isCombat && !_isQuickSlotOpen) _attackReleasedFrame = Time.frameCount;
-            _isCombat = false;
+            if (_isAttackHeld && !_isQuickSlotOpen) _attackReleasedFrame = Time.frameCount;
+            _isAttackHeld = false;
         }
 
         private void OnQuickSlotPerformed(InputAction.CallbackContext context)
         {
             _quickSlotFrame = Time.frameCount;
+        }
+
+        private void OnMouseLockPerformed(InputAction.CallbackContext context)
+        {
+            _isMouseLock = true;
+            _lookInput = Vector2.zero;
+            MouseManger.Instance?.RefreshLockState();
+        }
+
+        private void OnMouseLockCanceled(InputAction.CallbackContext context)
+        {
+            _isMouseLock = false;
+            MouseManger.Instance?.RefreshLockState();
         }
 
         public void SetQuickSlotOpen(bool isOpen)
@@ -178,7 +203,7 @@ namespace alpha.ingame.input
             if (!isOpen) return;
 
             // 열리는 순간 이미 누르고 있던 공격과 마우스 회전량도 지운다.
-            _isCombat = false;
+            _isAttackHeld = false;
             _attackPressedFrame = -1;
             _attackReleasedFrame = -1;
         }

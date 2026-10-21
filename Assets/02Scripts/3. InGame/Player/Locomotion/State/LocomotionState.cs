@@ -6,6 +6,7 @@ namespace alpha.ingame.player
         protected LocomotionStateFlow _StateMachine;
         protected LocomotionModule _LocomotionModule;
         protected AnimationView _AnimationView;
+        protected bool IsCombatStanceActive => _PlayerCore.CombatModule?.IsCombatStanceActive ?? false;
 
         public LocomotionState(PlayerCore p_playerCore)
         {

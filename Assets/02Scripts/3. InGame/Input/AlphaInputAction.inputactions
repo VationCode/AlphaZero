@@ -277,6 +277,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Mouse",
+            "id": "b8369918-711e-462e-b2e4-14f89d572a4c",
+            "actions": [
+                {
+                    "name": "Lock",
+                    "type": "Button",
+                    "id": "a11442d9-2b7a-40bc-92c8-e71cdaa66258",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "11b563f0-79d1-478b-8c3a-43e8d47b5909",
+                    "path": "<Keyboard>/leftAlt",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Lock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []

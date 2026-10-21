@@ -38,7 +38,7 @@ namespace alpha.ingame.player
                 return;
             }
 
-            if (moveInput.sqrMagnitude > 0.0001f || input.IsCombat)
+            if (moveInput.sqrMagnitude > 0.0001f || IsCombatStanceActive)
             {
                 _StateMachine.ChangeState(ELocomotionState.Move);
                 return;

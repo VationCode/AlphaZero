@@ -1,4 +1,3 @@
-using alpha.ingame.input;
 using alpha.ingame.player;
 using UnityEngine;
 
@@ -53,41 +52,45 @@ namespace alpha.ingame.item
             EnsurePools();
         }
 
-        private void Update()
+        // 전투 상태가 공격을 시작할 때 호출한다. 발사 방식은 무기가 결정한다.
+        public void BeginAttack()
         {
-            AlphaInput input = AlphaInput.Instance;
-            if (!IsEquipped || Owner == null || input == null || input.IsQuickSlotOpen || input.IsQuickSlotPressed)
-            {
-                _isCharging = false;
-                return;
-            }
+            if (!IsEquipped || Owner == null) return;
 
             switch (_fireMode)
             {
                 case EGunFireMode.Single:
-                    if (input.IsAttackPressed) TryFire(0f);
-                    break;
                 case EGunFireMode.Automatic:
-                    if (input.IsAttackPressed || input.IsAttackHeld) TryFire(0f);
+                    TryFire(0f);
                     break;
                 case EGunFireMode.Charge:
-                    if (input.IsAttackPressed)
-                    {
-                        _isCharging = true;
-                        _chargeStartedAt = Time.time;
-                    }
-                    if (_isCharging && input.IsAttackReleased)
-                    {
-                        _isCharging = false;
-                        float heldTime = Time.time - _chargeStartedAt;
-                        if (heldTime >= _minimumChargeTime)
-                            TryFire(Mathf.Clamp01(heldTime / Mathf.Max(0.01f, _chargeDuration)));
-                    }
+                    _isCharging = true;
+                    _chargeStartedAt = Time.time;
                     break;
             }
         }
 
-        private void OnDisable() => _isCharging = false;
+        // 연사 무기만 공격키를 누르는 동안 계속 발사를 시도한다.
+        public void UpdateAttack()
+        {
+            if (IsEquipped && Owner != null && _fireMode == EGunFireMode.Automatic)
+                TryFire(0f);
+        }
+
+        public void EndAttack()
+        {
+            if (_isCharging && IsEquipped && Owner != null)
+            {
+                float heldTime = Time.time - _chargeStartedAt;
+                if (heldTime >= _minimumChargeTime)
+                    TryFire(Mathf.Clamp01(heldTime / Mathf.Max(0.01f, _chargeDuration)));
+            }
+            _isCharging = false;
+        }
+
+        public void CancelAttack() => _isCharging = false;
+
+        private void OnDisable() => CancelAttack();
 
         private void OnDestroy()
         {
@@ -95,9 +98,9 @@ namespace alpha.ingame.item
             _impactPool?.Dispose();
         }
 
-        private void TryFire(float charge)
+        private bool TryFire(float charge)
         {
-            if (_firePoint == null || Time.time < _nextShotTime) return;
+            if (_firePoint == null || Time.time < _nextShotTime) return false;
             _nextShotTime = Time.time + Mathf.Max(0.01f, _fireInterval);
             EnsurePools();
 
@@ -115,6 +118,10 @@ namespace alpha.ingame.item
                     Owner.transform, _firePoint.position, direction,
                     damage, Mathf.Max(0.01f, _aimDistance));
             }
+
+            // 적중 여부와 관계없이 실제 발사가 일어나면 전투 자세 시간을 갱신한다.
+            Owner.CombatModule?.RegisterSuccessfulAttack(this);
+            return true;
         }
 
         private void EnsurePools()

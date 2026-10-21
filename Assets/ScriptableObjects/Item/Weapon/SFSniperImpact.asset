@@ -20,6 +20,6 @@ MonoBehaviour:
   _targetLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  _effectPrefab: {fileID: 3492691017000508022, guid: 50255dfd34b0b9c43960c04cd8ee1757, type: 3}
+  _effectPrefab: {fileID: 4288079983315933216, guid: 35f75a27cf2614f48b09a57647606b8c, type: 3}
   _initialPoolSize: 4
   _effectFallbackLifetime: 1

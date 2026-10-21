@@ -401,9 +401,9 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 2
-      localHash: 85718
-      globalHash: 1675126805
+      initVersion: 0
+      localHash: 0
+      globalHash: 0
       clothType: 1
       clothTransformRecord:
         transform: {fileID: 4841390422789514742}
@@ -1798,8 +1798,8 @@ Transform:
   m_GameObject: {fileID: 515677752824784657}
   serializedVersion: 2
   m_LocalRotation: {x: 0.99513334, y: 3.0238176e-15, z: -3.132052e-15, w: 0.09853784}
-  m_LocalPosition: {x: -6.6076387e-18, y: 0.0001961191, z: -0.000039223978}
-  m_LocalScale: {x: 0.01, y: 0.010000004, z: 0.009999999}
+  m_LocalPosition: {x: -6.6076387e-16, y: 0.01961191, z: -0.0039223978}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8580069197319181852}
@@ -1846,8 +1846,8 @@ Transform:
   m_GameObject: {fileID: 523131451280581380}
   serializedVersion: 2
   m_LocalRotation: {x: -0.19802368, y: -2.8552244e-15, z: -7.93446e-15, w: 0.98019725}
-  m_LocalPosition: {x: -0, y: 0.0007, z: 0.000132}
-  m_LocalScale: {x: 0.01, y: 0.0100000035, z: 0.010000002}
+  m_LocalPosition: {x: -0, y: 0.07, z: 0.0132}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8302338954166818706}
@@ -1932,8 +1932,8 @@ Transform:
   m_GameObject: {fileID: 3963903474815050691}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -1.6734707e-10, y: 0.0018786323, z: 9.363249e-10}
-  m_LocalScale: {x: 0.010000002, y: 0.0100000035, z: 0.010000004}
+  m_LocalPosition: {x: -1.6734707e-8, y: 0.18786323, z: 9.363249e-8}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5029373553628119801}
@@ -2361,9 +2361,9 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 2
-      localHash: 56186
-      globalHash: 929267550
+      initVersion: 0
+      localHash: 0
+      globalHash: 0
       clothType: 1
       clothTransformRecord:
         transform: {fileID: 1351577009348616173}
@@ -3643,9 +3643,9 @@ MonoBehaviour:
       springNoise: 0
   serializeData2:
     initData:
-      initVersion: 2
-      localHash: 127424
-      globalHash: 883999190
+      initVersion: 0
+      localHash: 0
+      globalHash: 0
       clothType: 1
       clothTransformRecord:
         transform: {fileID: 501804896499748159}
@@ -6048,8 +6048,8 @@ Transform:
   m_GameObject: {fileID: 7112474727364706490}
   serializedVersion: 2
   m_LocalRotation: {x: -0.0000000037252899, y: 0.9999681, z: -0.00000012229792, w: -0.007983319}
-  m_LocalPosition: {x: 2.9831163e-10, y: 0.0018786348, z: 0.0000000010704753}
-  m_LocalScale: {x: 0.00999991, y: 0.0100000035, z: 0.009999923}
+  m_LocalPosition: {x: 2.9831163e-8, y: 0.18786348, z: 1.0704753e-7}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 7674453680318337365}
@@ -6129,6 +6129,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: d41d0126389103246838575228d73979, type: 3}
       propertyPath: m_Name
       value: Herna
+      objectReference: {fileID: 0}
+    - target: {fileID: 4464064520942525848, guid: d41d0126389103246838575228d73979, type: 3}
+      propertyPath: m_ConstrainProportionsScale
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5866666021909216657, guid: d41d0126389103246838575228d73979, type: 3}
       propertyPath: m_Controller

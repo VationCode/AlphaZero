@@ -23,7 +23,7 @@ namespace alpha.ingame.player
             else if (_areteType == EAreteType.Silyon)
             {
                 AlphaInput input = AlphaInput.Instance;
-                _LocomotionModule.SetBoostMoveType(input.IsCombat);
+                _LocomotionModule.SetBoostMoveType(IsCombatStanceActive);
                 _LocomotionModule.Move(input.MoveInput);
             }
         }
@@ -40,7 +40,7 @@ namespace alpha.ingame.player
         public override void ExitState()
         {
             AlphaInput input = AlphaInput.Instance;
-            _LocomotionModule.SetMoveType(input.MoveInput, input.IsWalk, input.IsCombat);
+            _LocomotionModule.SetMoveType(input.MoveInput, input.IsWalk, IsCombatStanceActive);
         }
 
         private void UpdateLeap(AlphaInput input)
@@ -77,7 +77,7 @@ namespace alpha.ingame.player
                 return;
             }
 
-            _LocomotionModule.SetBoostMoveType(input.IsCombat);
+            _LocomotionModule.SetBoostMoveType(IsCombatStanceActive);
             _LocomotionModule.Move(input.MoveInput);
             if (_LocomotionModule.IsFalling)
                 _StateMachine.ChangeState(ELocomotionState.Fall);
@@ -91,7 +91,7 @@ namespace alpha.ingame.player
                 return;
             }
 
-            ELocomotionState next = input.MoveInput.sqrMagnitude > 0.0001f || input.IsCombat
+            ELocomotionState next = input.MoveInput.sqrMagnitude > 0.0001f || IsCombatStanceActive
                 ? ELocomotionState.Move
                 : ELocomotionState.Idle;
             _StateMachine.ChangeState(next);

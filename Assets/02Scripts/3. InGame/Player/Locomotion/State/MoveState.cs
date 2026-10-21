@@ -15,7 +15,7 @@ namespace alpha.ingame.player
             AlphaInput input = AlphaInput.Instance;
             Vector2 moveInput = input.MoveInput;
             bool isWalk = input.IsWalk;
-            bool isCombat = input.IsCombat;
+            bool isCombat = IsCombatStanceActive;
             bool isJump = input.IsJump;
 
             _LocomotionModule.SetMoveType(moveInput, isWalk, isCombat);
@@ -41,7 +41,7 @@ namespace alpha.ingame.player
                 return;
             }
 
-            // 전투 입력 중에는 방향 입력이 없어도 CombatMove Tree의 대기를 유지한다.
+            // 공격 후 Ready 중에도 입력 없이 CombatMove Tree의 대기를 유지한다.
             if (moveInput.sqrMagnitude <= 0.0001f && !isCombat)
             {
                 _StateMachine.ChangeState(ELocomotionState.Idle);

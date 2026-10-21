@@ -12,7 +12,7 @@ from pathlib import Path
 
 PROJECT = Path(r"D:\Portfolio\AlphaZero")
 SOURCE_DIR = PROJECT / "ModelSources" / "Anby"
-ASSET_DIR = PROJECT / "Assets" / "00Arts" / "Character" / "Anby"
+ASSET_DIR = PROJECT / "Assets" / "00Arts" / "InGame" / "Character" / "Anby"
 TEXTURE_DIR = ASSET_DIR / "Textures"
 INPUT_DIR = Path(r"C:\Users\User\Downloads\MyGtYUhe6t")
 BLEND_PATH = SOURCE_DIR / "Anby_UnityReady.blend"
@@ -299,6 +299,8 @@ export_options = dict(
     axis_forward="-Z",
     axis_up="Y",
     apply_unit_scale=True,
+    # Unity에 100배 로컬 Transform 대신 미터 단위를 기록한다.
+    apply_scale_options="FBX_SCALE_UNITS",
     use_mesh_modifiers=False,
     add_leaf_bones=False,
     use_armature_deform_only=True,
