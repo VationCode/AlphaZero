@@ -83,6 +83,14 @@ namespace alpha.ingame.player
                 _playerCore.CombatModule?.ClearReady();
         }
 
+        public void CancelForAirState()
+        {
+            // 공격 상태를 벗어나면 GunWeapon.CancelAttack이 차징을 발사 없이 종료한다.
+            if (CurrentState != ECombatState.Idle)
+                ChangeState(ECombatState.Idle);
+            _playerCore?.CombatModule?.ClearReady();
+        }
+
         public void ChangeState(ECombatState nextState)
         {
             if (_states == null || !_states.TryGetValue(nextState, out CombatState next) || _currentState == next)

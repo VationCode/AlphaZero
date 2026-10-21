@@ -13,6 +13,7 @@ namespace alpha.ingame.player
         [SerializeField] private GameObject _silyonPrefab;
 
         public GameObject CurrentModel { get; private set; }
+        public Arete CurrentArete { get; private set; }
         public EAreteType CurrentAreteType { get; private set; }
         public AnimationView AnimationView { get; private set; }
         
@@ -98,6 +99,18 @@ namespace alpha.ingame.player
             CurrentModel.transform.localPosition = Vector3.zero;
             CurrentModel.transform.localRotation = Quaternion.identity;
             CurrentModel.transform.localScale = Vector3.one;
+
+            CurrentArete = CurrentModel.GetComponent<Arete>();
+            if (CurrentArete == null || CurrentArete.AreteType != p_areteType)
+            {
+                Debug.LogError($"{nameof(PlayerCore)}: {p_areteType} 프리팹 루트에 올바른 Arete 컴포넌트가 없습니다.", this);
+                Destroy(CurrentModel);
+                CurrentModel = null;
+                CurrentArete = null;
+                return false;
+            }
+
+            CurrentArete.Initialize(this);
             return true;
         }
 

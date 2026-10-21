@@ -1,5 +1,134 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &536502634777547667
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1254332192533275060}
+  - component: {fileID: 6714310724635199752}
+  m_Layer: 0
+  m_Name: Audio
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1254332192533275060
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 536502634777547667}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6855771728599148588}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &6714310724635199752
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 536502634777547667}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &3305207289293494655
 GameObject:
   m_ObjectHideFlags: 0
@@ -96,6 +225,7 @@ Transform:
   - {fileID: 1533853973587315930}
   - {fileID: 1141787693000507974}
   - {fileID: 1718552167823379146}
+  - {fileID: 1254332192533275060}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7000000000000000002
@@ -113,10 +243,13 @@ MonoBehaviour:
   _weaponData: {fileID: 11400000, guid: e4f9400e8cc84ba41acb583e8245e8d5, type: 2}
   _firePoint: {fileID: 1533853973587315930}
   _muzzleEffectPoint: {fileID: 1141787693000507974}
+  _muzzleEffectPrefab: {fileID: 660499528128622750, guid: 43b39cbe60cdbb849a9df8979dd7ef46, type: 3}
+  _initialMuzzleEffectPoolSize: 4
+  _muzzleEffectMaxLifetime: 1
   _fireMode: 1
   _shotMode: 1
   _fireInterval: 2
-  _projectilePrefab: {fileID: 8213964935800047582, guid: 96b615f1667b40a886d5288b34477b06, type: 3}
+  _projectilePrefab: {fileID: 0}
   _initialPoolSize: 8
   _impactData: {fileID: 11400000, guid: f27c32348cfd401d8e0367d600104d59, type: 2}
   _damage: 60
@@ -124,6 +257,11 @@ MonoBehaviour:
   _chargeDuration: 1.5
   _minimumChargeTime: 0.2
   _fullChargeDamageMultiplier: 2
+  _audioSource: {fileID: 6714310724635199752}
+  _fireAudioClip: {fileID: 8300000, guid: 44c45d15e878e6249bc6901a51e557e3, type: 3}
+  _beamStartAudioClip: {fileID: 0}
+  _beamLoopAudioClip: {fileID: 0}
+  _beamEndAudioClip: {fileID: 0}
 --- !u!1 &6614242528160432478
 GameObject:
   m_ObjectHideFlags: 0

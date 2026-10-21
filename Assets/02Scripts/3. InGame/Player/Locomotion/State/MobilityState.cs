@@ -1,100 +1,37 @@
 using alpha.ingame.input;
-using UnityEngine;
+
 namespace alpha.ingame.player
 {
+    /// <summary>기동 상태 전환을 담당하고 아레테별 동작은 모델 컴포넌트에 맡긴다.</summary>
     public class MobilityState : LocomotionState
     {
-        private EAreteType _areteType;
-        private float _leapElapsed;
+        private Arete _arete;
 
-        public MobilityState(PlayerCore p_playerCore) : base(p_playerCore) { }
+        public MobilityState(PlayerCore playerCore) : base(playerCore) { }
 
         public override void EnterState()
         {
-            _areteType = _PlayerCore.CurrentAreteType;
-            _leapElapsed = 0f;
-
-            if (_areteType == EAreteType.Heruna)
-            {
-                _LocomotionModule.BeginLeap(AlphaInput.Instance.MoveInput);
-                _LocomotionModule.LeapMove();
-                _leapElapsed = Time.deltaTime;
-            }
-            else if (_areteType == EAreteType.Silyon)
-            {
-                AlphaInput input = AlphaInput.Instance;
-                _LocomotionModule.SetBoostMoveType(IsCombatStanceActive);
-                _LocomotionModule.Move(input.MoveInput);
-            }
+            _arete = _PlayerCore.CurrentArete;
+            _arete?.BeginMobility(AlphaInput.Instance, IsCombatStanceActive);
         }
 
         public override void UpdateState()
         {
-            AlphaInput input = AlphaInput.Instance;
-            if (_areteType == EAreteType.Heruna)
-                UpdateLeap(input);
-            else if (_areteType == EAreteType.Silyon)
-                UpdateBoost(input);
+            if (_arete == null) return;
+
+            ELocomotionState? nextState = _arete.UpdateMobility(AlphaInput.Instance, IsCombatStanceActive);
+            if (nextState.HasValue)
+                _StateMachine.ChangeState(nextState.Value);
         }
 
         public override void ExitState()
         {
+            _arete?.EndMobility();
+            _arete = null;
+
             AlphaInput input = AlphaInput.Instance;
-            _LocomotionModule.SetMoveType(input.MoveInput, input.IsWalk, IsCombatStanceActive);
-        }
-
-        private void UpdateLeap(AlphaInput input)
-        {
-            if (input.IsJump && _LocomotionModule.CanAirJump)
-            {
-                _StateMachine.ChangeState(ELocomotionState.Jump);
-                return;
-            }
-
-            _leapElapsed += Time.deltaTime;
-            if (_leapElapsed <= _LocomotionModule.LeapDuration)
-                _LocomotionModule.LeapMove();
-            else
-                _LocomotionModule.AirMove(input.MoveInput);
-
-            if (_LocomotionModule.IsGrounded && _LocomotionModule.VelocityY <= 0f)
-                _StateMachine.ChangeState(ELocomotionState.Land);
-            else if (_LocomotionModule.VelocityY <= 0f)
-                _StateMachine.ChangeState(ELocomotionState.Fall);
-        }
-
-        private void UpdateBoost(AlphaInput input)
-        {
-            if (!input.IsMobilityHeld)
-            {
-                ReturnToMovement(input);
-                return;
-            }
-
-            if (input.IsJump && _LocomotionModule.CanGroundJump)
-            {
-                _StateMachine.ChangeState(ELocomotionState.Jump);
-                return;
-            }
-
-            _LocomotionModule.SetBoostMoveType(IsCombatStanceActive);
-            _LocomotionModule.Move(input.MoveInput);
-            if (_LocomotionModule.IsFalling)
-                _StateMachine.ChangeState(ELocomotionState.Fall);
-        }
-
-        private void ReturnToMovement(AlphaInput input)
-        {
-            if (!_LocomotionModule.IsGrounded)
-            {
-                _StateMachine.ChangeState(ELocomotionState.Fall);
-                return;
-            }
-
-            ELocomotionState next = input.MoveInput.sqrMagnitude > 0.0001f || IsCombatStanceActive
-                ? ELocomotionState.Move
-                : ELocomotionState.Idle;
-            _StateMachine.ChangeState(next);
+            if (input != null)
+                _LocomotionModule.SetMoveType(input.MoveInput, input.IsWalk, IsCombatStanceActive);
         }
     }
 }

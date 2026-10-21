@@ -21,7 +21,8 @@ namespace alpha.ingame.player
                 AlphaInput input = AlphaInput.Instance;
                 GunWeapon gun = CurrentGun;
                 return gun != null && gun.IsEquipped && input != null &&
-                       !input.IsQuickSlotOpen && !input.IsQuickSlotPressed;
+                       !input.IsQuickSlotOpen && !input.IsQuickSlotPressed &&
+                       CanAttackFromLocomotion(input);
             }
         }
 
@@ -31,7 +32,8 @@ namespace alpha.ingame.player
             {
                 AlphaInput input = AlphaInput.Instance;
                 GunWeapon gun = CurrentGun;
-                return gun != null && gun.IsEquipped && input != null && !input.IsQuickSlotOpen;
+                return gun != null && gun.IsEquipped && input != null &&
+                       !input.IsQuickSlotOpen && CanAttackFromLocomotion(input);
             }
         }
 
@@ -50,6 +52,21 @@ namespace alpha.ingame.player
         private void Awake()
         {
             _playerCore = GetComponentInParent<PlayerCore>(true);
+        }
+
+        private bool CanAttackFromLocomotion(AlphaInput input)
+        {
+            LocomotionModule locomotion = _playerCore?.LocomotionModule;
+            LocomotionStateFlow flow = _playerCore?.LocomotionStateFlow;
+            if (locomotion == null || flow == null || !locomotion.IsGrounded)
+                return false;
+
+            ELocomotionState state = flow.CurrentState;
+            // 점프 입력과 공격 입력이 같은 프레임에 들어오면 점프를 우선한다.
+            return state != ELocomotionState.Jump &&
+                   state != ELocomotionState.Fall &&
+                   state != ELocomotionState.Land &&
+                   !(input.IsJump && locomotion.CanGroundJump);
         }
 
         public void RegisterSuccessfulAttack(GunWeapon gun)

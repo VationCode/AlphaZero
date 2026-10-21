@@ -24525,7 +24525,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3340550957912057036}
   m_Layer: 0
-  m_Name: Effect_20_EnergyRelease
+  m_Name: SniperHit_Effect_20_EnergyRelease
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -3,7 +3,7 @@ using alpha.ingame.item;
 
 namespace alpha.ingame.player
 {
-    /// <summary>단발·연사·차징의 입력 구간을 관리하고 발사 방식은 무기에 맡긴다.</summary>
+    /// <summary>단발·연사·차징·빔의 입력 구간을 관리하고 발사 방식은 무기에 맡긴다.</summary>
     public sealed class CombatAttackState : CombatState
     {
         private GunWeapon _gun;
