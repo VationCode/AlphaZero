@@ -10,10 +10,12 @@ namespace alpha.ingame.item
     public abstract class EquippableWeapon : MonoBehaviour
     {
         [SerializeField] private WeaponData _weaponData;
+        [SerializeField] private WeaponSecondaryAction _secondaryAction;
 
         public WeaponData Data => _weaponData;
         public PlayerCore Owner { get; private set; }
         public bool IsEquipped { get; private set; }
+        public WeaponSecondaryAction SecondaryAction => _secondaryAction;
 
         public virtual void Initialize(PlayerCore owner)
         {
@@ -23,6 +25,7 @@ namespace alpha.ingame.item
 
         public void SetEquipped(bool equipped)
         {
+            if (!equipped) _secondaryAction?.Cancel();
             IsEquipped = equipped;
         }
     }

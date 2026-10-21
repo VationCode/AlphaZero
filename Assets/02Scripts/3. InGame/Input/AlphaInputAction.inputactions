@@ -159,9 +159,18 @@
             "id": "70bff987-028a-48fc-a869-7495626e44ff",
             "actions": [
                 {
-                    "name": "Attack",
+                    "name": "Primary",
                     "type": "Button",
                     "id": "fbc14a8a-7303-4dc8-a9ac-c1fc53c90f92",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Secondary",
+                    "type": "Button",
+                    "id": "d9bd0756-41cf-4a4f-a07b-2b30ffd9e0e8",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -176,7 +185,18 @@
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Attack",
+                    "action": "Primary",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "dbfd098c-9639-4061-9bbd-0a759fd0a0af",
+                    "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Secondary",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

@@ -2,9 +2,11 @@ Shader "UI/ScopeCutout"
 {
     Properties
     {
+        _MainTex ("Scope Texture", 2D) = "white" {}
         _Color ("Outside Color", Color) = (0, 0, 0, 1)
         _Radius ("Hole Radius", Range(0, 0.5)) = 0.32
         _Edge ("Edge Softness", Range(0, 0.02)) = 0.002
+        _ShowInside ("Show Scope Image", Float) = 0
     }
     SubShader
     {
@@ -21,7 +23,8 @@ Shader "UI/ScopeCutout"
             #include "UnityCG.cginc"
 
             fixed4 _Color;
-            float _Radius, _Edge;
+            sampler2D _MainTex;
+            float _Radius, _Edge, _ShowInside;
 
             struct appdata
             {
@@ -49,6 +52,12 @@ Shader "UI/ScopeCutout"
                 float radius = _Radius * min(size.x, size.y);
                 float edge = _Edge * min(size.x, size.y);
                 float alpha = smoothstep(radius - edge, radius + edge, length(position));
+                if (_ShowInside > 0.5)
+                {
+                    fixed4 scopeColor = tex2D(_MainTex, i.uv);
+                    scopeColor.a *= 1 - alpha;
+                    return scopeColor;
+                }
                 return fixed4(_Color.rgb, _Color.a * alpha);
             }
             ENDCG

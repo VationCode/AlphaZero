@@ -41,6 +41,9 @@ namespace alpha.ingame.player
         [SerializeField, Min(0f)] private float _airSpeed = 3f;
         [SerializeField, Min(0f)] private float _airAcceleration = 8f;
 
+        [Header("Land")]
+        [SerializeField, Min(0f)] private float _landDuration = 0.25f;
+
         [Header("Gravity")]
         [SerializeField] private float _gravity = -20f;
 
@@ -67,6 +70,7 @@ namespace alpha.ingame.player
         public bool CanGroundJump => IsGrounded && _jumpCount == 0;
         public bool CanAirJump => !IsGrounded && _jumpCount == 1;
         public float LeapDuration => _leapDuration;
+        public float LandDuration => _landDuration;
         private void Awake()
         {
             _characterCtrl = GetComponentInParent<CharacterController>(true);

@@ -1,5 +1,57 @@
+using System;
+using System.Collections.Generic;
 using alpha.ingame.input;
+using alpha.ingame.player;
 using UnityEngine;
+using UnityEngine.Rendering;
+
+public enum ECameraViewType
+{
+    Default = 0,
+    Aim = 1,
+    Scope = 2
+}
+
+/// <summary>카메라 리그의 위치, 회전, 줌 값을 View마다 보관한다.</summary>
+[Serializable]
+public struct CameraViewSettings
+{
+    public ECameraViewType Type;
+
+    [Header("Settings")]
+    public float Vertical;
+    public float Horizontal;
+    [Min(0f)] public float FollowSmoothTime;
+
+    [Header("Rotation")]
+    [Range(0f, 89f)] public float LimitAngleY;
+    public float SensitivityX;
+    public float SensitivityY;
+
+    [Header("Zoom")]
+    [Min(0f)] public float ZoomMin;
+    [Min(0f)] public float ZoomMax;
+    public float SensitivityZoom;
+    [Min(0.01f)] public float ZoomSmoothSpeed;
+    [Range(1f, 179f)] public float FieldOfView;
+
+    // 기존 CameraModule 필드의 코드 기본값을 새 Default View에도 사용한다.
+    public static CameraViewSettings CreateDefault() => new()
+    {
+        Type = ECameraViewType.Default,
+        Vertical = 2.5f,
+        Horizontal = 0f,
+        FollowSmoothTime = 0.12f,
+        LimitAngleY = 60f,
+        SensitivityX = 15f,
+        SensitivityY = 10f,
+        ZoomMin = 1f,
+        ZoomMax = 4.5f,
+        SensitivityZoom = 1f,
+        ZoomSmoothSpeed = 10f,
+        FieldOfView = 60f
+    };
+}
 
 public class CameraModule : MonoBehaviour
 {
@@ -9,96 +61,245 @@ public class CameraModule : MonoBehaviour
     [SerializeField] private Transform _zoom;
     [SerializeField] private Transform _shake;
     [SerializeField] private Transform _target;
+    [SerializeField] private Camera _scopeCamera;
 
-    [Header("[Settings]")]
-    [SerializeField] private float _vertical = 2.5f;
-    [SerializeField] private float _horizontal = 0f;
-    [SerializeField] private float _followSmoothTime = 0.12f;
-
-    [Header("Rotation")]
-    [SerializeField] private float _limitAngleY = 60f;
-    [SerializeField] private float _sensitivityX = 15f;
-    [SerializeField] private float _sensitivityY = 10f;
-
-    [Header("Zoom")]
-    [SerializeField] private float _zoomMin = 1f;
-    [SerializeField] private float _zoomMax = 4.5f;
-    [SerializeField] private float _sensitivityZoom = 1f;
-    [SerializeField] private float _zoomSmoothSpeed = 10f;
+    [SerializeField] private CameraViewSettings[] _views = { CameraViewSettings.CreateDefault() };
     [SerializeField] private LayerMask _obstacleMask;
     [SerializeField, Min(0.01f)] private float _collisionRadius = 0.4f;
     [SerializeField, Min(0f)] private float _collisionPadding = 0.1f;
 
     public Camera Cam { get; private set; }
     public bool IsZoomed { get; private set; }
+    public RenderTexture ScopeTexture => _scopeCamera != null ? _scopeCamera.targetTexture : null;
 
+    private readonly Dictionary<ECameraViewType, float> _zoomDistances = new();
+    private CameraViewSettings _activeView;
+    private ECameraViewType _activeViewType;
     private Vector3 _followVelocity;
     private float _mouseX;
     private float _mouseY;
-    private float _currentZoom; // 휠로 정한 희망 거리
+    private float _currentZoom;
+    private MonoBehaviour _viewOwner;
+    private PlayerCore _playerCore;
+    private GameObject _scopeHiddenModel;
+    private Renderer[] _scopeHiddenRenderers = Array.Empty<Renderer>();
+    private bool[] _scopeRendererStates = Array.Empty<bool>();
+    private bool _scopeRenderersHidden;
+
+    private void OnValidate()
+    {
+        if (_views == null || _views.Length == 0)
+        {
+            _views = new[] { CameraViewSettings.CreateDefault() };
+            return;
+        }
+
+        // Inspector에서 새 Default 항목을 추가했을 때만 빈 설정을 채운다.
+        for (int i = 0; i < _views.Length; i++)
+        {
+            CameraViewSettings view = _views[i];
+            if (view.Type != ECameraViewType.Default || view.ZoomMax != 0f ||
+                view.ZoomSmoothSpeed != 0f || view.FieldOfView != 0f) continue;
+            _views[i] = CameraViewSettings.CreateDefault();
+        }
+    }
 
     private void Awake()
     {
         Cam = Camera.main;
+        _playerCore = _target != null ? _target.GetComponentInParent<PlayerCore>() : null;
+        if (_scopeCamera != null) _scopeCamera.enabled = false;
+    }
+
+    private void OnEnable()
+    {
+        RenderPipelineManager.beginCameraRendering += HideLocalPlayerForScope;
+        RenderPipelineManager.endCameraRendering += RestoreLocalPlayerAfterScope;
     }
 
     private void Start()
     {
-        SettingsCamera(_vertical, _horizontal, _zoomMax);
+        if (!TryGetView(ECameraViewType.Default, out _activeView))
+        {
+            Debug.LogWarning($"{nameof(CameraModule)}: Default View 설정이 없습니다.", this);
+            enabled = false;
+            return;
+        }
+
+        _activeViewType = ECameraViewType.Default;
+        _currentZoom = Mathf.Max(_activeView.ZoomMin, _activeView.ZoomMax);
+        _pivot.localPosition = new Vector3(0f, _activeView.Vertical, 0f);
+        _shoulder.localPosition = new Vector3(_activeView.Horizontal, 0f, 0f);
+        _zoom.localPosition = new Vector3(0f, 0f, -_currentZoom);
+        if (Cam != null) Cam.fieldOfView = _activeView.FieldOfView;
+        IsZoomed = false;
     }
 
-    public void SettingsCamera(float p_vertical, float p_horizontal, float p_distance)
+    // Scope는 메인 카메라의 시야를 유지한 채 별도 카메라로 렌즈 영상을 만든다.
+    public bool SetView(MonoBehaviour owner, ECameraViewType type)
     {
-        _pivot.localPosition = new Vector3(0f, p_vertical, 0f);
-        _shoulder.localPosition = new Vector3(p_horizontal, 0f, 0f);
-        _zoom.localPosition = new Vector3(0f, 0f, -p_distance);
+        if (owner == null || Cam == null || !TryGetView(type, out CameraViewSettings view)) return false;
+        if (type == ECameraViewType.Scope && ScopeTexture == null)
+        {
+            Debug.LogWarning($"{nameof(CameraModule)}: Scope Camera의 RenderTexture가 설정되지 않았습니다.", this);
+            return false;
+        }
+        if (_activeViewType != type)
+        {
+            _zoomDistances[_activeViewType] = _currentZoom;
+            _currentZoom = _zoomDistances.TryGetValue(type, out float savedZoom)
+                ? savedZoom : Mathf.Max(view.ZoomMin, view.ZoomMax);
+        }
 
-        _currentZoom = p_distance;
-        IsZoomed = false;
+        _viewOwner = owner;
+        _activeView = view;
+        _activeViewType = type;
+        if (_scopeCamera != null) _scopeCamera.enabled = type == ECameraViewType.Scope;
+        return true;
+    }
+
+    public void ClearView(MonoBehaviour owner)
+    {
+        if (_viewOwner != owner || !TryGetView(ECameraViewType.Default, out CameraViewSettings view)) return;
+        _zoomDistances[_activeViewType] = _currentZoom;
+        _currentZoom = _zoomDistances.TryGetValue(ECameraViewType.Default, out float savedZoom)
+            ? savedZoom : Mathf.Max(view.ZoomMin, view.ZoomMax);
+        _viewOwner = null;
+        _activeView = view;
+        _activeViewType = ECameraViewType.Default;
+        if (_scopeCamera != null) _scopeCamera.enabled = false;
+    }
+
+    private bool TryGetView(ECameraViewType type, out CameraViewSettings view)
+    {
+        if (_views != null)
+        {
+            foreach (CameraViewSettings candidate in _views)
+            {
+                if (candidate.Type != type) continue;
+                view = candidate;
+                return true;
+            }
+        }
+
+        view = default;
+        return false;
     }
 
     private void FollowTarget()
     {
         if (_rig == null || _target == null) return;
-        _rig.position = Vector3.SmoothDamp(_rig.position, _target.position, ref _followVelocity, _followSmoothTime);
+        _rig.position = Vector3.SmoothDamp(_rig.position, _target.position, ref _followVelocity,
+            Mathf.Max(0.0001f, _activeView.FollowSmoothTime));
     }
 
-    private void Rotation(Vector2 p_lookInput)
+    private void Rotation(Vector2 lookInput)
     {
-        _mouseX += p_lookInput.x * _sensitivityX * 0.01f;
-        _mouseY = Mathf.Clamp(_mouseY - (p_lookInput.y * _sensitivityY * 0.01f), -_limitAngleY, _limitAngleY);
-
+        _mouseX += lookInput.x * _activeView.SensitivityX * 0.01f;
+        _mouseY = Mathf.Clamp(_mouseY - lookInput.y * _activeView.SensitivityY * 0.01f,
+            -_activeView.LimitAngleY, _activeView.LimitAngleY);
         _pivot.localRotation = Quaternion.Euler(_mouseY, _mouseX, 0f);
     }
 
-    private void Zoom(float p_wheel)
+    private void Zoom(float wheel, float blend)
     {
-        // 휠 방향으로 일반/확대 시점을 선택한다. 카메라 거리와는 별도로 유지한다.
-        if (p_wheel > 0f) IsZoomed = true;
-        else if (p_wheel < 0f) IsZoomed = false;
+        if (wheel > 0f) IsZoomed = true;
+        else if (wheel < 0f) IsZoomed = false;
 
-        // 휠 입력으로 원하는 거리 변경
-        _currentZoom = Mathf.Clamp(_currentZoom - (p_wheel * _sensitivityZoom), _zoomMin, _zoomMax);
+        float min = Mathf.Min(_activeView.ZoomMin, _activeView.ZoomMax);
+        float max = Mathf.Max(_activeView.ZoomMin, _activeView.ZoomMax);
+        _currentZoom = Mathf.Clamp(_currentZoom - wheel * _activeView.SensitivityZoom, min, max);
+        float next = Mathf.Lerp(-_zoom.localPosition.z, _currentZoom, blend);
 
-        float next = Mathf.Lerp(-_zoom.localPosition.z, _currentZoom, Time.deltaTime * _zoomSmoothSpeed);
-
-        // 현재 위치와 희망 위치 사이의 장애물을 검사
         float castDistance = Mathf.Max(-_zoom.localPosition.z, _currentZoom);
-        Vector3 dir = _shoulder.position - _shoulder.forward * castDistance;
-        if (Physics.Linecast(_shoulder.position, dir, out RaycastHit hit, _obstacleMask, QueryTriggerInteraction.Ignore))
-        {
+        Vector3 destination = _shoulder.position - _shoulder.forward * castDistance;
+        if (Physics.Linecast(_shoulder.position, destination, out RaycastHit hit, _obstacleMask,
+                QueryTriggerInteraction.Ignore))
             next = Mathf.Min(next, Mathf.Max(0f, hit.distance - _collisionPadding));
-        }
 
         Vector3 local = _zoom.localPosition;
         local.z = -next;
         _zoom.localPosition = local;
     }
 
+    private void UpdateView(float blend)
+    {
+        _pivot.localPosition = Vector3.Lerp(_pivot.localPosition,
+            new Vector3(0f, _activeView.Vertical, 0f), blend);
+        _shoulder.localPosition = Vector3.Lerp(_shoulder.localPosition,
+            new Vector3(_activeView.Horizontal, 0f, 0f), blend);
+        if (Cam == null) return;
+
+        float fieldOfView = _activeView.FieldOfView;
+        if (_activeViewType == ECameraViewType.Scope &&
+            TryGetView(ECameraViewType.Default, out CameraViewSettings defaultView))
+            fieldOfView = defaultView.FieldOfView;
+        Cam.fieldOfView = Mathf.Lerp(Cam.fieldOfView, fieldOfView, blend);
+    }
+
     private void LateUpdate()
     {
+        AlphaInput input = AlphaInput.Instance;
+        if (input == null) return;
+
+        float blend = 1f - Mathf.Exp(-Mathf.Max(0.01f, _activeView.ZoomSmoothSpeed) * Time.deltaTime);
         FollowTarget();
-        Rotation(AlphaInput.Instance.LookInput);
-        Zoom(AlphaInput.Instance.ZoomInput.y);
+        Rotation(input.LookInput);
+        Zoom(input.ZoomInput.y, blend);
+        UpdateView(blend);
+        if (_activeViewType == ECameraViewType.Scope && _scopeCamera != null)
+        {
+            _scopeCamera.fieldOfView = _activeView.FieldOfView;
+        }
     }
+
+    // 스코프 카메라에만 현재 모델과 장착 무기의 Renderer를 숨긴다.
+    private void HideLocalPlayerForScope(ScriptableRenderContext context, Camera camera)
+    {
+        if (camera != _scopeCamera || _playerCore == null) return;
+        GameObject model = _playerCore.CurrentModel;
+        if (model == null) return;
+
+        if (_scopeRenderersHidden) RestoreLocalRenderers();
+        if (_scopeHiddenModel != model)
+        {
+            _scopeHiddenModel = model;
+            _scopeHiddenRenderers = model.GetComponentsInChildren<Renderer>(true);
+            _scopeRendererStates = new bool[_scopeHiddenRenderers.Length];
+        }
+
+        for (int i = 0; i < _scopeHiddenRenderers.Length; i++)
+        {
+            Renderer renderer = _scopeHiddenRenderers[i];
+            if (renderer == null) continue;
+            _scopeRendererStates[i] = renderer.forceRenderingOff;
+            renderer.forceRenderingOff = true;
+        }
+        _scopeRenderersHidden = true;
+    }
+
+    private void RestoreLocalPlayerAfterScope(ScriptableRenderContext context, Camera camera)
+    {
+        if (camera == _scopeCamera) RestoreLocalRenderers();
+    }
+
+    private void RestoreLocalRenderers()
+    {
+        if (!_scopeRenderersHidden) return;
+        for (int i = 0; i < _scopeHiddenRenderers.Length; i++)
+        {
+            Renderer renderer = _scopeHiddenRenderers[i];
+            if (renderer != null) renderer.forceRenderingOff = _scopeRendererStates[i];
+        }
+        _scopeRenderersHidden = false;
+    }
+
+    private void OnDisable()
+    {
+        RenderPipelineManager.beginCameraRendering -= HideLocalPlayerForScope;
+        RenderPipelineManager.endCameraRendering -= RestoreLocalPlayerAfterScope;
+        RestoreLocalRenderers();
+        if (_scopeCamera != null) _scopeCamera.enabled = false;
+    }
+
 }

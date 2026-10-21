@@ -12,7 +12,7 @@ namespace alpha.ingame.player
         public override void UpdateState()
         {
             AlphaInput input = AlphaInput.Instance;
-            if (input != null && input.IsAttackPressed && Module.CanAttack)
+            if (input != null && input.IsPrimaryPressed && Module.CanAttack)
             {
                 Flow.ChangeState(ECombatState.Attack);
                 return;

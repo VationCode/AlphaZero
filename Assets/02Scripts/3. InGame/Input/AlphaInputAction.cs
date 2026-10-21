@@ -245,9 +245,18 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
             ""id"": ""70bff987-028a-48fc-a869-7495626e44ff"",
             ""actions"": [
                 {
-                    ""name"": ""Attack"",
+                    ""name"": ""Primary"",
                     ""type"": ""Button"",
                     ""id"": ""fbc14a8a-7303-4dc8-a9ac-c1fc53c90f92"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Secondary"",
+                    ""type"": ""Button"",
+                    ""id"": ""d9bd0756-41cf-4a4f-a07b-2b30ffd9e0e8"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -262,7 +271,18 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""Attack"",
+                    ""action"": ""Primary"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""dbfd098c-9639-4061-9bbd-0a759fd0a0af"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Secondary"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -404,7 +424,8 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         m_PlayerLocomotion_Jump = m_PlayerLocomotion.FindAction("Jump", throwIfNotFound: true);
         // PlayerCombat
         m_PlayerCombat = asset.FindActionMap("PlayerCombat", throwIfNotFound: true);
-        m_PlayerCombat_Attack = m_PlayerCombat.FindAction("Attack", throwIfNotFound: true);
+        m_PlayerCombat_Primary = m_PlayerCombat.FindAction("Primary", throwIfNotFound: true);
+        m_PlayerCombat_Secondary = m_PlayerCombat.FindAction("Secondary", throwIfNotFound: true);
         // PlayerInteraction
         m_PlayerInteraction = asset.FindActionMap("PlayerInteraction", throwIfNotFound: true);
         m_PlayerInteraction_Interaction = m_PlayerInteraction.FindAction("Interaction", throwIfNotFound: true);
@@ -640,7 +661,8 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
     // PlayerCombat
     private readonly InputActionMap m_PlayerCombat;
     private List<IPlayerCombatActions> m_PlayerCombatActionsCallbackInterfaces = new List<IPlayerCombatActions>();
-    private readonly InputAction m_PlayerCombat_Attack;
+    private readonly InputAction m_PlayerCombat_Primary;
+    private readonly InputAction m_PlayerCombat_Secondary;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerCombat".
     /// </summary>
@@ -653,9 +675,13 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         /// </summary>
         public PlayerCombatActions(@AlphaInputAction wrapper) { m_Wrapper = wrapper; }
         /// <summary>
-        /// Provides access to the underlying input action "PlayerCombat/Attack".
+        /// Provides access to the underlying input action "PlayerCombat/Primary".
         /// </summary>
-        public InputAction @Attack => m_Wrapper.m_PlayerCombat_Attack;
+        public InputAction @Primary => m_Wrapper.m_PlayerCombat_Primary;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerCombat/Secondary".
+        /// </summary>
+        public InputAction @Secondary => m_Wrapper.m_PlayerCombat_Secondary;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -682,9 +708,12 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         {
             if (instance == null || m_Wrapper.m_PlayerCombatActionsCallbackInterfaces.Contains(instance)) return;
             m_Wrapper.m_PlayerCombatActionsCallbackInterfaces.Add(instance);
-            @Attack.started += instance.OnAttack;
-            @Attack.performed += instance.OnAttack;
-            @Attack.canceled += instance.OnAttack;
+            @Primary.started += instance.OnPrimary;
+            @Primary.performed += instance.OnPrimary;
+            @Primary.canceled += instance.OnPrimary;
+            @Secondary.started += instance.OnSecondary;
+            @Secondary.performed += instance.OnSecondary;
+            @Secondary.canceled += instance.OnSecondary;
         }
 
         /// <summary>
@@ -696,9 +725,12 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="PlayerCombatActions" />
         private void UnregisterCallbacks(IPlayerCombatActions instance)
         {
-            @Attack.started -= instance.OnAttack;
-            @Attack.performed -= instance.OnAttack;
-            @Attack.canceled -= instance.OnAttack;
+            @Primary.started -= instance.OnPrimary;
+            @Primary.performed -= instance.OnPrimary;
+            @Primary.canceled -= instance.OnPrimary;
+            @Secondary.started -= instance.OnSecondary;
+            @Secondary.performed -= instance.OnSecondary;
+            @Secondary.canceled -= instance.OnSecondary;
         }
 
         /// <summary>
@@ -1093,12 +1125,19 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
     public interface IPlayerCombatActions
     {
         /// <summary>
-        /// Method invoked when associated input action "Attack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "Primary" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnAttack(InputAction.CallbackContext context);
+        void OnPrimary(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Secondary" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSecondary(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "PlayerInteraction" which allows adding and removing callbacks.

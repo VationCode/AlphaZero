@@ -31,7 +31,7 @@ namespace alpha.ingame.player
                 return;
             }
 
-            if (!input.IsAttackHeld)
+            if (!input.IsPrimaryHeld)
             {
                 // 차징 무기는 키를 놓을 때 발사하므로 종료 후 Ready 여부를 판단한다.
                 _gun.EndAttack();

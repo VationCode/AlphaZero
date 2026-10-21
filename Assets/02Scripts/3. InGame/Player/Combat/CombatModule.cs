@@ -11,6 +11,8 @@ namespace alpha.ingame.player
 
         private PlayerCore _playerCore;
         private float _readyUntil;
+        private EquippableWeapon _secondaryWeapon;
+        private WeaponSecondaryAction _activeSecondary;
 
         public GunWeapon CurrentGun => _playerCore?.EquipmentModule?.CurrentWeapon?.GetComponent<GunWeapon>();
         public bool HasReadyTime => Time.time < _readyUntil;
@@ -22,7 +24,7 @@ namespace alpha.ingame.player
                 GunWeapon gun = CurrentGun;
                 return gun != null && gun.IsEquipped && input != null &&
                        !input.IsQuickSlotOpen && !input.IsQuickSlotPressed &&
-                       CanAttackFromLocomotion(input);
+                       CanUseCombatFromLocomotion(input);
             }
         }
 
@@ -33,7 +35,7 @@ namespace alpha.ingame.player
                 AlphaInput input = AlphaInput.Instance;
                 GunWeapon gun = CurrentGun;
                 return gun != null && gun.IsEquipped && input != null &&
-                       !input.IsQuickSlotOpen && CanAttackFromLocomotion(input);
+                       !input.IsQuickSlotOpen && CanUseCombatFromLocomotion(input);
             }
         }
 
@@ -43,9 +45,11 @@ namespace alpha.ingame.player
             {
                 AlphaInput input = AlphaInput.Instance;
                 CombatStateFlow flow = _playerCore?.CombatStateFlow;
+                bool isViewActive = _activeSecondary is SecondaryViewAction view && view.IsActive;
                 return input != null && !input.IsQuickSlotOpen && flow != null &&
+                       CanUseCombatFromLocomotion(input) &&
                        (!input.IsQuickSlotPressed || flow.CurrentState == ECombatState.Attack) &&
-                       flow.IsCombatStanceActive;
+                       (flow.IsCombatStanceActive || isViewActive);
             }
         }
 
@@ -54,7 +58,52 @@ namespace alpha.ingame.player
             _playerCore = GetComponentInParent<PlayerCore>(true);
         }
 
-        private bool CanAttackFromLocomotion(AlphaInput input)
+        private void Update()
+        {
+            AlphaInput input = AlphaInput.Instance;
+            EquippableWeapon weapon = _playerCore?.EquipmentModule?.CurrentWeapon?.GetComponent<EquippableWeapon>();
+            bool available = input != null && !input.IsQuickSlotOpen && !input.IsQuickSlotPressed &&
+                             weapon != null && weapon.IsEquipped && CanUseCombatFromLocomotion(input);
+
+            if (_activeSecondary != null)
+            {
+                if (!available || weapon != _secondaryWeapon || weapon.SecondaryAction != _activeSecondary)
+                {
+                    CancelSecondary();
+                    return;
+                }
+
+                if (input.IsSecondaryReleased || !input.IsSecondaryHeld)
+                {
+                    WeaponSecondaryAction action = _activeSecondary;
+                    _activeSecondary = null;
+                    _secondaryWeapon = null;
+                    action.End();
+                    return;
+                }
+
+                _activeSecondary.Tick();
+                return;
+            }
+
+            if (!available || !input.IsSecondaryPressed || weapon.SecondaryAction == null) return;
+            _secondaryWeapon = weapon;
+            _activeSecondary = weapon.SecondaryAction;
+            _activeSecondary.Begin();
+        }
+
+        private void OnDisable() => CancelSecondary();
+
+        public void CancelSecondary()
+        {
+            WeaponSecondaryAction action = _activeSecondary;
+            _activeSecondary = null;
+            _secondaryWeapon = null;
+            action?.Cancel();
+        }
+
+        // Primary와 Secondary 모두 공중 및 착지 중에는 사용할 수 없다.
+        private bool CanUseCombatFromLocomotion(AlphaInput input)
         {
             LocomotionModule locomotion = _playerCore?.LocomotionModule;
             LocomotionStateFlow flow = _playerCore?.LocomotionStateFlow;

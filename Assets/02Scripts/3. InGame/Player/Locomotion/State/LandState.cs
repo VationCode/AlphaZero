@@ -1,22 +1,24 @@
-using alpha.ingame.input;
 using UnityEngine;
 namespace alpha.ingame.player
 {
     public class LandState : LocomotionState
     {
+        private float _landEndTime;
+
         public LandState(PlayerCore p_playerCore) : base(p_playerCore) { }
 
         public override void EnterState()
         {
             _LocomotionModule.ResetJumpCount();
             _AnimationView.LandAnim();
+            _landEndTime = Time.time + _LocomotionModule.LandDuration;
         }
         public override void UpdateState()
         {
-            /*_LocomotionModule.HoldGround(); // 수평 이동 없이 접지 유지
+            _LocomotionModule.HoldGround(); // 짧은 착지 구간 동안 접지와 정지를 유지한다.
 
-            if (!_AnimationView.IsLandAnimFinished())
-                return;*/
+            if (Time.time < _landEndTime)
+                return;
 
             _StateMachine.ChangeState(ELocomotionState.Idle);
         }

@@ -51,11 +51,14 @@ namespace alpha.ingame.player
         {
             if (_currentState == _stateDict[newState]) return;
 
-            // 공중 및 착지 상태에 들어가기 전에 차징·연사와 Ready를 즉시 종료한다.
+            // 공중 및 착지 상태에 들어가기 전에 공격과 Aim/Scope를 즉시 종료한다.
             if (newState == ELocomotionState.Jump ||
                 newState == ELocomotionState.Fall ||
                 newState == ELocomotionState.Land)
+            {
+                _playerCore.CombatModule?.CancelSecondary();
                 _playerCore.CombatStateFlow?.CancelForAirState();
+            }
 
             _currentState?.ExitState();
             _currentState = _stateDict[newState];

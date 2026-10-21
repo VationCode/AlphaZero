@@ -76,7 +76,7 @@ public class UIManager : MonoBehaviour
         {
             CombatStateFlow combatFlow = FindFirstObjectByType<CombatStateFlow>();
             // 공격키를 놓은 프레임에도 입력 순서에 따라 창이 열리지 않게 한다.
-            bool attackJustEnded = AlphaInput.Instance != null && AlphaInput.Instance.IsAttackReleased;
+            bool attackJustEnded = AlphaInput.Instance != null && AlphaInput.Instance.IsPrimaryReleased;
             if (attackJustEnded || (combatFlow != null && combatFlow.CurrentState == ECombatState.Attack))
                 return;
         }
@@ -117,6 +117,7 @@ public class UIManager : MonoBehaviour
         if (QuickSlot == null || QuickSlot.activeSelf == isVisible) return;
 
         // UI 표시와 같은 시점에 전투 및 카메라 입력 상태를 갱신한다.
+            if (isVisible) FindFirstObjectByType<CombatModule>()?.CancelSecondary();
         AlphaInput.Instance?.SetQuickSlotOpen(isVisible);
         QuickSlot.SetActive(isVisible);
         MouseManger.Instance?.RefreshLockState();

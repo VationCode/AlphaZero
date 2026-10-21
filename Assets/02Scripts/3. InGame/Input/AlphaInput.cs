@@ -29,12 +29,12 @@ namespace alpha.ingame.input
         private int _mobilityFrame = -1;
 
         // 발사 방식에 따라 누름/유지/해제를 각각 사용한다.
-        public bool IsAttackPressed => !_isQuickSlotOpen && _attackPressedFrame == Time.frameCount;
-        public bool IsAttackHeld => !_isQuickSlotOpen && _isAttackHeld;
-        public bool IsAttackReleased => !_isQuickSlotOpen && _attackReleasedFrame == Time.frameCount;
-        private bool _isAttackHeld;
-        private int _attackPressedFrame = -1;
-        private int _attackReleasedFrame = -1;
+        public bool IsPrimaryPressed => !_isQuickSlotOpen && _primaryPressedFrame == Time.frameCount;
+        public bool IsPrimaryHeld => !_isQuickSlotOpen && _isPrimaryHeld;
+        public bool IsPrimaryReleased => !_isQuickSlotOpen && _primaryReleasedFrame == Time.frameCount;
+        private bool _isPrimaryHeld;
+        private int _primaryPressedFrame = -1;
+        private int _primaryReleasedFrame = -1;
 
         // Interaction
         public bool IsQuickSlotPressed => _quickSlotFrame == Time.frameCount;
@@ -48,6 +48,13 @@ namespace alpha.ingame.input
 
         public Vector2 ZoomInput => _zoomInput;
         private Vector2 _zoomInput;
+
+        public bool IsSecondaryPressed => !_isQuickSlotOpen && _secondaryPressedFrame == Time.frameCount;
+        public bool IsSecondaryHeld => !_isQuickSlotOpen && _isSecondaryHeld;
+        public bool IsSecondaryReleased => !_isQuickSlotOpen && _secondaryReleasedFrame == Time.frameCount;
+        private bool _isSecondaryHeld;
+        private int _secondaryPressedFrame = -1;
+        private int _secondaryReleasedFrame = -1;
 
         // Mouse
         // 누르고 있는 동안 커서를 표시하고 잠금을 해제한다.
@@ -85,8 +92,12 @@ namespace alpha.ingame.input
             _action.PlayerLocomotion.Dodge.performed += i => _dodgeFrame = Time.frameCount;
 
             // Combat
-            _action.PlayerCombat.Attack.performed += OnAttackPerformed;
-            _action.PlayerCombat.Attack.canceled += OnAttackCanceled;
+            _action.PlayerCombat.Primary.performed += OnPrimaryPerformed;
+            _action.PlayerCombat.Primary.canceled += OnPrimaryCanceled;
+
+
+            _action.PlayerCombat.Secondary.performed += OnSecondaryPerformed;
+            _action.PlayerCombat.Secondary.canceled += OnSecondaryCanceled;
 
             // Interaction
             _action.PlayerInteraction.QuickSlot.performed += OnQuickSlotPerformed;
@@ -123,9 +134,11 @@ namespace alpha.ingame.input
             _action.PlayerInteraction.QuickSlot.performed -= OnQuickSlotPerformed;
 
             // Combat
-            _action.PlayerCombat.Attack.performed -= OnAttackPerformed;
-            _action.PlayerCombat.Attack.canceled -= OnAttackCanceled;
+            _action.PlayerCombat.Primary.performed -= OnPrimaryPerformed;
+            _action.PlayerCombat.Primary.canceled -= OnPrimaryCanceled;
 
+            _action.PlayerCombat.Secondary.performed -= OnSecondaryPerformed;
+            _action.PlayerCombat.Secondary.canceled -= OnSecondaryCanceled;
 
             // Camera
             _action.Camera.Look.performed -= i => _lookInput = i.ReadValue<Vector2>();
@@ -133,6 +146,7 @@ namespace alpha.ingame.input
 
             _action.Camera.Zoom.performed -= i => _zoomInput = i.ReadValue<Vector2>();
             _action.Camera.Zoom.canceled -= i => _zoomInput = Vector2.zero;
+
 
             // Mouse
             _action.Mouse.Lock.performed -= OnMouseLockPerformed;
@@ -142,15 +156,19 @@ namespace alpha.ingame.input
 
             _action = null;
             _moveInput = Vector2.zero;
-            _isAttackHeld = false;
+            _isPrimaryHeld = false;
             _jumpFrame = -1;
             _dodgeFrame = -1;
-            _attackPressedFrame = -1;
-            _attackReleasedFrame = -1;
+            _primaryPressedFrame = -1;
+            _primaryReleasedFrame = -1;
             _isQuickSlotOpen = false;
             _quickSlotFrame = -1;
             _isMobilityHeld = false;
             _zoomInput = Vector2.zero;
+            _isSecondaryHeld = false;
+            _secondaryPressedFrame = -1;
+            _secondaryReleasedFrame = -1;
+
             _isMouseLock = false;
         }
 
@@ -165,17 +183,30 @@ namespace alpha.ingame.input
             _isMobilityHeld = false;
         }
 
-        private void OnAttackPerformed(InputAction.CallbackContext context)
+        private void OnPrimaryPerformed(InputAction.CallbackContext context)
         {
             if (_isQuickSlotOpen) return;
-            _isAttackHeld = true;
-            _attackPressedFrame = Time.frameCount;
+            _isPrimaryHeld = true;
+            _primaryPressedFrame = Time.frameCount;
         }
 
-        private void OnAttackCanceled(InputAction.CallbackContext context)
+        private void OnPrimaryCanceled(InputAction.CallbackContext context)
         {
-            if (_isAttackHeld && !_isQuickSlotOpen) _attackReleasedFrame = Time.frameCount;
-            _isAttackHeld = false;
+            if (_isPrimaryHeld && !_isQuickSlotOpen) _primaryReleasedFrame = Time.frameCount;
+            _isPrimaryHeld = false;
+        }
+
+        private void OnSecondaryPerformed(InputAction.CallbackContext context)
+        {
+            if (_isQuickSlotOpen) return;
+            _isSecondaryHeld = true;
+            _secondaryPressedFrame = Time.frameCount;
+        }
+
+        private void OnSecondaryCanceled(InputAction.CallbackContext context)
+        {
+            if (_isSecondaryHeld && !_isQuickSlotOpen) _secondaryReleasedFrame = Time.frameCount;
+            _isSecondaryHeld = false;
         }
 
         private void OnQuickSlotPerformed(InputAction.CallbackContext context)
@@ -203,9 +234,12 @@ namespace alpha.ingame.input
             if (!isOpen) return;
 
             // 열리는 순간 이미 누르고 있던 공격과 마우스 회전량도 지운다.
-            _isAttackHeld = false;
-            _attackPressedFrame = -1;
-            _attackReleasedFrame = -1;
+            _isPrimaryHeld = false;
+            _primaryPressedFrame = -1;
+            _primaryReleasedFrame = -1;
+            _isSecondaryHeld = false;
+            _secondaryPressedFrame = -1;
+            _secondaryReleasedFrame = -1;
         }
 
     }
