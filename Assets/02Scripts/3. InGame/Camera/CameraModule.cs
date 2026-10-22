@@ -24,7 +24,8 @@ public struct CameraViewSettings
     [Min(0f)] public float FollowSmoothTime;
 
     [Header("Rotation")]
-    [Range(0f, 89f)] public float LimitAngleY;
+    [Range(0f, 89f)] public float LimitAngleUp;
+    [Range(0f, 89f)] public float LimitAngleDown;
     public float SensitivityX;
     public float SensitivityY;
 
@@ -42,7 +43,8 @@ public struct CameraViewSettings
         Vertical = 2.5f,
         Horizontal = 0f,
         FollowSmoothTime = 0.12f,
-        LimitAngleY = 60f,
+        LimitAngleUp = 60f,
+        LimitAngleDown = 60f,
         SensitivityX = 15f,
         SensitivityY = 10f,
         ZoomMin = 1f,
@@ -71,6 +73,8 @@ public class CameraModule : MonoBehaviour
     public Camera Cam { get; private set; }
     public bool IsZoomed { get; private set; }
     public RenderTexture ScopeTexture => _scopeCamera != null ? _scopeCamera.targetTexture : null;
+    public ECameraViewType ActiveViewType => _activeViewType;
+    public event Action<ECameraViewType> OnViewChanged;
 
     private readonly Dictionary<ECameraViewType, float> _zoomDistances = new();
     private CameraViewSettings _activeView;
@@ -133,6 +137,7 @@ public class CameraModule : MonoBehaviour
         _zoom.localPosition = new Vector3(0f, 0f, -_currentZoom);
         if (Cam != null) Cam.fieldOfView = _activeView.FieldOfView;
         IsZoomed = false;
+        OnViewChanged?.Invoke(_activeViewType);
     }
 
     // Scope는 메인 카메라의 시야를 유지한 채 별도 카메라로 렌즈 영상을 만든다.
@@ -155,6 +160,7 @@ public class CameraModule : MonoBehaviour
         _activeView = view;
         _activeViewType = type;
         if (_scopeCamera != null) _scopeCamera.enabled = type == ECameraViewType.Scope;
+        OnViewChanged?.Invoke(_activeViewType);
         return true;
     }
 
@@ -168,6 +174,7 @@ public class CameraModule : MonoBehaviour
         _activeView = view;
         _activeViewType = ECameraViewType.Default;
         if (_scopeCamera != null) _scopeCamera.enabled = false;
+        OnViewChanged?.Invoke(_activeViewType);
     }
 
     private bool TryGetView(ECameraViewType type, out CameraViewSettings view)
@@ -196,8 +203,9 @@ public class CameraModule : MonoBehaviour
     private void Rotation(Vector2 lookInput)
     {
         _mouseX += lookInput.x * _activeView.SensitivityX * 0.01f;
+        // 음수 피치는 위쪽, 양수 피치는 아래쪽을 향한다.
         _mouseY = Mathf.Clamp(_mouseY - lookInput.y * _activeView.SensitivityY * 0.01f,
-            -_activeView.LimitAngleY, _activeView.LimitAngleY);
+            -_activeView.LimitAngleUp, _activeView.LimitAngleDown);
         _pivot.localRotation = Quaternion.Euler(_mouseY, _mouseX, 0f);
     }
 

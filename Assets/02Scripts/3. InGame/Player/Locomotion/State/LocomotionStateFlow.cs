@@ -73,8 +73,15 @@ namespace alpha.ingame.player
                 _playerCore.CurrentArete == null || !_playerCore.LocomotionModule.IsGrounded)
                 return false;
 
-            // 아린처럼 기동이 정의되지 않은 아레테는 입력을 소비하지 않는다.
+            // 기동이 정의되지 않은 아레테는 입력을 소비하지 않는다.
             if (!_playerCore.CurrentArete.CanUseMobility)
+                return false;
+
+            // 실리온 기동에만 부스터 잔량 조건을 적용한다.
+            if (_playerCore.CurrentArete is SilyonArete && !_playerCore.LocomotionModule.CanUseBoost)
+                return false;
+
+            if (_playerCore.CombatModule?.IsAimOrScopeActive == true)
                 return false;
 
             ChangeState(ELocomotionState.Mobility);

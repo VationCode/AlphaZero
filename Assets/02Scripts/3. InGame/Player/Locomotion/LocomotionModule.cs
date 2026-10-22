@@ -25,9 +25,8 @@ namespace alpha.ingame.player
 
         [Header("Mobility")]
         [SerializeField, Min(0f)] private float _boostSpeed = 10f;
-        [SerializeField, Min(0f)] private float _leapSpeed = 12f;
-        [SerializeField, Min(0.01f)] private float _leapDuration = 0.18f;
-        [SerializeField, Min(0.01f)] private float _leapHeight = 1.4f;
+        [SerializeField, Min(0.01f)] private float _maxBoostDuration = 4f;
+        [SerializeField, Min(0.01f)] private float _boostRechargeDuration = 6f;
 
         [Header("Speed Transition")]
         [Min(0.001f)]
@@ -55,25 +54,71 @@ namespace alpha.ingame.player
         // 월드 이동 방향, 이동 타입, 0~1 입력 세기
         public event Action<Vector3, EMoveType, float> OnMove;
         public event Action<int> OnJump;
+        public event Action<float> OnBoostRatioChanged;
+        public event Action<bool> OnBoostStateChanged;
+
+        public float BoostRatio => Mathf.Clamp01(_boostRemaining / Mathf.Max(0.01f, _maxBoostDuration));
+        public bool CanUseBoost => _boostRemaining > 0f;
+        public bool IsBoosting => _isBoosting;
 
         public void ResetJumpCount() => _jumpCount = 0;
 
         private Vector3 _velocityXZ;
         private float _airEntrySpeed;
         private bool _isAirMoving;
-        private Vector3 _leapDirection;
         public float VelocityY => _velocityY;
         private float _velocityY;
         private int _jumpCount;
+        private float _boostRemaining;
+        private bool _isBoosting;
         public bool IsGrounded => _characterCtrl.isGrounded;
         public bool IsFalling => !IsGrounded && _velocityY < 0f;
         public bool CanGroundJump => IsGrounded && _jumpCount == 0;
         public bool CanAirJump => !IsGrounded && _jumpCount == 1;
-        public float LeapDuration => _leapDuration;
         public float LandDuration => _landDuration;
         private void Awake()
         {
             _characterCtrl = GetComponentInParent<CharacterController>(true);
+            _boostRemaining = Mathf.Max(0.01f, _maxBoostDuration);
+            OnBoostRatioChanged?.Invoke(BoostRatio);
+        }
+
+        private void Update()
+        {
+            if (_isBoosting || _boostRemaining >= _maxBoostDuration) return;
+
+            // 부스터를 사용하지 않는 동안 설정된 충전 시간에 맞춰 회복한다.
+            float recharge = Time.deltaTime * _maxBoostDuration / Mathf.Max(0.01f, _boostRechargeDuration);
+            SetBoostRemaining(_boostRemaining + recharge);
+        }
+
+        public void BeginBoost()
+        {
+            if (_isBoosting) return;
+            _isBoosting = true;
+            OnBoostStateChanged?.Invoke(true);
+        }
+
+        public bool ConsumeBoost(float deltaTime)
+        {
+            if (!_isBoosting || !CanUseBoost) return false;
+            SetBoostRemaining(_boostRemaining - Mathf.Max(0f, deltaTime));
+            return CanUseBoost;
+        }
+
+        public void EndBoost()
+        {
+            if (!_isBoosting) return;
+            _isBoosting = false;
+            OnBoostStateChanged?.Invoke(false);
+        }
+
+        private void SetBoostRemaining(float value)
+        {
+            float next = Mathf.Clamp(value, 0f, Mathf.Max(0.01f, _maxBoostDuration));
+            if (_boostRemaining == next) return;
+            _boostRemaining = next;
+            OnBoostRatioChanged?.Invoke(BoostRatio);
         }
 
         private void LateUpdate()
@@ -187,41 +232,13 @@ namespace alpha.ingame.player
             OnJump?.Invoke(_jumpCount);
         }
 
-        public void BeginLeap(Vector2 p_moveInput)
-        {
-            // 입력이 없으면 카메라 정면으로 도약한다.
-            _leapDirection = GetWorldMoveDirection(
-                p_moveInput.sqrMagnitude > 0.0001f ? p_moveInput : Vector2.up);
-            if (_leapDirection.sqrMagnitude <= 0.0001f)
-                _leapDirection = _characterCtrl.transform.forward;
-
-            MoveDirection = _leapDirection;
-            _velocityXZ = _leapDirection * _leapSpeed;
-            _isAirMoving = false;
-            _velocityY = Mathf.Sqrt(_leapHeight * -2f * _gravity);
-            _jumpCount = 1;
-            UpdateFacing(_leapDirection, false);
-            OnJump?.Invoke(_jumpCount);
-        }
-
-        public void LeapMove()
-        {
-            _velocityXZ = _leapDirection * _leapSpeed;
-            CurrentSpeed = _leapSpeed;
-            UpdateFacing(_leapDirection, false);
-
-            Vector3 velocity = _velocityXZ;
-            velocity.y = CalculateGravity(Time.deltaTime);
-            _characterCtrl.Move(velocity * Time.deltaTime);
-        }
-
         public void AirMove(Vector2 p_moveInput)
         {
             float deltaTime = Time.deltaTime;
 
             if (!_isAirMoving)
             {
-                // 도약 또는 낙하 직전의 속도를 공중 방향 전환의 기준으로 사용한다.
+                // 점프 또는 낙하 직전의 속도를 공중 방향 전환의 기준으로 사용한다.
                 _airEntrySpeed = Mathf.Max(_airSpeed, _velocityXZ.magnitude);
                 _isAirMoving = true;
             }

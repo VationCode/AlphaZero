@@ -19,6 +19,7 @@ namespace alpha.ingame.player
 
         public override void BeginMobility(AlphaInput input, bool isCombatStance)
         {
+            Locomotion.BeginBoost();
             if (_mobilityEffect != null) _mobilityEffect.SetActive(true);
             Locomotion.SetBoostMoveType(isCombatStance);
             Locomotion.Move(input.MoveInput);
@@ -27,15 +28,13 @@ namespace alpha.ingame.player
         public override ELocomotionState? UpdateMobility(AlphaInput input, bool isCombatStance)
         {
             if (!input.IsMobilityHeld)
-            {
-                if (!Locomotion.IsGrounded) return ELocomotionState.Fall;
-                return input.MoveInput.sqrMagnitude > 0.0001f || isCombatStance
-                    ? ELocomotionState.Move
-                    : ELocomotionState.Idle;
-            }
+                return GetStateAfterBoost(input, isCombatStance);
 
             if (input.IsJump && Locomotion.CanGroundJump)
                 return ELocomotionState.Jump;
+
+            if (!Locomotion.ConsumeBoost(Time.deltaTime))
+                return GetStateAfterBoost(input, isCombatStance);
 
             Locomotion.SetBoostMoveType(isCombatStance);
             Locomotion.Move(input.MoveInput);
@@ -44,7 +43,16 @@ namespace alpha.ingame.player
 
         public override void EndMobility()
         {
+            Locomotion.EndBoost();
             if (_mobilityEffect != null) _mobilityEffect.SetActive(false);
+        }
+
+        private ELocomotionState GetStateAfterBoost(AlphaInput input, bool isCombatStance)
+        {
+            if (!Locomotion.IsGrounded) return ELocomotionState.Fall;
+            return input.MoveInput.sqrMagnitude > 0.0001f || isCombatStance
+                ? ELocomotionState.Move
+                : ELocomotionState.Idle;
         }
     }
 }

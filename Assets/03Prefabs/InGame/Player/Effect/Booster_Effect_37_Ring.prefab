@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4161385944253381053}
   - component: {fileID: 4161385944253381052}
   m_Layer: 0
-  m_Name: Effect_37_Ring
+  m_Name: Booster_Effect_37_Ring
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

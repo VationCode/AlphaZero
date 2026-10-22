@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.Animations.Rigging;
 
 namespace alpha.ingame.player
 {
@@ -30,6 +31,9 @@ namespace alpha.ingame.player
         [Header("Fall Crossfade")]
         [SerializeField, Min(0f)] private float _fallBlendTime = 0.1f;
 
+        [Header("Silyon Aim Point")]
+        [SerializeField, Min(1f)] private float _aimPointDistance = 30f;
+
         // Animator 상태
         private readonly int _walk = Animator.StringToHash("Base Layer.Walk");
         private readonly int _sprintTree = Animator.StringToHash("Base Layer.Sprint Tree");
@@ -48,6 +52,21 @@ namespace alpha.ingame.player
         private readonly int _moveMagnitude = Animator.StringToHash("MoveMagnitude");
 
         private int _currentMoveState;
+        private Rig[] _modelRigs = Array.Empty<Rig>();
+        private CameraModule _cameraModule;
+        private Transform _aimPoint;
+
+        private void OnEnable()
+        {
+            if (_animator != null) BindCameraView();
+        }
+
+        private void OnDisable()
+        {
+            if (_cameraModule != null)
+                _cameraModule.OnViewChanged -= HandleCameraViewChanged;
+            HandleCameraViewChanged(ECameraViewType.Default);
+        }
 
         private void Start()
         {
@@ -67,7 +86,44 @@ namespace alpha.ingame.player
 
             // 생성된 모델의 Animator에 해당 아레테 컨트롤러를 적용한다.
             _animator = p_animator;
+            PlayerCore playerCore = GetComponentInParent<PlayerCore>();
+            _modelRigs = playerCore != null && playerCore.CurrentModel != null
+                ? playerCore.CurrentModel.GetComponentsInChildren<Rig>(true)
+                : Array.Empty<Rig>();
+            _aimPoint = playerCore != null && playerCore.CurrentModel != null
+                ? playerCore.CurrentModel.transform.Find("AimPoint")
+                : null;
+            BindCameraView();
             HandlePlayerSetup(p_areteType);
+        }
+
+        private void LateUpdate()
+        {
+            // 프리팹에 배치된 AimPoint만 카메라 조준 방향으로 옮긴다.
+            if (_aimPoint == null || _cameraModule == null || _cameraModule.Cam == null) return;
+            Transform cameraTransform = _cameraModule.Cam.transform;
+            _aimPoint.position = cameraTransform.position + cameraTransform.forward * _aimPointDistance;
+        }
+
+        private void BindCameraView()
+        {
+            if (_cameraModule != null)
+                _cameraModule.OnViewChanged -= HandleCameraViewChanged;
+
+            _cameraModule = FindFirstObjectByType<CameraModule>();
+            if (_cameraModule != null)
+                _cameraModule.OnViewChanged += HandleCameraViewChanged;
+
+            HandleCameraViewChanged(_cameraModule != null
+                ? _cameraModule.ActiveViewType : ECameraViewType.Default);
+        }
+
+        private void HandleCameraViewChanged(ECameraViewType viewType)
+        {
+            // 조준 View에서만 모델의 애니메이션 리깅을 적용한다.
+            float weight = viewType == ECameraViewType.Aim ? 1f : 0f;
+            foreach (Rig rig in _modelRigs)
+                if (rig != null) rig.weight = weight;
         }
 
         public void HandlePlayerSetup(EAreteType p_type)

@@ -16,6 +16,9 @@ namespace alpha.ingame.player
 
         public GunWeapon CurrentGun => _playerCore?.EquipmentModule?.CurrentWeapon?.GetComponent<GunWeapon>();
         public bool HasReadyTime => Time.time < _readyUntil;
+        // 실제 Aim/Scope View가 활성화된 동안에만 부스터를 막는다.
+        public bool IsAimOrScopeActive =>
+            _activeSecondary is SecondaryViewAction view && view.IsActive;
         public bool CanAttack
         {
             get
@@ -90,6 +93,11 @@ namespace alpha.ingame.player
             _secondaryWeapon = weapon;
             _activeSecondary = weapon.SecondaryAction;
             _activeSecondary.Begin();
+
+            // 부스터 중 Aim/Scope가 켜지면 일반 전투 이동으로 전환한다.
+            LocomotionStateFlow flow = _playerCore.LocomotionStateFlow;
+            if (IsAimOrScopeActive && flow != null && flow.CurrentState == ELocomotionState.Mobility)
+                flow.ChangeState(ELocomotionState.Move);
         }
 
         private void OnDisable() => CancelSecondary();
