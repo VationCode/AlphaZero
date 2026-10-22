@@ -27,6 +27,8 @@ namespace alpha.ingame.player
                 GunWeapon gun = CurrentGun;
                 return gun != null && gun.IsEquipped && input != null &&
                        !input.IsQuickSlotOpen && !input.IsQuickSlotPressed &&
+                       _playerCore?.SkillStateFlow?.IsExecuting != true &&
+                       _playerCore?.SkillStateFlow?.IsPrimaryConsumedThisFrame != true &&
                        CanUseCombatFromLocomotion(input);
             }
         }
@@ -38,7 +40,9 @@ namespace alpha.ingame.player
                 AlphaInput input = AlphaInput.Instance;
                 GunWeapon gun = CurrentGun;
                 return gun != null && gun.IsEquipped && input != null &&
-                       !input.IsQuickSlotOpen && CanUseCombatFromLocomotion(input);
+                       !input.IsQuickSlotOpen && _playerCore?.SkillStateFlow?.IsExecuting != true &&
+                       _playerCore?.SkillStateFlow?.IsPrimaryConsumedThisFrame != true &&
+                       CanUseCombatFromLocomotion(input);
             }
         }
 
@@ -50,6 +54,7 @@ namespace alpha.ingame.player
                 CombatStateFlow flow = _playerCore?.CombatStateFlow;
                 bool isViewActive = _activeSecondary is SecondaryViewAction view && view.IsActive;
                 return input != null && !input.IsQuickSlotOpen && flow != null &&
+                       _playerCore?.SkillStateFlow?.IsExecuting != true &&
                        CanUseCombatFromLocomotion(input) &&
                        (!input.IsQuickSlotPressed || flow.CurrentState == ECombatState.Attack) &&
                        (flow.IsCombatStanceActive || isViewActive);
@@ -66,7 +71,9 @@ namespace alpha.ingame.player
             AlphaInput input = AlphaInput.Instance;
             EquippableWeapon weapon = _playerCore?.EquipmentModule?.CurrentWeapon?.GetComponent<EquippableWeapon>();
             bool available = input != null && !input.IsQuickSlotOpen && !input.IsQuickSlotPressed &&
-                             weapon != null && weapon.IsEquipped && CanUseCombatFromLocomotion(input);
+                             weapon != null && weapon.IsEquipped &&
+                             _playerCore?.SkillStateFlow?.IsExecuting != true &&
+                             CanUseCombatFromLocomotion(input);
 
             if (_activeSecondary != null)
             {

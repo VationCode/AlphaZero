@@ -56,6 +56,7 @@ namespace alpha.ingame.player
 
             GunWeapon gun = _playerCore.CombatModule.CurrentGun;
             if (gun != _knownGun || input.IsQuickSlotOpen ||
+                _playerCore.SkillStateFlow?.IsExecuting == true ||
                 (input.IsQuickSlotPressed && CurrentState != ECombatState.Attack))
             {
                 // 무기 교체와 퀵슬롯은 진행 중인 공격과 남은 자세 시간을 초기화한다.

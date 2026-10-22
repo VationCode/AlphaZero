@@ -56,6 +56,7 @@ namespace alpha.ingame.player
         public event Action<int> OnJump;
         public event Action<float> OnBoostRatioChanged;
         public event Action<bool> OnBoostStateChanged;
+        public event Action OnBoostFullyCharged;
 
         public float BoostRatio => Mathf.Clamp01(_boostRemaining / Mathf.Max(0.01f, _maxBoostDuration));
         public bool CanUseBoost => _boostRemaining > 0f;
@@ -115,10 +116,15 @@ namespace alpha.ingame.player
 
         private void SetBoostRemaining(float value)
         {
-            float next = Mathf.Clamp(value, 0f, Mathf.Max(0.01f, _maxBoostDuration));
+            float maximum = Mathf.Max(0.01f, _maxBoostDuration);
+            float previous = _boostRemaining;
+            float next = Mathf.Clamp(value, 0f, maximum);
             if (_boostRemaining == next) return;
             _boostRemaining = next;
             OnBoostRatioChanged?.Invoke(BoostRatio);
+            // 시작 시의 풀충전은 제외하고, 충전으로 최대치에 도달한 순간만 알린다.
+            if (!_isBoosting && previous < maximum && next >= maximum)
+                OnBoostFullyCharged?.Invoke();
         }
 
         private void LateUpdate()

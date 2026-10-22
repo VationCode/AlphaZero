@@ -1,5 +1,6 @@
 using System;
 using alpha.ingame.item;
+using alpha.ingame.skill;
 using UnityEngine;
 
 namespace alpha.ingame.player
@@ -19,6 +20,8 @@ namespace alpha.ingame.player
         
         public LocomotionStateFlow LocomotionStateFlow { get; private set; }
         public CombatStateFlow CombatStateFlow { get; private set; }
+        public SkillStateFlow SkillStateFlow { get; private set; }
+        public SkillDisplayChannel SkillDisplayChannel { get; } = new SkillDisplayChannel();
 
 
         public LocomotionModule LocomotionModule { get; private set; }
@@ -37,6 +40,7 @@ namespace alpha.ingame.player
             LocomotionModule = GetComponentInChildren<LocomotionModule>(true);
             CombatStateFlow = GetComponentInChildren<CombatStateFlow>(true);
             CombatModule = GetComponentInChildren<CombatModule>(true);
+            SkillStateFlow = GetComponentInChildren<SkillStateFlow>(true);
 
             EquipmentModule = GetComponentInChildren<EquipmentModule>(true);
             InventoryModule = GetComponentInChildren<InventoryModule>(true);

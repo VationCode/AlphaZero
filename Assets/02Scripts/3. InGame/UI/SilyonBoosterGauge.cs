@@ -1,86 +1,104 @@
 using System.Collections;
-using alpha;
 using alpha.ingame.player;
 using UnityEngine;
 using UnityEngine.UI;
 
 /// <summary>실리온 부스터 잔량을 8칸의 이미지로 표시한다.</summary>
-public sealed class SilyonBoosterGauge : MonoBehaviour
+public sealed class SilyonBoosterGauge : AreteMobilityGauge
 {
-    [SerializeField] private PlayerCore _playerCore;
     [SerializeField] private LocomotionModule _locomotion;
     [SerializeField] private Image[] _segments;
-    [SerializeField, Min(0f)] private float _visibleAfterBoost = 1.5f;
-    [SerializeField, Min(0f)] private float _fadeDuration = 0.5f;
+
+    [Tooltip("부스트 이후 활성화 시간")]
+    [SerializeField, Min(0f)] private float _visibleAfterBoost = 1f;
+    
+    [Header("풀충전 이펙트")]
+    [SerializeField, Min(0f)] private float _visibleAfterFullCharge = 0.3f;
+    [SerializeField, Min(0f)] float flashDuration = 0.15f;
+    [SerializeField, Min(0f)] float dimAlpha = 0.2f;
+    [Space(10)]
+
+    [Tooltip("활성화 이후 페이드")]
+    [SerializeField, Min(0f)] private float _fadeDuration = 0.3f;
 
     private float[] _originalAlphas;
     private Coroutine _hideRoutine;
-    private GameObject _gaugeObject;
 
-    private void Awake()
+    protected override void Awake()
     {
+        base.Awake();
         // 현재 배치된 각 칸의 알파값을 부스터 재시작 시 복원한다.
         _originalAlphas = new float[_segments?.Length ?? 0];
         for (int i = 0; i < _originalAlphas.Length; i++)
             if (_segments[i] != null) _originalAlphas[i] = _segments[i].color.a;
-
-        // 첫 번째 칸의 두 단계 부모가 현재 배치의 Gauge 객체다.
-        if (_originalAlphas.Length > 0 && _segments[0] != null)
-        {
-            Transform mobility = _segments[0].transform.parent;
-            if (mobility != null && mobility.parent != null)
-                _gaugeObject = mobility.parent.gameObject;
-        }
     }
 
     private void OnEnable()
     {
-        if (_playerCore != null) _playerCore.OnPlayerSetup += HandlePlayerSetup;
         if (_locomotion != null)
         {
             _locomotion.OnBoostRatioChanged += Refresh;
             _locomotion.OnBoostStateChanged += HandleBoostStateChanged;
+            _locomotion.OnBoostFullyCharged += HandleBoostFullyCharged;
             Refresh(_locomotion.BoostRatio);
         }
 
-        if (_playerCore != null && _playerCore.CurrentArete != null)
-            HandlePlayerSetup(_playerCore.CurrentAreteType);
-        else HideGauge();
+        if (_locomotion != null && _locomotion.IsBoosting) ShowGroup();
+        else HideGroup();
     }
 
     private void OnDisable()
     {
         StopHideRoutine();
-        HideGauge();
-        if (_playerCore != null) _playerCore.OnPlayerSetup -= HandlePlayerSetup;
+        HideGroup();
         if (_locomotion != null)
         {
             _locomotion.OnBoostRatioChanged -= Refresh;
             _locomotion.OnBoostStateChanged -= HandleBoostStateChanged;
+            _locomotion.OnBoostFullyCharged -= HandleBoostFullyCharged;
         }
-    }
-
-    private void HandlePlayerSetup(EAreteType type)
-    {
-        StopHideRoutine();
-        if (type == EAreteType.Silyon && _locomotion != null && _locomotion.IsBoosting)
-            ShowGauge();
-        else
-            HideGauge();
     }
 
     private void HandleBoostStateChanged(bool isBoosting)
     {
         StopHideRoutine();
-        if (_playerCore == null || _playerCore.CurrentAreteType != EAreteType.Silyon)
-        {
-            HideGauge();
+        if (isBoosting) ShowGroup();
+        else if (IsGroupVisible)
+            _hideRoutine = StartCoroutine(HideAfterDelay());
+    }
+
+    private void HandleBoostFullyCharged()
+    {
+        if (_locomotion == null || _locomotion.IsBoosting)
             return;
+
+        StopHideRoutine();
+        ShowGroup();
+        _hideRoutine = StartCoroutine(ShowFullChargeCue());
+    }
+
+    private IEnumerator ShowFullChargeCue()
+    {
+        // 원래 알파값을 넘기지 않고 두 번 짧게 깜빡여 충전 완료를 알린다.
+        const int flashCount = 2;
+
+        for (int flash = 0; flash < flashCount; flash++)
+        {
+            float elapsed = 0f;
+            while (elapsed < flashDuration)
+            {
+                elapsed += Time.deltaTime;
+                float pulse = Mathf.Sin(Mathf.PI * Mathf.Clamp01(elapsed / flashDuration));
+                SetAlpha(Mathf.Lerp(1f, dimAlpha, pulse));
+                yield return null;
+            }
         }
 
-        if (isBoosting) ShowGauge();
-        else if (_gaugeObject != null && _gaugeObject.activeSelf)
-            _hideRoutine = StartCoroutine(HideAfterDelay());
+        SetAlpha(1f);
+        if (_visibleAfterFullCharge > 0f)
+            yield return new WaitForSeconds(_visibleAfterFullCharge);
+
+        yield return FadeOutAndHide();
     }
 
     private IEnumerator HideAfterDelay()
@@ -88,6 +106,11 @@ public sealed class SilyonBoosterGauge : MonoBehaviour
         if (_visibleAfterBoost > 0f)
             yield return new WaitForSeconds(_visibleAfterBoost);
 
+        yield return FadeOutAndHide();
+    }
+
+    private IEnumerator FadeOutAndHide()
+    {
         float elapsed = 0f;
         while (elapsed < _fadeDuration)
         {
@@ -96,19 +119,19 @@ public sealed class SilyonBoosterGauge : MonoBehaviour
             yield return null;
         }
 
-        HideGauge();
+        HideGroup();
         _hideRoutine = null;
     }
 
-    private void ShowGauge()
+    private void ShowGroup()
     {
         SetAlpha(1f);
-        if (_gaugeObject != null) _gaugeObject.SetActive(true);
+        SetGroupVisible(true);
     }
 
-    private void HideGauge()
+    private void HideGroup()
     {
-        if (_gaugeObject != null) _gaugeObject.SetActive(false);
+        SetGroupVisible(false);
     }
 
     private void SetAlpha(float fraction)

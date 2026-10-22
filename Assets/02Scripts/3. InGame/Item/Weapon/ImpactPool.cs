@@ -9,11 +9,15 @@ namespace alpha.ingame.item
         private readonly Stack<ImpactInstance> _available = new();
         private readonly ImpactData _data;
         private readonly Transform _root;
+        private readonly Transform _inactiveRoot;
 
         public ImpactPool(ImpactData data, string ownerName)
         {
             _data = data;
             _root = new GameObject($"{ownerName} Impact Pool").transform;
+            _inactiveRoot = new GameObject("Inactive Spawn Root").transform;
+            _inactiveRoot.SetParent(_root, false);
+            _inactiveRoot.gameObject.SetActive(false);
             for (int i = 0; i < data.InitialPoolSize; i++) _available.Push(Create());
         }
 
@@ -40,13 +44,15 @@ namespace alpha.ingame.item
         private ImpactInstance Create()
         {
             GameObject obj = _data.EffectPrefab != null
-                ? Object.Instantiate(_data.EffectPrefab, _root)
+                ? Object.Instantiate(_data.EffectPrefab, _inactiveRoot)
                 : new GameObject("Impact");
-            if (obj.transform.parent != _root) obj.transform.SetParent(_root);
+            if (obj.transform.parent != _inactiveRoot) obj.transform.SetParent(_inactiveRoot, false);
+            obj.SetActive(false);
             ImpactInstance instance = obj.GetComponent<ImpactInstance>();
             if (instance == null) instance = obj.AddComponent<ImpactInstance>();
             instance.Initialize(this, _data);
-            obj.SetActive(false);
+            // 위치를 정하기 전까지 OnEnable과 Play On Awake가 실행되지 않게 한다.
+            obj.transform.SetParent(_root, false);
             return instance;
         }
     }

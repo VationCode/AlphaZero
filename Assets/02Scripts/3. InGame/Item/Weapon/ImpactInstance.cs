@@ -24,6 +24,13 @@ namespace alpha.ingame.item
             _pool = pool;
             _data = data;
             _particles = GetComponentsInChildren<ParticleSystem>(true);
+            foreach (ParticleSystem particle in _particles)
+            {
+                // 풀에서 꺼낼 때는 명중 위치를 지정한 뒤 직접 재생한다.
+                ParticleSystem.MainModule main = particle.main;
+                main.playOnAwake = false;
+                main.stopAction = ParticleSystemStopAction.None;
+            }
         }
 
         public void Play(RaycastHit hit, Transform owner, float damage, Vector3 fallbackNormal)

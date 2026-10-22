@@ -261,6 +261,15 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SkillNum"",
+                    ""type"": ""Button"",
+                    ""id"": ""6f52e1f5-7ad5-4a70-aeb6-a92f60d53695"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -283,6 +292,50 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Secondary"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""013a272e-bf31-454f-abc7-1d8d9074bacf"",
+                    ""path"": ""<Keyboard>/1"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SkillNum"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a2e3307e-eb5b-4172-901e-6fc946b4f90c"",
+                    ""path"": ""<Keyboard>/2"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SkillNum"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""209a48e1-2aab-4b6b-9004-c69fdecd0ed9"",
+                    ""path"": ""<Keyboard>/3"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SkillNum"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""84f03df3-34db-4b50-a77d-efb8eb70b073"",
+                    ""path"": ""<Keyboard>/4"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SkillNum"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -426,6 +479,7 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         m_PlayerCombat = asset.FindActionMap("PlayerCombat", throwIfNotFound: true);
         m_PlayerCombat_Primary = m_PlayerCombat.FindAction("Primary", throwIfNotFound: true);
         m_PlayerCombat_Secondary = m_PlayerCombat.FindAction("Secondary", throwIfNotFound: true);
+        m_PlayerCombat_SkillNum = m_PlayerCombat.FindAction("SkillNum", throwIfNotFound: true);
         // PlayerInteraction
         m_PlayerInteraction = asset.FindActionMap("PlayerInteraction", throwIfNotFound: true);
         m_PlayerInteraction_Interaction = m_PlayerInteraction.FindAction("Interaction", throwIfNotFound: true);
@@ -663,6 +717,7 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
     private List<IPlayerCombatActions> m_PlayerCombatActionsCallbackInterfaces = new List<IPlayerCombatActions>();
     private readonly InputAction m_PlayerCombat_Primary;
     private readonly InputAction m_PlayerCombat_Secondary;
+    private readonly InputAction m_PlayerCombat_SkillNum;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerCombat".
     /// </summary>
@@ -682,6 +737,10 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "PlayerCombat/Secondary".
         /// </summary>
         public InputAction @Secondary => m_Wrapper.m_PlayerCombat_Secondary;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerCombat/SkillNum".
+        /// </summary>
+        public InputAction @SkillNum => m_Wrapper.m_PlayerCombat_SkillNum;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -714,6 +773,9 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
             @Secondary.started += instance.OnSecondary;
             @Secondary.performed += instance.OnSecondary;
             @Secondary.canceled += instance.OnSecondary;
+            @SkillNum.started += instance.OnSkillNum;
+            @SkillNum.performed += instance.OnSkillNum;
+            @SkillNum.canceled += instance.OnSkillNum;
         }
 
         /// <summary>
@@ -731,6 +793,9 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
             @Secondary.started -= instance.OnSecondary;
             @Secondary.performed -= instance.OnSecondary;
             @Secondary.canceled -= instance.OnSecondary;
+            @SkillNum.started -= instance.OnSkillNum;
+            @SkillNum.performed -= instance.OnSkillNum;
+            @SkillNum.canceled -= instance.OnSkillNum;
         }
 
         /// <summary>
@@ -1138,6 +1203,13 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSecondary(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SkillNum" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSkillNum(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "PlayerInteraction" which allows adding and removing callbacks.

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 
 namespace alpha.ingame.input
 {
@@ -49,12 +50,17 @@ namespace alpha.ingame.input
         public Vector2 ZoomInput => _zoomInput;
         private Vector2 _zoomInput;
 
+        // Combat
         public bool IsSecondaryPressed => !_isQuickSlotOpen && _secondaryPressedFrame == Time.frameCount;
         public bool IsSecondaryHeld => !_isQuickSlotOpen && _isSecondaryHeld;
         public bool IsSecondaryReleased => !_isQuickSlotOpen && _secondaryReleasedFrame == Time.frameCount;
         private bool _isSecondaryHeld;
         private int _secondaryPressedFrame = -1;
         private int _secondaryReleasedFrame = -1;
+
+        public int SkillNum => _skillNum;
+        private int _skillNum;
+
 
         // Mouse
         // 누르고 있는 동안 커서를 표시하고 잠금을 해제한다.
@@ -95,9 +101,11 @@ namespace alpha.ingame.input
             _action.PlayerCombat.Primary.performed += OnPrimaryPerformed;
             _action.PlayerCombat.Primary.canceled += OnPrimaryCanceled;
 
-
             _action.PlayerCombat.Secondary.performed += OnSecondaryPerformed;
             _action.PlayerCombat.Secondary.canceled += OnSecondaryCanceled;
+
+            _action.PlayerCombat.SkillNum.performed += OnSkillNumPerformed;
+            _action.PlayerCombat.SkillNum.canceled += OnSkillNumCanceled;
 
             // Interaction
             _action.PlayerInteraction.QuickSlot.performed += OnQuickSlotPerformed;
@@ -140,6 +148,9 @@ namespace alpha.ingame.input
             _action.PlayerCombat.Secondary.performed -= OnSecondaryPerformed;
             _action.PlayerCombat.Secondary.canceled -= OnSecondaryCanceled;
 
+            _action.PlayerCombat.SkillNum.performed -= OnSkillNumPerformed;
+            _action.PlayerCombat.SkillNum.canceled -= OnSkillNumCanceled;
+
             // Camera
             _action.Camera.Look.performed -= i => _lookInput = i.ReadValue<Vector2>();
             _action.Camera.Look.canceled -= i => _lookInput = Vector2.zero;
@@ -156,18 +167,21 @@ namespace alpha.ingame.input
 
             _action = null;
             _moveInput = Vector2.zero;
-            _isPrimaryHeld = false;
             _jumpFrame = -1;
             _dodgeFrame = -1;
+            _isMobilityHeld = false;
+
+            _isPrimaryHeld = false;
             _primaryPressedFrame = -1;
             _primaryReleasedFrame = -1;
-            _isQuickSlotOpen = false;
-            _quickSlotFrame = -1;
-            _isMobilityHeld = false;
-            _zoomInput = Vector2.zero;
             _isSecondaryHeld = false;
             _secondaryPressedFrame = -1;
             _secondaryReleasedFrame = -1;
+            _skillNum = 0;
+
+            _isQuickSlotOpen = false;
+            _quickSlotFrame = -1;
+            _zoomInput = Vector2.zero;
 
             _isMouseLock = false;
         }
@@ -209,6 +223,26 @@ namespace alpha.ingame.input
             _isSecondaryHeld = false;
         }
 
+        private void OnSkillNumPerformed(InputAction.CallbackContext context)
+        {
+            if (_isQuickSlotOpen || context.control is not KeyControl key) return;
+
+            // Button 값은 모든 숫자 키에서 동일하므로 실제 눌린 키로 슬롯을 구분한다.
+            _skillNum = key.keyCode switch
+            {
+                Key.Digit1 => 1,
+                Key.Digit2 => 2,
+                Key.Digit3 => 3,
+                Key.Digit4 => 4,
+                _ => 0
+            };
+        }
+
+        private void OnSkillNumCanceled(InputAction.CallbackContext context)
+        {
+            _skillNum = 0;
+        }
+
         private void OnQuickSlotPerformed(InputAction.CallbackContext context)
         {
             _quickSlotFrame = Time.frameCount;
@@ -240,6 +274,7 @@ namespace alpha.ingame.input
             _isSecondaryHeld = false;
             _secondaryPressedFrame = -1;
             _secondaryReleasedFrame = -1;
+            _skillNum = 0;
         }
 
     }
