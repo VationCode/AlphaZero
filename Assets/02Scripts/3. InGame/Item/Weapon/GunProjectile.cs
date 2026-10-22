@@ -71,7 +71,11 @@ namespace alpha.ingame.item
 
             if (nearest >= 0)
             {
-                _impactPool?.Spawn(Hits[nearest], _owner, _damage, -_direction);
+                RaycastHit hit = Hits[nearest];
+                // 시작점에서 겹친 SphereCast는 접촉점 대신 (0,0,0)을 돌려줄 수 있다.
+                Vector3 contactPoint = hit.distance <= 0f && hit.point == Vector3.zero
+                    ? center : hit.point;
+                _impactPool?.Spawn(hit, _owner, _damage, -_direction, contactPoint);
                 _pool.Return(this);
                 return;
             }

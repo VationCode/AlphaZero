@@ -44,6 +44,7 @@ GameObject:
   - component: {fileID: 9000000000101}
   - component: {fileID: 9000000000102}
   - component: {fileID: 9000000000103}
+  - component: {fileID: 9000000000104}
   m_Layer: 0
   m_Name: Canon
   m_TagString: Untagged
@@ -134,7 +135,7 @@ MonoBehaviour:
   - {fileID: 6136208172575614960}
   - {fileID: 5728830979699189045}
   - {fileID: 8821005327325788767}
-  _fireInterval: 0.2
+  _fireInterval: 0.15
   _aimTolerance: 12
   _damage: 8
   _projectilePrefab: {fileID: 7363047557607551855, guid: 3396cb01e5934c14294929f1618465a4, type: 3}
@@ -145,6 +146,20 @@ MonoBehaviour:
   _muzzleEffectMaxLifetime: 1
   _audioSource: {fileID: 2471677107759776719}
   _fireAudioClip: {fileID: 8300000, guid: 7eb6674d602e95742976b672d44653ff, type: 3}
+  _canonAnimator: {fileID: 9000000000104}
+--- !u!114 &9000000000104
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7218214149929976134}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c731628cb3464936a07e53a699b61ac1, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  _animator: {fileID: 4604415518999999001}
 --- !u!1 &7388024632293972445
 GameObject:
   m_ObjectHideFlags: 0
@@ -190,7 +205,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -410,24 +425,28 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5008741545554730856, guid: 541030502e4721d40b2edc86dfa3b350, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.059999973
+      objectReference: {fileID: 0}
+    - target: {fileID: 5008741545554730856, guid: 541030502e4721d40b2edc86dfa3b350, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.602
+      value: 0.533
       objectReference: {fileID: 0}
     - target: {fileID: 7692199477966586567, guid: 541030502e4721d40b2edc86dfa3b350, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.602
+      value: 0.533
       objectReference: {fileID: 0}
     - target: {fileID: 8100000000000000001, guid: 541030502e4721d40b2edc86dfa3b350, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.602
+      value: 0.533
       objectReference: {fileID: 0}
     - target: {fileID: 8100000000000000002, guid: 541030502e4721d40b2edc86dfa3b350, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.10400007
+      value: 0.10400009
       objectReference: {fileID: 0}
     - target: {fileID: 8100000000000000002, guid: 541030502e4721d40b2edc86dfa3b350, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.602
+      value: 0.533
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -462,6 +481,11 @@ Transform:
 --- !u!4 &8821005327325788767 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5008741545554730856, guid: 541030502e4721d40b2edc86dfa3b350, type: 3}
+  m_PrefabInstance: {fileID: 4604964128246932791}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &4604415518999999001 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 95000012164270796, guid: 541030502e4721d40b2edc86dfa3b350, type: 3}
   m_PrefabInstance: {fileID: 4604964128246932791}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &6055438111961321930

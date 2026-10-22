@@ -33,11 +33,12 @@ namespace alpha.ingame.item
             }
         }
 
-        public void Play(RaycastHit hit, Transform owner, float damage, Vector3 fallbackNormal)
+        public void Play(RaycastHit hit, Transform owner, float damage, Vector3 fallbackNormal,
+            Vector3? contactPointOverride = null)
         {
             _owner = owner;
             _damage = damage;
-            _impactPoint = hit.point;
+            _impactPoint = contactPointOverride ?? hit.point;
             _singleTarget = FindDamageable(hit.collider);
             Vector3 normal = hit.normal.sqrMagnitude > 0.0001f ? hit.normal : fallbackNormal;
             transform.SetPositionAndRotation(_impactPoint + normal * 0.01f, Quaternion.LookRotation(normal));

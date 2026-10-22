@@ -23,6 +23,7 @@ namespace alpha.ingame.player
         [SerializeField, Min(0.01f)] private float _muzzleEffectMaxLifetime = 1f;
         [SerializeField] private AudioSource _audioSource;
         [SerializeField] private AudioClip _fireAudioClip;
+        [SerializeField] private CanonAnimator _canonAnimator;
 
         private CanonTargeting _targeting;
         private CanonLifetime _lifetime;
@@ -78,6 +79,7 @@ namespace alpha.ingame.player
             Vector3 direction = toTarget.normalized;
             _projectilePool.Rent().Launch(_projectilePool, _impactPool,
                 transform, firePoint.position, direction, _damage, toTarget.magnitude + 1f);
+            _canonAnimator?.PlayShoot();
             _muzzleEffectPool?.Spawn(firePoint);
             if (_audioSource != null && _fireAudioClip != null)
                 _audioSource.PlayOneShot(_fireAudioClip);

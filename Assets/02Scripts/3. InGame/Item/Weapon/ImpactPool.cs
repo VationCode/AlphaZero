@@ -21,11 +21,12 @@ namespace alpha.ingame.item
             for (int i = 0; i < data.InitialPoolSize; i++) _available.Push(Create());
         }
 
-        public void Spawn(RaycastHit hit, Transform owner, float damage, Vector3 fallbackNormal)
+        public void Spawn(RaycastHit hit, Transform owner, float damage, Vector3 fallbackNormal,
+            Vector3? contactPointOverride = null)
         {
             if (hit.collider == null) return;
             ImpactInstance instance = _available.Count > 0 ? _available.Pop() : Create();
-            instance.Play(hit, owner, damage, fallbackNormal);
+            instance.Play(hit, owner, damage, fallbackNormal, contactPointOverride);
         }
 
         public void Return(ImpactInstance instance)
