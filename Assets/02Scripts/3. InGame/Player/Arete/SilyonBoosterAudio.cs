@@ -15,6 +15,8 @@ namespace alpha.ingame.player
         private LocomotionModule _locomotion;
         private Coroutine _pulseRoutine;
 
+        public void SetAudioSource(AudioSource source) => _audioSource = source;
+
         private void OnEnable()
         {
             _locomotion = GetComponentInParent<PlayerCore>(true)?.LocomotionModule;

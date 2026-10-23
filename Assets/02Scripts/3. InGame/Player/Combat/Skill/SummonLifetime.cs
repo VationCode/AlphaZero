@@ -7,14 +7,14 @@ namespace alpha.ingame.player
     {
         [Header("Visuals")]
         [SerializeField] private GameObject _createEffect;
-        [SerializeField] private Transform _intactRoot;
-        [SerializeField] private Transform _brokenRoot;
+        [SerializeField] private Transform _intactRoot; // 소환 중 보여줄 정상 외형
+        [SerializeField] private Transform _brokenRoot; // 파괴 시 정상 외형 대신 보여줄 외형
         [SerializeField] private GameObject _breakEffectPrefab;
 
         [Header("Lifetime")]
         [SerializeField, Min(0f)] private float _survivalTime = 15f;
         [SerializeField] private bool _destroyOnExpire = true;
-        [SerializeField, Min(0f)] private float _debrisLifetime = 2f;
+        [Tooltip("부서지는 시간"),SerializeField, Min(0f)] private float _debrisLifetime = 2f;
 
         private bool _isExpired;
 
@@ -34,8 +34,9 @@ namespace alpha.ingame.player
         private void OnEnable()
         {
             _isExpired = false;
-            _intactRoot?.gameObject.SetActive(true);
-            _brokenRoot?.gameObject.SetActive(false);
+            // Unity 참조의 빈 값은 ?. 대신 Unity의 null 비교로 확인한다.
+            if (_intactRoot != null) _intactRoot.gameObject.SetActive(true);
+            if (_brokenRoot != null) _brokenRoot.gameObject.SetActive(false);
             Invoke(nameof(Expire), Mathf.Max(0f, _survivalTime));
             if (_createEffect != null && _destroyOnExpire) Destroy(_createEffect, 2.2f);
         }
@@ -55,8 +56,8 @@ namespace alpha.ingame.player
                 return;
             }
 
-            _intactRoot?.gameObject.SetActive(false);
-            _brokenRoot?.gameObject.SetActive(true);
+            if (_intactRoot != null) _intactRoot.gameObject.SetActive(false);
+            if (_brokenRoot != null) _brokenRoot.gameObject.SetActive(true);
 
             if (_breakEffectPrefab != null)
             {

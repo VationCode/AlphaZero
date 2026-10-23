@@ -67,6 +67,9 @@ namespace alpha.ingame.input
         public bool IsReload => !_isQuickSlotOpen && _reloadFrame == Time.frameCount;
         private int _reloadFrame = -1;
 
+        public bool IsAssistance => _assistanceFrame == Time.frameCount;
+        private int _assistanceFrame = -1;
+
         // Mouse
         // 누르고 있는 동안 커서를 표시하고 잠금을 해제한다.
         public bool IsMouseLock => _isMouseLock;
@@ -114,6 +117,8 @@ namespace alpha.ingame.input
 
             _action.PlayerCombat.Reload.performed += OnReloadPerformed;
 
+            _action.PlayerCombat.Assistance.performed += i => _assistanceFrame = Time.frameCount;
+
             // Interaction
             _action.PlayerInteraction.QuickSlot.performed += OnQuickSlotPerformed;
 
@@ -160,6 +165,8 @@ namespace alpha.ingame.input
 
             _action.PlayerCombat.Reload.performed -= OnReloadPerformed;
 
+            _action.PlayerCombat.Assistance.performed -= i => _assistanceFrame = Time.frameCount;
+
             // Camera
             _action.Camera.Look.performed -= i => _lookInput = i.ReadValue<Vector2>();
             _action.Camera.Look.canceled -= i => _lookInput = Vector2.zero;
@@ -190,6 +197,7 @@ namespace alpha.ingame.input
             _skillPressedSlot = 0;
             _skillPressedFrame = -1;
             _reloadFrame = -1;
+            _assistanceFrame = -1;
 
             _isQuickSlotOpen = false;
             _quickSlotFrame = -1;

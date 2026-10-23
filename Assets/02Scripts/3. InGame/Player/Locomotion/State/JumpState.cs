@@ -8,7 +8,6 @@ namespace alpha.ingame.player
 
         public override void EnterState()
         {
-            Debug.Log("Enter Jump");
             _LocomotionModule.Jump();
             _LocomotionModule.AirMove(AlphaInput.Instance.MoveInput);
         }

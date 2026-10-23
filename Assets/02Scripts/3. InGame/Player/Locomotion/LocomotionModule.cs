@@ -46,6 +46,11 @@ namespace alpha.ingame.player
         [Header("Gravity")]
         [SerializeField] private float _gravity = -20f;
 
+        [Header("Ground Probe")]
+        [SerializeField] private LayerMask _groundLayers = (1 << 0) | (1 << 6);
+        [SerializeField, Min(0f)] private float _groundProbeDistance = 0.2f;
+        [SerializeField, Min(0f)] private float _landingDistance = 0.06f;
+
         public Vector3 MoveDirection { get; private set; }
         public float CurrentSpeed { get; private set; }
         public EMoveType MoveType { get; private set; } = EMoveType.Idle;
@@ -69,11 +74,13 @@ namespace alpha.ingame.player
         private bool _isAirMoving;
         public float VelocityY => _velocityY;
         private float _velocityY;
+        private bool _groundSupported;
+        private readonly RaycastHit[] _groundHits = new RaycastHit[8];
         private int _jumpCount;
         private float _boostRemaining;
         private bool _isBoosting;
         private PlayerCore _playerCore;
-        public bool IsGrounded => _characterCtrl.isGrounded;
+        public bool IsGrounded => _groundSupported;
         public bool IsFalling => !IsGrounded && _velocityY < 0f;
         public bool CanGroundJump => IsGrounded && _jumpCount == 0;
         public bool CanAirJump => !IsGrounded && _jumpCount == 1;
@@ -176,9 +183,19 @@ namespace alpha.ingame.player
             _velocityXZ = MoveDirection * targetSpeed * inputStrength;
             _isAirMoving = false;
 
-            Vector3 velocity = _velocityXZ;
-            velocity.y = CalculateGravity(Time.deltaTime);
+            // 가까운 보행 가능 지면의 법선을 따라 움직여 내리막에서도 발밑 간격을 유지한다.
+            bool hasGround = TryGetWalkableGround(out RaycastHit groundHit);
+            Vector3 velocity = hasGround && _velocityXZ.sqrMagnitude > 0f
+                ? Vector3.ProjectOnPlane(_velocityXZ, groundHit.normal).normalized * _velocityXZ.magnitude
+                : _velocityXZ;
+
+            if (hasGround)
+                _velocityY = -2f;
+            else
+                velocity.y = CalculateGravity(Time.deltaTime);
+
             _characterCtrl.Move(velocity * Time.deltaTime);
+            _groundSupported = TryGetWalkableGround(out _);
 
             // 월드 방향과 입력 세기를 애니메이션에 전달한다.
             OnMove?.Invoke(MoveDirection, MoveType, inputStrength);
@@ -241,6 +258,7 @@ namespace alpha.ingame.player
         public void Jump()
         {
             // 진입 가능 여부는 상태에서 확인한다.
+            _groundSupported = false;
             _velocityY = Mathf.Sqrt(_jumpHeight * -2f * _gravity);
             _jumpCount++;
             OnJump?.Invoke(_jumpCount);
@@ -276,6 +294,11 @@ namespace alpha.ingame.player
             velocity.y = CalculateGravity(deltaTime);
             CollisionFlags collision = _characterCtrl.Move(velocity * deltaTime);
 
+            // 상승 중에는 이전 프레임의 접지를 재사용하지 않고, 하강 시 발밑에 도달했을 때만 착지한다.
+            _groundSupported = _velocityY <= 0f &&
+                TryGetWalkableGround(out RaycastHit groundHit) &&
+                groundHit.distance <= GetProbeStartOffset() + _landingDistance;
+
             // 천장에 닿으면 상승을 종료한다.
             if ((collision & CollisionFlags.Above) != 0 && _velocityY > 0f)
                 _velocityY = 0f;
@@ -289,8 +312,47 @@ namespace alpha.ingame.player
             CurrentSpeed = 0f;
 
             // OnMove를 발생시키지 않아 착지 애니메이션을 유지한다.
+            _groundSupported = TryGetWalkableGround(out _);
             _velocityY = -2f;
-            _characterCtrl.Move(Vector3.up * (_velocityY * Time.deltaTime));
+            if (!_groundSupported)
+            {
+                _characterCtrl.Move(Vector3.up * (_velocityY * Time.deltaTime));
+                _groundSupported = TryGetWalkableGround(out _);
+            }
+        }
+
+        private float GetProbeStartOffset() => 0.05f;
+
+        private bool TryGetWalkableGround(out RaycastHit p_groundHit)
+        {
+            p_groundHit = default;
+            if (_characterCtrl == null) return false;
+
+            // 캡슐 바닥에서 시작해 의도적으로 띄운 콜라이더와 짧은 내리막 간격만 검사한다.
+            float radius = _characterCtrl.radius * 0.8f;
+            Vector3 capsuleBottom = _characterCtrl.transform.TransformPoint(_characterCtrl.center) -
+                                    Vector3.up * (_characterCtrl.height * 0.5f);
+            float startOffset = GetProbeStartOffset();
+            Vector3 origin = capsuleBottom + Vector3.up * (radius + startOffset);
+            int count = Physics.SphereCastNonAlloc(origin, radius, Vector3.down, _groundHits,
+                startOffset + _groundProbeDistance, _groundLayers, QueryTriggerInteraction.Ignore);
+
+            float nearestDistance = float.PositiveInfinity;
+            float minUpDot = Mathf.Cos(_characterCtrl.slopeLimit * Mathf.Deg2Rad);
+            for (int i = 0; i < count; i++)
+            {
+                RaycastHit hit = _groundHits[i];
+                if (hit.collider == null ||
+                    hit.collider.transform.IsChildOf(_characterCtrl.transform) ||
+                    Vector3.Dot(hit.normal, Vector3.up) < minUpDot ||
+                    hit.distance >= nearestDistance)
+                    continue;
+
+                nearestDistance = hit.distance;
+                p_groundHit = hit;
+            }
+
+            return nearestDistance < float.PositiveInfinity;
         }
 
         // 수직 속도 계산

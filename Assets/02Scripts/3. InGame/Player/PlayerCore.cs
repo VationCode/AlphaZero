@@ -119,6 +119,19 @@ namespace alpha.ingame.player
                 return false;
             }
 
+            // 모델이 생성된 뒤 플레이어 Audios의 채널을 모델 이벤트에 전달한다.
+            Transform audioRoot = transform.Find("Audios");
+            if (audioRoot == null)
+            {
+                GameObject audioObject = new GameObject("Audios");
+                audioObject.transform.SetParent(transform, false);
+                audioRoot = audioObject.transform;
+            }
+            PlayerAudioModule audioModule = audioRoot.GetComponent<PlayerAudioModule>();
+            if (audioModule == null)
+                audioModule = audioRoot.gameObject.AddComponent<PlayerAudioModule>();
+            audioModule.BindModel(CurrentModel);
+
             CurrentArete.Initialize(this);
             return true;
         }

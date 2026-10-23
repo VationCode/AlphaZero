@@ -9,7 +9,6 @@ namespace alpha.ingame.player
 
         public override void EnterState()
         {
-            Debug.Log("Enter IdleState");
             _LocomotionModule.SetMoveType(Vector2.zero, false, false);
         }
         public override void UpdateState()

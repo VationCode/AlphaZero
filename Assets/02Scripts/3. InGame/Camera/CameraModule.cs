@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using alpha.ingame;
 using alpha.ingame.input;
 using alpha.ingame.player;
 using UnityEngine;
@@ -79,7 +80,7 @@ public class CameraModule : MonoBehaviour
     private readonly Dictionary<ECameraViewType, float> _zoomDistances = new();
     private CameraViewSettings _activeView;
     private ECameraViewType _activeViewType;
-    private Vector3 _followVelocity;
+    private readonly SmoothPositionFollower _positionFollower = new();
     private float _mouseX;
     private float _mouseY;
     private float _currentZoom;
@@ -196,8 +197,8 @@ public class CameraModule : MonoBehaviour
     private void FollowTarget()
     {
         if (_rig == null || _target == null) return;
-        _rig.position = Vector3.SmoothDamp(_rig.position, _target.position, ref _followVelocity,
-            Mathf.Max(0.0001f, _activeView.FollowSmoothTime));
+        _rig.position = _positionFollower.Step(_rig.position, _target.position,
+            _activeView.FollowSmoothTime);
     }
 
     private void Rotation(Vector2 lookInput)

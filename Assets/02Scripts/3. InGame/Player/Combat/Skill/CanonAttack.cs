@@ -4,7 +4,7 @@ using UnityEngine;
 namespace alpha.ingame.player
 {
     /// <summary>조준된 적을 향해 좌우 포구에서 번갈아 투사체를 발사한다.</summary>
-    [DefaultExecutionOrder(100)]
+    [DefaultExecutionOrder(170)]
     [RequireComponent(typeof(CanonTargeting), typeof(SummonLifetime))]
     public sealed class CanonAttack : MonoBehaviour
     {

@@ -8,7 +8,6 @@ namespace alpha.ingame.player
 
         public override void EnterState()
         {
-            Debug.Log("Enter MoveState");
         }
         public override void UpdateState()
         {

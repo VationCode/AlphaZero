@@ -18,6 +18,8 @@ namespace alpha.ingame.player
 
         public AudioSource AudioSource => _audioSource;
 
+        public void SetAudioSource(AudioSource source) => _audioSource = source;
+
         private PlayerCore _playerCore;
         private SkillModule _skillModule;
 

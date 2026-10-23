@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4829c6a8eb5543f4b8deda9ccaec9878, type: 3}
-  m_Name: BeamPodSkill
+  m_Name: DragoonSystemSkill
   m_EditorClassIdentifier: 
   _id: 2
   _displayName: Beam Pod

@@ -3,6 +3,7 @@ using UnityEngine;
 namespace alpha.ingame.player
 {
     /// <summary>가장 가까운 적을 찾아 포탑 상부와 좌우 포구를 각 축으로 회전시킨다.</summary>
+    [DefaultExecutionOrder(160)]
     public sealed class CanonTargeting : MonoBehaviour
     {
         private readonly Collider[] _candidates = new Collider[32];
