@@ -1,5 +1,37 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &3351791509222600678
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7581554435145826345}
+  m_Layer: 8
+  m_Name: ReloadEffect
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7581554435145826345
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3351791509222600678}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.091, y: 0, z: 0.092}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7391026933989602465}
+  m_Father: {fileID: 5129790716566292870}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4017764552679917033
 GameObject:
   m_ObjectHideFlags: 0
@@ -129,6 +161,7 @@ Transform:
   - {fileID: 2923812110690742186}
   - {fileID: 4031101077077371827}
   - {fileID: 6679922319801339194}
+  - {fileID: 7581554435145826345}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7000000000000000001
@@ -147,12 +180,22 @@ MonoBehaviour:
   _secondaryAction: {fileID: 7000000000000000003}
   _firePoint: {fileID: 4777701081816656765}
   _muzzleEffectPoint: {fileID: 2923812110690742186}
-  _muzzleEffectPrefab: {fileID: 0}
-  _initialMuzzleEffectPoolSize: 4
   _muzzleEffectMaxLifetime: 1
   _fireMode: 1
   _shotMode: 0
-  _fireInterval: 0.2
+  _fireInterval: 0.15
+  _magazineCapacity: 30
+  _reloadFallbackDuration: 1
+  _reloadBlendOutDuration: 0.25
+  _reloadEffectPoint: {fileID: 7581554435145826345}
+  _reloadAudioEvents:
+  - _key: Audio1
+    _clip: {fileID: 8300000, guid: 0f94a502bd5200040b4a4ddaad1c5803, type: 3}
+  - _key: Audio2
+    _clip: {fileID: 8300000, guid: 57707b73054ad4c4cab1265f41f929ba, type: 3}
+  _reloadEffectEvents:
+  - _key: Effect
+    _effect: {fileID: 7391026933989602465}
   _projectilePrefab: {fileID: 8213964935800047582, guid: 32f79682787fa434aa747094c9c5f8d5, type: 3}
   _initialPoolSize: 24
   _impactData: {fileID: 11400000, guid: 294df9f8805e45e4a45a10976cd31a46, type: 2}
@@ -308,6 +351,68 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!1001 &2999680906511177678
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 7581554435145826345}
+    m_Modifications:
+    - target: {fileID: 5706960345115239278, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+      propertyPath: m_Name
+      value: Reload_Effect_43_HolyRedemption
+      objectReference: {fileID: 0}
+    - target: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+--- !u!4 &7391026933989602465 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
+  m_PrefabInstance: {fileID: 2999680906511177678}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8601478722160599886
 PrefabInstance:
   m_ObjectHideFlags: 0

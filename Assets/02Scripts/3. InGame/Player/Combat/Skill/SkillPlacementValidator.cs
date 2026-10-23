@@ -36,18 +36,20 @@ namespace alpha.ingame.player
             Vector3 forward = Vector3.ProjectOnPlane(owner.forward, Vector3.up);
             if (forward.sqrMagnitude < 0.0001f)
                 forward = Vector3.ProjectOnPlane(camera.transform.forward, Vector3.up);
-            pose = new Pose(nearest.point, Quaternion.LookRotation(forward, Vector3.up));
+            Quaternion rotation = Quaternion.LookRotation(forward, Vector3.up);
+            Vector3 position = nearest.point + rotation * data.PlacementOffset;
+            pose = new Pose(position, rotation);
             hasTarget = true;
 
             if ((data.SurfaceMask.value & (1 << nearest.collider.gameObject.layer)) == 0 ||
-                Vector3.Distance(owner.position, nearest.point) > data.MaxDistance ||
+                Vector3.Distance(owner.position, position) > data.MaxDistance ||
                 Vector3.Angle(nearest.normal, Vector3.up) > data.MaxSlopeAngle)
                 return false;
 
             float radius = data.ClearanceRadius;
             float height = Mathf.Max(data.ClearanceHeight, radius * 2f);
-            Vector3 bottom = nearest.point + Vector3.up * (radius + 0.01f);
-            Vector3 top = nearest.point + Vector3.up * (height - radius + 0.01f);
+            Vector3 bottom = position + Vector3.up * (radius + 0.01f);
+            Vector3 top = position + Vector3.up * (height - radius + 0.01f);
             Collider[] overlaps = Physics.OverlapCapsule(bottom, top, radius, data.ObstacleMask,
                 QueryTriggerInteraction.Ignore);
             foreach (Collider collider in overlaps)

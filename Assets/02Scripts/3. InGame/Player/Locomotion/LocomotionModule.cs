@@ -72,13 +72,18 @@ namespace alpha.ingame.player
         private int _jumpCount;
         private float _boostRemaining;
         private bool _isBoosting;
+        private PlayerCore _playerCore;
         public bool IsGrounded => _characterCtrl.isGrounded;
         public bool IsFalling => !IsGrounded && _velocityY < 0f;
         public bool CanGroundJump => IsGrounded && _jumpCount == 0;
         public bool CanAirJump => !IsGrounded && _jumpCount == 1;
         public float LandDuration => _landDuration;
+        private bool ShouldFaceAimDirection =>
+            (MoveType == EMoveType.Combat || MoveType == EMoveType.BoostCombat) &&
+            _playerCore?.CombatModule?.ShouldFaceAimDirection == true;
         private void Awake()
         {
+            _playerCore = GetComponentInParent<PlayerCore>(true);
             _characterCtrl = GetComponentInParent<CharacterController>(true);
             _boostRemaining = Mathf.Max(0.01f, _maxBoostDuration);
             OnBoostRatioChanged?.Invoke(BoostRatio);
@@ -129,9 +134,10 @@ namespace alpha.ingame.player
 
         private void LateUpdate()
         {
+            if (_playerCore?.SkillStateFlow?.IsCasting == true) return;
+
             // 공중에서는 이동 입력 방향 회전을 유지하고, 락온만 대상 회전을 우선한다.
-            if (LockOnTarget != null ||
-                (!_isAirMoving && (MoveType == EMoveType.Combat || MoveType == EMoveType.BoostCombat)))
+            if (LockOnTarget != null || (!_isAirMoving && ShouldFaceAimDirection))
                 UpdateFacing(MoveDirection, true);
         }
         public void SetMoveType(Vector2 p_input, bool p_isWalk, bool p_isCombat)
@@ -162,7 +168,7 @@ namespace alpha.ingame.player
                 _ => 0f
             };
 
-            UpdateFacing(MoveDirection, MoveType == EMoveType.Combat || MoveType == EMoveType.BoostCombat);
+            UpdateFacing(MoveDirection, ShouldFaceAimDirection);
 
             // 이동 속도 값을 부드럽게 전환
             CurrentSpeed = Mathf.Lerp(CurrentSpeed, targetSpeed * inputStrength, Time.deltaTime / _speedSmoothTime);
@@ -197,7 +203,7 @@ namespace alpha.ingame.player
         public void SetLockOnTarget(Transform p_target)
         {
             LockOnTarget = p_target;
-            UpdateFacing(MoveDirection, MoveType == EMoveType.Combat);
+            UpdateFacing(MoveDirection, ShouldFaceAimDirection);
         }
 
         private void UpdateFacing(Vector3 p_direction, bool p_faceCameraImmediately)

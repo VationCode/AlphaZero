@@ -22,6 +22,7 @@ namespace alpha.ingame.player
         public CombatStateFlow CombatStateFlow { get; private set; }
         public SkillStateFlow SkillStateFlow { get; private set; }
         public SkillDisplayChannel SkillDisplayChannel { get; } = new SkillDisplayChannel();
+        public AmmoDisplayChannel AmmoDisplayChannel { get; } = new AmmoDisplayChannel();
 
 
         public LocomotionModule LocomotionModule { get; private set; }

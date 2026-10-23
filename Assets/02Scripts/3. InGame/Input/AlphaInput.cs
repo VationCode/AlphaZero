@@ -59,8 +59,13 @@ namespace alpha.ingame.input
         private int _secondaryReleasedFrame = -1;
 
         public int SkillNum => _skillNum;
+        public int SkillPressedSlotThisFrame => _skillPressedFrame == Time.frameCount ? _skillPressedSlot : 0;
         private int _skillNum;
+        private int _skillPressedSlot;
+        private int _skillPressedFrame = -1;
 
+        public bool IsReload => !_isQuickSlotOpen && _reloadFrame == Time.frameCount;
+        private int _reloadFrame = -1;
 
         // Mouse
         // 누르고 있는 동안 커서를 표시하고 잠금을 해제한다.
@@ -107,6 +112,8 @@ namespace alpha.ingame.input
             _action.PlayerCombat.SkillNum.performed += OnSkillNumPerformed;
             _action.PlayerCombat.SkillNum.canceled += OnSkillNumCanceled;
 
+            _action.PlayerCombat.Reload.performed += OnReloadPerformed;
+
             // Interaction
             _action.PlayerInteraction.QuickSlot.performed += OnQuickSlotPerformed;
 
@@ -151,6 +158,8 @@ namespace alpha.ingame.input
             _action.PlayerCombat.SkillNum.performed -= OnSkillNumPerformed;
             _action.PlayerCombat.SkillNum.canceled -= OnSkillNumCanceled;
 
+            _action.PlayerCombat.Reload.performed -= OnReloadPerformed;
+
             // Camera
             _action.Camera.Look.performed -= i => _lookInput = i.ReadValue<Vector2>();
             _action.Camera.Look.canceled -= i => _lookInput = Vector2.zero;
@@ -178,6 +187,9 @@ namespace alpha.ingame.input
             _secondaryPressedFrame = -1;
             _secondaryReleasedFrame = -1;
             _skillNum = 0;
+            _skillPressedSlot = 0;
+            _skillPressedFrame = -1;
+            _reloadFrame = -1;
 
             _isQuickSlotOpen = false;
             _quickSlotFrame = -1;
@@ -236,11 +248,19 @@ namespace alpha.ingame.input
                 Key.Digit4 => 4,
                 _ => 0
             };
+            // 같은 프레임에 키를 떼어도 스킬 요청을 읽을 수 있게 누름을 보관한다.
+            _skillPressedSlot = _skillNum;
+            _skillPressedFrame = Time.frameCount;
         }
 
         private void OnSkillNumCanceled(InputAction.CallbackContext context)
         {
             _skillNum = 0;
+        }
+
+        private void OnReloadPerformed(InputAction.CallbackContext context)
+        {
+            if (!_isQuickSlotOpen) _reloadFrame = Time.frameCount;
         }
 
         private void OnQuickSlotPerformed(InputAction.CallbackContext context)
@@ -275,6 +295,7 @@ namespace alpha.ingame.input
             _secondaryPressedFrame = -1;
             _secondaryReleasedFrame = -1;
             _skillNum = 0;
+            _reloadFrame = -1;
         }
 
     }

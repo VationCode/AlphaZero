@@ -1,5 +1,7 @@
+using System;
 using alpha.ingame.player;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace alpha.ingame.item
 {
@@ -23,14 +25,45 @@ namespace alpha.ingame.item
     /// </summary>
     public class GunWeapon : EquippableWeapon
     {
+        private const string ReloadEndEventKey = "End";
+
+        [Serializable]
+        private sealed class ReloadAudioEvent
+        {
+            [SerializeField] private string _key;
+            [SerializeField] private AudioClip _clip;
+
+            public string Key => _key;
+            public AudioClip Clip => _clip;
+        }
+
+        [Serializable]
+        private sealed class ReloadEffectEvent
+        {
+            [SerializeField] private string _key;
+            [SerializeField] private Transform _effect;
+
+            public string Key => _key;
+            public Transform Effect => _effect;
+        }
+
         [SerializeField] private Transform _firePoint;
         [SerializeField] private Transform _muzzleEffectPoint;
-        [SerializeField] private GameObject _muzzleEffectPrefab;
-        [SerializeField, Min(0)] private int _initialMuzzleEffectPoolSize = 4;
         [SerializeField, Min(0.01f)] private float _muzzleEffectMaxLifetime = 1f;
         [SerializeField] private EGunFireMode _fireMode = EGunFireMode.Single;
         [SerializeField] private EGunShotMode _shotMode = EGunShotMode.Projectile;
         [SerializeField, Min(0.01f)] private float _fireInterval = 0.2f;
+        [Header("Ammo")]
+        [SerializeField, Min(1)] private int _magazineCapacity = 30;
+        [FormerlySerializedAs("_reloadDuration")]
+        [SerializeField, Min(0f)] private float _reloadFallbackDuration = 1.5f;
+        [Header("Reload Animation")]
+        [SerializeField, Min(0f)] private float _reloadEndFadeDuration = 0.25f;    //애니메이션 끝나는 지점 End이후 weight페이드 시간
+        [Header("Reload Effect")]
+        [SerializeField] private Transform _reloadEffectPoint;
+        [Header("Reload Animation Events")]
+        [SerializeField] private ReloadAudioEvent[] _reloadAudioEvents = Array.Empty<ReloadAudioEvent>();
+        [SerializeField] private ReloadEffectEvent[] _reloadEffectEvents = Array.Empty<ReloadEffectEvent>();
         [SerializeField] private GunProjectile _projectilePrefab;
         [SerializeField, Min(0)] private int _initialPoolSize = 12;
         [SerializeField] private ImpactData _impactData;
@@ -48,8 +81,14 @@ namespace alpha.ingame.item
 
         private GunProjectilePool _projectilePool;
         private ImpactPool _impactPool;
-        private MuzzleEffectPool _muzzleEffectPool;
+        private PlacedWeaponEffects _muzzleEffects;
+        private PlacedWeaponEffects _reloadEffects;
         private float _nextShotTime;
+        private float _reloadEndsAt;
+        private int _currentAmmo;
+        private bool _isReloading;
+        private bool _reloadUsesAnimation;
+        private bool _reloadCompletionStarted;
         private float _chargeStartedAt;
         private bool _isCharging;
         private bool _beamActive;
@@ -58,18 +97,129 @@ namespace alpha.ingame.item
 
         public Transform FirePoint => _firePoint;
         public Transform MuzzleEffectPoint => _muzzleEffectPoint != null ? _muzzleEffectPoint : _firePoint;
+        public int CurrentAmmo => _currentAmmo;
+        public int MagazineCapacity => Mathf.Max(1, _magazineCapacity);
+        public bool CanReload => IsEquipped && !_isReloading && _currentAmmo < MagazineCapacity;
+        public bool IsReloading => _isReloading;
+        public event Action<int, int> AmmoChanged;
 
         public override void Initialize(PlayerCore owner)
         {
             base.Initialize(owner);
+            _currentAmmo = MagazineCapacity;
+            _isReloading = false;
+            _reloadCompletionStarted = false;
+            // 프리팹에 배치한 이펙트만 재생 대상으로 등록한다.
+            _muzzleEffects = new PlacedWeaponEffects(MuzzleEffectPoint, _muzzleEffectMaxLifetime);
+            _reloadEffects = new PlacedWeaponEffects(_reloadEffectPoint);
             // 무기를 만들 때 선택한 판정 방식에 필요한 풀을 준비한다.
             EnsurePools();
+        }
+
+        private void Update()
+        {
+            _muzzleEffects?.Tick();
+            _reloadEffects?.Tick();
+            if (!_isReloading) return;
+
+            if (!_reloadUsesAnimation)
+            {
+                if (Time.time < _reloadEndsAt) return;
+                BeginReloadCompletion();
+                FinishReload();
+                return;
+            }
+
+            AnimationView animationView = Owner != null ? Owner.AnimationView : null;
+            if (!_reloadCompletionStarted)
+            {
+                // End 이벤트가 빠진 클립도 재장전 상태에 갇히지 않게 한다.
+                if (animationView != null && !animationView.IsReloadFinished()) return;
+                Debug.LogWarning($"{nameof(GunWeapon)}: Reload End 이벤트 없이 애니메이션이 끝났습니다.", this);
+                BeginReloadCompletion();
+            }
+
+            // LeftArm 레이어의 페이드가 끝날 때까지 공격을 잠근다.
+            if (animationView == null || !animationView.IsReloadActive)
+                FinishReload();
+        }
+
+        private void BeginReloadCompletion()
+        {
+            if (!_isReloading || _reloadCompletionStarted) return;
+
+            _reloadCompletionStarted = true;
+            if (_reloadUsesAnimation)
+                Owner?.AnimationView?.StopReload(_reloadEndFadeDuration);
+            StopReloadEffect();
+            _currentAmmo = MagazineCapacity;
+            AmmoChanged?.Invoke(_currentAmmo, MagazineCapacity);
+        }
+
+        private void FinishReload()
+        {
+            _isReloading = false;
+            _reloadUsesAnimation = false;
+            _reloadCompletionStarted = false;
+        }
+
+        public bool TryReload()
+        {
+            if (!CanReload) return false;
+
+            // 애니메이션이 있으면 End 이벤트를 기다리고, 없으면 설정 시간을 사용한다.
+            CancelAttack();
+            _isReloading = true;
+            _reloadCompletionStarted = false;
+            _reloadEndsAt = Time.time + Mathf.Max(0f, _reloadFallbackDuration);
+            AnimationView animationView = Owner != null ? Owner.AnimationView : null;
+            _reloadUsesAnimation = animationView != null && animationView.PlayReload();
+            if (!_reloadUsesAnimation)
+            {
+                // 애니메이션이 없으면 첫 번째 유효한 사운드와 이펙트를 즉시 재생한다.
+                PlayFallbackReloadEvents();
+            }
+            return true;
+        }
+
+        public void CancelReload()
+        {
+            if (!_isReloading) return;
+
+            Owner?.AnimationView?.StopReload();
+            StopReloadEffect();
+            FinishReload();
+        }
+
+        public void HandleReloadAnimationEvent(string eventKey)
+        {
+            if (!IsEquipped || !_isReloading || !_reloadUsesAnimation ||
+                _reloadCompletionStarted ||
+                string.IsNullOrEmpty(eventKey)) return;
+
+            if (string.Equals(eventKey, ReloadEndEventKey, StringComparison.Ordinal))
+            {
+                // End에서 탄약을 채우고, 재장전 상태는 페이드 종료까지 유지한다.
+                BeginReloadCompletion();
+                return;
+            }
+
+            // 같은 키에 여러 항목이 있어도 모두 재생한다.
+            if (_reloadAudioEvents != null)
+                foreach (ReloadAudioEvent cue in _reloadAudioEvents)
+                    if (cue != null && string.Equals(eventKey, cue.Key, StringComparison.Ordinal))
+                        PlayReloadAudio(cue.Clip);
+
+            if (_reloadEffectEvents != null)
+                foreach (ReloadEffectEvent cue in _reloadEffectEvents)
+                    if (cue != null && string.Equals(eventKey, cue.Key, StringComparison.Ordinal))
+                        _reloadEffects?.Play(cue.Effect);
         }
 
         // 전투 상태가 공격을 시작할 때 호출한다. 발사 방식은 무기가 결정한다.
         public void BeginAttack()
         {
-            if (!IsEquipped || Owner == null) return;
+            if (!IsEquipped || Owner == null || _isReloading) return;
 
             switch (_fireMode)
             {
@@ -90,7 +240,7 @@ namespace alpha.ingame.item
         // 연사는 탄환을 발사하고 빔은 일정 간격으로 적중 판정을 갱신한다.
         public void UpdateAttack()
         {
-            if (!IsEquipped || Owner == null) return;
+            if (!IsEquipped || Owner == null || _isReloading) return;
             if (_fireMode == EGunFireMode.Automatic) TryFire(0f);
             if (_fireMode != EGunFireMode.Beam) return;
 
@@ -120,18 +270,52 @@ namespace alpha.ingame.item
             StopBeam(false);
         }
 
-        private void OnDisable() => CancelAttack();
+        private void OnDisable()
+        {
+            CancelAttack();
+            CancelReload();
+            _muzzleEffects?.StopAll();
+        }
+
+        private void PlayFallbackReloadEvents()
+        {
+            if (_reloadAudioEvents != null)
+                foreach (ReloadAudioEvent cue in _reloadAudioEvents)
+                    if (cue?.Clip != null)
+                    {
+                        PlayReloadAudio(cue.Clip);
+                        break;
+                    }
+
+            if (_reloadEffectEvents != null)
+                foreach (ReloadEffectEvent cue in _reloadEffectEvents)
+                    if (cue?.Effect != null)
+                    {
+                        _reloadEffects?.Play(cue.Effect);
+                        break;
+                    }
+        }
+
+        private void PlayReloadAudio(AudioClip clip)
+        {
+            if (_audioSource != null && clip != null)
+                _audioSource.PlayOneShot(clip);
+        }
+
+        private void StopReloadEffect()
+        {
+            _reloadEffects?.StopAll();
+        }
 
         private void OnDestroy()
         {
             _projectilePool?.Dispose();
             _impactPool?.Dispose();
-            _muzzleEffectPool?.Dispose();
         }
 
         private bool TryFire(float charge)
         {
-            if (_firePoint == null || Time.time < _nextShotTime) return false;
+            if (_isReloading || _currentAmmo <= 0 || _firePoint == null || Time.time < _nextShotTime) return false;
             if (_shotMode == EGunShotMode.Projectile && _projectilePrefab == null) return false;
             _nextShotTime = Time.time + Mathf.Max(0.01f, _fireInterval);
             EnsurePools();
@@ -151,8 +335,10 @@ namespace alpha.ingame.item
                     damage, Mathf.Max(0.01f, _aimDistance));
             }
 
+            ConsumeRound();
+
             // 입력 시점이 아닌 실제 발사 시점에 무기별 총구 효과를 재생한다.
-            _muzzleEffectPool?.Spawn(MuzzleEffectPoint);
+            _muzzleEffects?.PlayNext();
             if (_audioSource != null && _fireAudioClip != null)
                 _audioSource.PlayOneShot(_fireAudioClip);
             // 적중 여부와 관계없이 실제 발사가 일어나면 전투 자세 시간을 갱신한다.
@@ -162,7 +348,8 @@ namespace alpha.ingame.item
 
         private void BeginBeam()
         {
-            if (_beamActive || _firePoint == null || Time.time < _nextShotTime) return;
+            if (_beamActive || _isReloading || _currentAmmo <= 0 ||
+                _firePoint == null || Time.time < _nextShotTime) return;
             _beamActive = true;
             _beamLoopStarted = false;
             _beamLoopAt = Time.time;
@@ -192,7 +379,14 @@ namespace alpha.ingame.item
 
         private void TickBeam()
         {
+            if (_currentAmmo <= 0)
+            {
+                StopBeam(true);
+                return;
+            }
+
             _nextShotTime = Time.time + Mathf.Max(0.01f, _fireInterval);
+            ConsumeRound();
             Vector3 direction = GetAimDirection();
             if (TryGetNearestHit(new Ray(_firePoint.position, direction), _aimDistance, out RaycastHit hit))
             {
@@ -205,6 +399,13 @@ namespace alpha.ingame.item
                 }
             }
             Owner.CombatModule?.RegisterSuccessfulAttack(this);
+            if (_currentAmmo == 0) StopBeam(true);
+        }
+
+        private void ConsumeRound()
+        {
+            _currentAmmo--;
+            AmmoChanged?.Invoke(_currentAmmo, MagazineCapacity);
         }
 
         private void StopBeam(bool playEndSound)
@@ -226,9 +427,6 @@ namespace alpha.ingame.item
                 _projectilePool ??= new GunProjectilePool(_projectilePrefab, Mathf.Max(0, _initialPoolSize), name);
             if (_impactPool == null && _impactData != null)
                 _impactPool = new ImpactPool(_impactData, name);
-            if (_muzzleEffectPool == null && _muzzleEffectPrefab != null)
-                _muzzleEffectPool = new MuzzleEffectPool(_muzzleEffectPrefab,
-                    Mathf.Max(0, _initialMuzzleEffectPoolSize), _muzzleEffectMaxLifetime, name);
         }
 
         private Vector3 GetAimDirection()

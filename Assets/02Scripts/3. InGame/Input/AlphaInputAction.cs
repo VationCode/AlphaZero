@@ -270,6 +270,15 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Reload"",
+                    ""type"": ""Button"",
+                    ""id"": ""0e26a3d5-3a38-42b5-85e8-87d2dbd4f19b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -336,6 +345,17 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""SkillNum"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2f59b8b0-db33-4067-8875-9540e4a52074"",
+                    ""path"": ""<Keyboard>/r"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Reload"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -480,6 +500,7 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         m_PlayerCombat_Primary = m_PlayerCombat.FindAction("Primary", throwIfNotFound: true);
         m_PlayerCombat_Secondary = m_PlayerCombat.FindAction("Secondary", throwIfNotFound: true);
         m_PlayerCombat_SkillNum = m_PlayerCombat.FindAction("SkillNum", throwIfNotFound: true);
+        m_PlayerCombat_Reload = m_PlayerCombat.FindAction("Reload", throwIfNotFound: true);
         // PlayerInteraction
         m_PlayerInteraction = asset.FindActionMap("PlayerInteraction", throwIfNotFound: true);
         m_PlayerInteraction_Interaction = m_PlayerInteraction.FindAction("Interaction", throwIfNotFound: true);
@@ -718,6 +739,7 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerCombat_Primary;
     private readonly InputAction m_PlayerCombat_Secondary;
     private readonly InputAction m_PlayerCombat_SkillNum;
+    private readonly InputAction m_PlayerCombat_Reload;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerCombat".
     /// </summary>
@@ -741,6 +763,10 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "PlayerCombat/SkillNum".
         /// </summary>
         public InputAction @SkillNum => m_Wrapper.m_PlayerCombat_SkillNum;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerCombat/Reload".
+        /// </summary>
+        public InputAction @Reload => m_Wrapper.m_PlayerCombat_Reload;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -776,6 +802,9 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
             @SkillNum.started += instance.OnSkillNum;
             @SkillNum.performed += instance.OnSkillNum;
             @SkillNum.canceled += instance.OnSkillNum;
+            @Reload.started += instance.OnReload;
+            @Reload.performed += instance.OnReload;
+            @Reload.canceled += instance.OnReload;
         }
 
         /// <summary>
@@ -796,6 +825,9 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
             @SkillNum.started -= instance.OnSkillNum;
             @SkillNum.performed -= instance.OnSkillNum;
             @SkillNum.canceled -= instance.OnSkillNum;
+            @Reload.started -= instance.OnReload;
+            @Reload.performed -= instance.OnReload;
+            @Reload.canceled -= instance.OnReload;
         }
 
         /// <summary>
@@ -1210,6 +1242,13 @@ public partial class @AlphaInputAction: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnSkillNum(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Reload" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnReload(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "PlayerInteraction" which allows adding and removing callbacks.

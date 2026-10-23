@@ -11,8 +11,9 @@ namespace alpha.ingame.player
         private readonly MaterialPropertyBlock _properties = new();
         private readonly GameObject _root;
         private readonly Material _material;
+        private Mesh _footprintMesh;
 
-        public SkillPlacementPreview(GameObject prefab)
+        public SkillPlacementPreview(GameObject prefab, float clearanceRadius)
         {
             if (prefab == null) return;
 
@@ -36,6 +37,7 @@ namespace alpha.ingame.player
             _root = new GameObject(prefab.name + " Hologram");
             _root.SetActive(false);
             CopyVisual(prefab.transform, _root.transform);
+            if (_renderers.Count == 0) CreateFootprint(clearanceRadius);
         }
 
         public void Show(Pose pose, bool hasTarget, bool canPlace)
@@ -58,6 +60,47 @@ namespace alpha.ingame.player
         {
             if (_root != null) Object.Destroy(_root);
             if (_material != null) Object.Destroy(_material);
+            if (_footprintMesh != null) Object.Destroy(_footprintMesh);
+        }
+
+        private void CreateFootprint(float radius)
+        {
+            const int segments = 32;
+            float size = Mathf.Max(0.05f, radius);
+            var vertices = new Vector3[segments + 2];
+            var triangles = new int[segments * 3];
+            vertices[0] = new Vector3(0f, 0.03f, 0f);
+            for (int i = 0; i <= segments; i++)
+            {
+                float angle = i * Mathf.PI * 2f / segments;
+                vertices[i + 1] = new Vector3(Mathf.Cos(angle) * size, 0.03f,
+                    Mathf.Sin(angle) * size);
+                if (i == segments) continue;
+                triangles[i * 3] = 0;
+                triangles[i * 3 + 1] = i + 2;
+                triangles[i * 3 + 2] = i + 1;
+            }
+
+            _footprintMesh = new Mesh { name = "Skill Placement Footprint" };
+            _footprintMesh.vertices = vertices;
+            _footprintMesh.triangles = triangles;
+            _footprintMesh.RecalculateNormals();
+            _footprintMesh.RecalculateBounds();
+
+            var marker = new GameObject("Placement Footprint");
+            marker.transform.SetParent(_root.transform, false);
+            // 프리팹 루트가 축소되어 있어도 지정한 반지름을 월드 크기로 표시한다.
+            Vector3 rootScale = _root.transform.localScale;
+            marker.transform.localScale = new Vector3(
+                1f / Mathf.Max(Mathf.Abs(rootScale.x), 0.0001f),
+                1f / Mathf.Max(Mathf.Abs(rootScale.y), 0.0001f),
+                1f / Mathf.Max(Mathf.Abs(rootScale.z), 0.0001f));
+            marker.AddComponent<MeshFilter>().sharedMesh = _footprintMesh;
+            MeshRenderer renderer = marker.AddComponent<MeshRenderer>();
+            renderer.sharedMaterial = _material;
+            renderer.shadowCastingMode = ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+            _renderers.Add(renderer);
         }
 
         private void CopyVisual(Transform source, Transform destination)

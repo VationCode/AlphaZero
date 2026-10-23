@@ -25,4 +25,20 @@ namespace alpha.ingame.player
 
         public override void ExitState() { }
     }
+
+    /// <summary>스킬 모션 중에는 설치 입력을 무시하고 취소만 받는다.</summary>
+    public sealed class SkillCastingState : SkillState
+    {
+        public SkillCastingState(SkillStateFlow flow) : base(flow) { }
+
+        public override void EnterState() { }
+
+        public override void UpdateState()
+        {
+            if (AlphaInput.Instance?.IsSecondaryPressed == true)
+                Flow.CancelExecute();
+        }
+
+        public override void ExitState() { }
+    }
 }

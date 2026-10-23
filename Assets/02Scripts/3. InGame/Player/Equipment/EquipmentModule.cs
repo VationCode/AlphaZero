@@ -11,6 +11,9 @@ namespace alpha.ingame.player
 
     public class EquipmentModule : MonoBehaviour
     {
+        private PlayerCore _playerCore;
+        private GunWeapon _observedGun;
+
         public GameObject MainWeapon { get; private set; }
         public GameObject SubWeapon { get; private set; }
         public GameObject CurrentWeapon { get; private set; }
@@ -20,8 +23,12 @@ namespace alpha.ingame.player
             : null;
         public EWeaponKind? CurrentWeaponKind => CurrentWeaponData?.Kind;
 
+        private void Awake() => _playerCore = GetComponentInParent<PlayerCore>(true);
+
         public void Initialize(EAreteType areteType, GameObject model, InventoryModule inventory)
         {
+            UnsubscribeAmmo();
+            _playerCore?.AmmoDisplayChannel.Clear();
             MainWeapon = null;
             SubWeapon = null;
             CurrentWeapon = null;
@@ -58,6 +65,7 @@ namespace alpha.ingame.player
 
             ActiveSlot = EEquipmentSlot.Main;
             CurrentWeapon = MainWeapon;
+            ObserveCurrentAmmo();
         }
 
         public bool SelectSlot(EEquipmentSlot slot)
@@ -79,8 +87,36 @@ namespace alpha.ingame.player
             }
             ActiveSlot = slot;
             CurrentWeapon = selected;
+            ObserveCurrentAmmo();
             return true;
         }
+
+        private void ObserveCurrentAmmo()
+        {
+            UnsubscribeAmmo();
+            _observedGun = CurrentWeapon != null ? CurrentWeapon.GetComponent<GunWeapon>() : null;
+            if (_observedGun == null)
+            {
+                _playerCore?.AmmoDisplayChannel.Clear();
+                return;
+            }
+
+            _observedGun.AmmoChanged += HandleAmmoChanged;
+            HandleAmmoChanged(_observedGun.CurrentAmmo, _observedGun.MagazineCapacity);
+        }
+
+        private void HandleAmmoChanged(int currentAmmo, int magazineCapacity)
+        {
+            _playerCore?.AmmoDisplayChannel.Publish(new AmmoDisplayState(currentAmmo, magazineCapacity));
+        }
+
+        private void UnsubscribeAmmo()
+        {
+            if (_observedGun != null) _observedGun.AmmoChanged -= HandleAmmoChanged;
+            _observedGun = null;
+        }
+
+        private void OnDestroy() => UnsubscribeAmmo();
 
         private static GameObject CreateWeapon(GameObject prefab, Transform holder, PlayerCore owner)
         {

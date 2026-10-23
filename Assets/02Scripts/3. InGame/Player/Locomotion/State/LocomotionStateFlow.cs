@@ -44,6 +44,13 @@ namespace alpha.ingame.player
 
         private void Update()
         {
+            if (_playerCore?.SkillStateFlow?.IsCasting == true)
+            {
+                // 스킬 모션 중에는 수평 이동을 멈추고 접지용 중력만 유지한다.
+                _playerCore.LocomotionModule?.HoldGround();
+                return;
+            }
+
             _currentState?.UpdateState();
         }
 

@@ -8,7 +8,8 @@ namespace alpha.ingame.player
     public enum ESkillState
     {
         Idle,
-        Execute
+        Execute,
+        Casting
     }
 
     /// <summary>스킬 슬롯 입력과 실행 상태를 관리한다.</summary>
@@ -17,11 +18,11 @@ namespace alpha.ingame.player
     {
         private Dictionary<ESkillState, SkillState> _states;
         private SkillState _currentState;
-        private int _previousInputSlot;
         private int _primaryConsumedFrame = -1;
 
         public ESkillState CurrentState { get; private set; } = ESkillState.Idle;
-        public bool IsExecuting => _currentState != null && CurrentState == ESkillState.Execute;
+        public bool IsExecuting => _currentState != null && CurrentState != ESkillState.Idle;
+        public bool IsCasting => _currentState != null && CurrentState == ESkillState.Casting;
         public bool IsPrimaryConsumedThisFrame => _primaryConsumedFrame == Time.frameCount;
         public int SelectedSlot { get; private set; }
         public int PressedSlotThisFrame { get; private set; }
@@ -35,7 +36,8 @@ namespace alpha.ingame.player
             _states = new Dictionary<ESkillState, SkillState>
             {
                 { ESkillState.Idle, new SkillIdleState(this) },
-                { ESkillState.Execute, new SkillExecuteState(this) }
+                { ESkillState.Execute, new SkillExecuteState(this) },
+                { ESkillState.Casting, new SkillCastingState(this) }
             };
         }
 
@@ -44,9 +46,7 @@ namespace alpha.ingame.player
         private void Update()
         {
             AlphaInput input = AlphaInput.Instance;
-            int inputSlot = input?.SkillNum ?? 0;
-            PressedSlotThisFrame = inputSlot != 0 && inputSlot != _previousInputSlot ? inputSlot : 0;
-            _previousInputSlot = inputSlot;
+            PressedSlotThisFrame = input?.SkillPressedSlotThisFrame ?? 0;
 
             if (input == null || input.IsQuickSlotOpen)
             {
@@ -65,7 +65,6 @@ namespace alpha.ingame.player
             CurrentState = ESkillState.Idle;
             SelectedSlot = 0;
             PressedSlotThisFrame = 0;
-            _previousInputSlot = 0;
             _primaryConsumedFrame = -1;
         }
 
@@ -77,6 +76,24 @@ namespace alpha.ingame.player
 
             SelectedSlot = slot;
             ChangeState(ESkillState.Execute);
+            return true;
+        }
+
+        public bool BeginCast()
+        {
+            if (CurrentState != ESkillState.Execute) return false;
+            ChangeState(ESkillState.Casting);
+            return true;
+        }
+
+        // 자신에게 발동하는 스킬은 위치 선택 상태 없이 시전 상태로 들어간다.
+        public bool BeginSelfCast(int slot)
+        {
+            if (slot < 1 || slot > 4 || _currentState == null || CurrentState != ESkillState.Idle)
+                return false;
+
+            SelectedSlot = slot;
+            ChangeState(ESkillState.Casting);
             return true;
         }
 
@@ -100,9 +117,9 @@ namespace alpha.ingame.player
 
         public void RequestExecuteConfirm()
         {
-            if (!IsExecuting) return;
+            if (CurrentState != ESkillState.Execute) return;
 
-            // 설치에 성공해 Idle로 돌아와도 같은 클릭을 무기 공격에 재사용하지 않는다.
+            // 설치 확정 클릭을 무기 공격에 재사용하지 않는다.
             _primaryConsumedFrame = Time.frameCount;
             ExecuteConfirmRequested?.Invoke(SelectedSlot);
         }

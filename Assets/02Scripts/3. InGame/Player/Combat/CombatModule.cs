@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace alpha.ingame.player
 {
-    /// <summary>장착 무기와 공격 후 전투 자세 유지 시간을 관리한다.</summary>
+    /// <summary>장착 무기와 전투 자세 유지 시간을 관리한다.</summary>
     public class CombatModule : MonoBehaviour
     {
         [SerializeField, Min(0f)] private float _readyDuration = 1.5f;
@@ -19,13 +19,26 @@ namespace alpha.ingame.player
         // 실제 Aim/Scope View가 활성화된 동안에만 부스터를 막는다.
         public bool IsAimOrScopeActive =>
             _activeSecondary is SecondaryViewAction view && view.IsActive;
+        public bool CanReload
+        {
+            get
+            {
+                AlphaInput input = AlphaInput.Instance;
+                GunWeapon gun = CurrentGun;
+                return gun != null && gun.CanReload && input != null &&
+                       !input.IsQuickSlotOpen && !input.IsQuickSlotPressed &&
+                       _playerCore?.SkillStateFlow?.IsExecuting != true &&
+                       CanUseCombatFromLocomotion(input);
+            }
+        }
         public bool CanAttack
         {
             get
             {
                 AlphaInput input = AlphaInput.Instance;
                 GunWeapon gun = CurrentGun;
-                return gun != null && gun.IsEquipped && input != null &&
+                return gun != null && gun.IsEquipped && !gun.IsReloading &&
+                       _playerCore?.CombatStateFlow?.IsReloading != true && input != null &&
                        !input.IsQuickSlotOpen && !input.IsQuickSlotPressed &&
                        _playerCore?.SkillStateFlow?.IsExecuting != true &&
                        _playerCore?.SkillStateFlow?.IsPrimaryConsumedThisFrame != true &&
@@ -39,7 +52,8 @@ namespace alpha.ingame.player
             {
                 AlphaInput input = AlphaInput.Instance;
                 GunWeapon gun = CurrentGun;
-                return gun != null && gun.IsEquipped && input != null &&
+                return gun != null && gun.IsEquipped && !gun.IsReloading &&
+                       _playerCore?.CombatStateFlow?.IsReloading != true && input != null &&
                        !input.IsQuickSlotOpen && _playerCore?.SkillStateFlow?.IsExecuting != true &&
                        _playerCore?.SkillStateFlow?.IsPrimaryConsumedThisFrame != true &&
                        CanUseCombatFromLocomotion(input);
@@ -60,6 +74,9 @@ namespace alpha.ingame.player
                        (flow.IsCombatStanceActive || isViewActive);
             }
         }
+
+        public bool ShouldFaceAimDirection =>
+            IsCombatStanceActive && _playerCore?.CombatStateFlow?.IsReloading != true;
 
         private void Awake()
         {
@@ -137,9 +154,10 @@ namespace alpha.ingame.player
         {
             if (gun == null || gun != CurrentGun) return;
             // 성공한 마지막 발사를 기준으로 Ready 종료 시각을 다시 계산한다.
-            _readyUntil = Time.time + _readyDuration;
+            StartReadyTime();
         }
 
+        public void StartReadyTime() => _readyUntil = Time.time + _readyDuration;
         public void ClearReady() => _readyUntil = 0f;
     }
 }

@@ -21,6 +21,11 @@ namespace alpha.ingame.player
         [SerializeField] private Animator _animator;
         [SerializeField] private AreteAnimatorController[] _areteControllers;
 
+        [Header("Animator Layers")]
+        [SerializeField] private string _baseLayerName = "Base Layer";
+        [SerializeField] private string _reloadLayerName = "LeftArm";
+        [SerializeField] private string _skillLayerName = "Full Body";
+
         [Header("Blend Time")]
         [SerializeField] private float _moveBlendTime = 0.12f;
 
@@ -34,17 +39,20 @@ namespace alpha.ingame.player
         [Header("Silyon Aim Point")]
         [SerializeField, Min(1f)] private float _aimPointDistance = 30f;
 
-        // Animator 상태
-        private readonly int _walk = Animator.StringToHash("Base Layer.Walk");
-        private readonly int _sprintTree = Animator.StringToHash("Base Layer.Sprint Tree");
-        private readonly int _boostTree = Animator.StringToHash("Base Layer.Boost Tree");
-        private readonly int _boostCombatTree = Animator.StringToHash("Base Layer.Boost Combat Tree");
-        private readonly int _combatMoveTree = Animator.StringToHash("Base Layer.CombatMove Tree");
-
-        private readonly int _jump = Animator.StringToHash("Base Layer.Jump");
-        private readonly int _doubleJump = Animator.StringToHash("Base Layer.Double Jump");
-        private readonly int _fall = Animator.StringToHash("Base Layer.Fall");
-        private readonly int _land = Animator.StringToHash("Base Layer.Land");
+        // 설정된 레이어 이름을 포함한 Animator 상태 해시
+        private int _walk;
+        private int _sprintTree;
+        private int _boostTree;
+        private int _boostCombatTree;
+        private int _combatMoveTree;
+        private int _jump;
+        private int _doubleJump;
+        private int _fall;
+        private int _land;
+        private int _reload;
+        private int _reloadEmpty;
+        private int _skillEmpty;
+        private readonly int _skillCastSpeed = Animator.StringToHash("SkillCastSpeed");
 
         // Blend Tree 파라미터
         private readonly int _inputX = Animator.StringToHash("InputX");
@@ -55,14 +63,49 @@ namespace alpha.ingame.player
         private Rig[] _modelRigs = Array.Empty<Rig>();
         private CameraModule _cameraModule;
         private Transform _aimPoint;
+        private bool _reloadAnimationActive;
+        private bool _reloadAnimationEntered;
+        private float _reloadFadeStartTime;
+        private float _reloadFadeDuration;
+        private bool _skillAnimationActive;
+        private int _skillState;
+
+        public bool IsReloadActive => _reloadAnimationActive;
 
         private void OnEnable()
         {
+            RefreshStateHashes();
             if (_animator != null) BindCameraView();
         }
 
+#if UNITY_EDITOR
+        private void OnValidate() => RefreshStateHashes();
+#endif
+
+        private void RefreshStateHashes()
+        {
+            _walk = Animator.StringToHash(_baseLayerName + ".Walk");
+            _sprintTree = Animator.StringToHash(_baseLayerName + ".Sprint Tree");
+            _boostTree = Animator.StringToHash(_baseLayerName + ".Boost Tree");
+            _boostCombatTree = Animator.StringToHash(_baseLayerName + ".Boost Combat Tree");
+            _combatMoveTree = Animator.StringToHash(_baseLayerName + ".CombatMove Tree");
+            _jump = Animator.StringToHash(_baseLayerName + ".Jump");
+            _doubleJump = Animator.StringToHash(_baseLayerName + ".Double Jump");
+            _fall = Animator.StringToHash(_baseLayerName + ".Fall");
+            _land = Animator.StringToHash(_baseLayerName + ".Land");
+            _reload = Animator.StringToHash(_reloadLayerName + ".Reload");
+            _reloadEmpty = Animator.StringToHash(_reloadLayerName + ".Empty");
+            _skillEmpty = Animator.StringToHash(_skillLayerName + ".Empty");
+        }
+
+        private int GetLayerIndex(string layerName) =>
+            _animator != null && !string.IsNullOrWhiteSpace(layerName)
+                ? _animator.GetLayerIndex(layerName) : -1;
+
         private void OnDisable()
         {
+            StopSkill();
+            StopReload();
             if (_cameraModule != null)
                 _cameraModule.OnViewChanged -= HandleCameraViewChanged;
             HandleCameraViewChanged(ECameraViewType.Default);
@@ -85,7 +128,10 @@ namespace alpha.ingame.player
             }
 
             // 생성된 모델의 Animator에 해당 아레테 컨트롤러를 적용한다.
+            StopSkill();
+            StopReload();
             _animator = p_animator;
+            RefreshStateHashes();
             PlayerCore playerCore = GetComponentInParent<PlayerCore>();
             _modelRigs = playerCore != null && playerCore.CurrentModel != null
                 ? playerCore.CurrentModel.GetComponentsInChildren<Rig>(true)
@@ -105,6 +151,32 @@ namespace alpha.ingame.player
             _aimPoint.position = cameraTransform.position + cameraTransform.forward * _aimPointDistance;
         }
 
+        private void Update()
+        {
+            if (_reloadFadeDuration <= 0f) return;
+            if (_animator == null || !_animator.isActiveAndEnabled)
+            {
+                CompleteStopReload();
+                return;
+            }
+
+            int layer = GetLayerIndex(_reloadLayerName);
+            if (layer < 0)
+            {
+                CompleteStopReload();
+                return;
+            }
+
+            float progress = Mathf.Clamp01((Time.time - _reloadFadeStartTime) / _reloadFadeDuration);
+            float blend = Mathf.SmoothStep(0f, 1f, progress);
+            _animator.SetLayerWeight(layer, 1f - blend);
+            if (progress >= 1f)
+                CompleteStopReload();
+            else
+                HandleCameraViewChanged(_cameraModule != null
+                    ? _cameraModule.ActiveViewType : ECameraViewType.Default);
+        }
+
         private void BindCameraView()
         {
             if (_cameraModule != null)
@@ -120,10 +192,160 @@ namespace alpha.ingame.player
 
         private void HandleCameraViewChanged(ECameraViewType viewType)
         {
-            // 조준 View에서만 모델의 애니메이션 리깅을 적용한다.
-            float weight = viewType == ECameraViewType.Aim ? 1f : 0f;
+            // 재장전 레이어가 사라지는 만큼 조준 리깅을 함께 복귀시킨다.
+            float weight = 0f;
+            if (viewType == ECameraViewType.Aim && !_skillAnimationActive)
+            {
+                if (!_reloadAnimationActive)
+                    weight = 1f;
+                else if (_reloadFadeDuration > 0f)
+                {
+                    float progress = Mathf.Clamp01((Time.time - _reloadFadeStartTime) / _reloadFadeDuration);
+                    weight = Mathf.SmoothStep(0f, 1f, progress);
+                }
+            }
             foreach (Rig rig in _modelRigs)
                 if (rig != null) rig.weight = weight;
+        }
+
+        public bool PlayReload()
+        {
+            if (_animator == null || !_animator.isActiveAndEnabled) return false;
+
+            int layer = GetLayerIndex(_reloadLayerName);
+            if (layer < 0 || !_animator.HasState(layer, _reload)) return false;
+
+            // 왼팔 레이어의 Reload 상태를 처음부터 재생한다.
+            _reloadFadeDuration = 0f;
+            _reloadAnimationActive = true;
+            _reloadAnimationEntered = false;
+            _animator.SetLayerWeight(layer, 1f);
+            _animator.CrossFadeInFixedTime(_reload, 0.05f, layer, 0f);
+            HandleCameraViewChanged(_cameraModule != null
+                ? _cameraModule.ActiveViewType : ECameraViewType.Default);
+            return true;
+        }
+
+        // End 이벤트가 누락됐을 때 전체 클립 종료 여부만 확인한다.
+        public bool IsReloadFinished()
+        {
+            if (!_reloadAnimationActive || _animator == null || !_animator.isActiveAndEnabled)
+                return true;
+
+            int layer = GetLayerIndex(_reloadLayerName);
+            if (layer < 0) return true;
+
+            if (_animator.IsInTransition(layer))
+            {
+                if (_animator.GetNextAnimatorStateInfo(layer).fullPathHash == _reload)
+                    _reloadAnimationEntered = true;
+                return false;
+            }
+
+            AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(layer);
+            if (state.fullPathHash == _reload)
+            {
+                _reloadAnimationEntered = true;
+                return state.normalizedTime >= 1f;
+            }
+
+            return _reloadAnimationEntered;
+        }
+
+        public void StopReload(float blendOutDuration = 0f)
+        {
+            if (!_reloadAnimationActive) return;
+            if (blendOutDuration > 0f && _animator != null && _animator.isActiveAndEnabled &&
+                GetLayerIndex(_reloadLayerName) >= 0)
+            {
+                // 완료 지점부터 왼팔 레이어만 서서히 줄인다.
+                _reloadFadeStartTime = Time.time;
+                _reloadFadeDuration = blendOutDuration;
+                return;
+            }
+
+            CompleteStopReload();
+        }
+
+        private void CompleteStopReload()
+        {
+            _reloadAnimationActive = false;
+            _reloadAnimationEntered = false;
+            _reloadFadeDuration = 0f;
+
+            if (_animator != null)
+            {
+                int layer = GetLayerIndex(_reloadLayerName);
+                if (layer >= 0)
+                {
+                    _animator.SetLayerWeight(layer, 0f);
+                    if (_animator.isActiveAndEnabled && _animator.HasState(layer, _reloadEmpty))
+                        _animator.Play(_reloadEmpty, layer, 0f);
+                }
+            }
+
+            HandleCameraViewChanged(_cameraModule != null
+                ? _cameraModule.ActiveViewType : ECameraViewType.Default);
+        }
+
+        public bool PlaySkill(string stateName, AnimationClip clip, float castDuration)
+        {
+            if (string.IsNullOrWhiteSpace(stateName) || clip == null ||
+                castDuration <= 0f || _animator == null ||
+                !_animator.isActiveAndEnabled) return false;
+
+            int layer = GetLayerIndex(_skillLayerName);
+            int state = Animator.StringToHash(_skillLayerName + "." + stateName);
+            if (layer < 0 || !_animator.HasState(layer, state)) return false;
+
+            StopReload();
+            _skillState = state;
+            _skillAnimationActive = true;
+            // 지정한 시전 시간에 클립이 한 번 재생되도록 이 상태의 속도만 맞춘다.
+            _animator.SetFloat(_skillCastSpeed, clip.length / castDuration);
+            _animator.SetLayerWeight(layer, 1f);
+            _animator.CrossFadeInFixedTime(state, 0.05f, layer, 0f);
+            HandleCameraViewChanged(_cameraModule != null
+                ? _cameraModule.ActiveViewType : ECameraViewType.Default);
+            return true;
+        }
+
+        public bool TryGetSkillProgress(out float normalizedTime)
+        {
+            normalizedTime = 0f;
+            if (!_skillAnimationActive || _animator == null || !_animator.isActiveAndEnabled)
+                return false;
+
+            int layer = GetLayerIndex(_skillLayerName);
+            if (layer < 0 || _animator.IsInTransition(layer)) return false;
+
+            AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(layer);
+            if (state.fullPathHash != _skillState) return false;
+
+            normalizedTime = state.normalizedTime;
+            return true;
+        }
+
+        public void StopSkill()
+        {
+            if (!_skillAnimationActive) return;
+            _skillAnimationActive = false;
+            _skillState = 0;
+
+            if (_animator != null)
+            {
+                _animator.SetFloat(_skillCastSpeed, 1f);
+                int layer = GetLayerIndex(_skillLayerName);
+                if (layer >= 0)
+                {
+                    _animator.SetLayerWeight(layer, 0f);
+                    if (_animator.isActiveAndEnabled && _animator.HasState(layer, _skillEmpty))
+                        _animator.Play(_skillEmpty, layer, 0f);
+                }
+            }
+
+            HandleCameraViewChanged(_cameraModule != null
+                ? _cameraModule.ActiveViewType : ECameraViewType.Default);
         }
 
         public void HandlePlayerSetup(EAreteType p_type)
@@ -154,6 +376,9 @@ namespace alpha.ingame.player
                 _animator.runtimeAnimatorController == null)
                 return;
 
+            int layer = GetLayerIndex(_baseLayerName);
+            if (layer < 0) return;
+
             float strength = Mathf.Clamp01(p_inputStrength);
             // 걷기 전환은 이동 중에만 적용하고 전투 이동을 우선한다.
             int nextState = p_moveType switch
@@ -179,26 +404,29 @@ namespace alpha.ingame.player
                 return;
 
             _currentMoveState = nextState;
-            _animator.CrossFadeInFixedTime(nextState, _moveBlendTime, 0, 0f);
+            _animator.CrossFadeInFixedTime(nextState, _moveBlendTime, layer, 0f);
         }
 
         public void JumpAnim(int p_jumpCount)
         {
             if (_animator == null || !_animator.isActiveAndEnabled) return;
 
+            int layer = GetLayerIndex(_baseLayerName);
             int state = p_jumpCount == 2 ? _doubleJump : _jump;
-            if (!_animator.HasState(0, state)) return;
+            if (layer < 0 || !_animator.HasState(layer, state)) return;
 
             _currentMoveState = 0;
-            _animator.CrossFadeInFixedTime(state, 0.08f, 0, 0f); // 점프 시작부터 재생
+            _animator.CrossFadeInFixedTime(state, 0.08f, layer, 0f); // 점프 시작부터 재생
         }
 
         public bool CanEnterFallFromJump()
         {
             if (_animator == null || !_animator.isActiveAndEnabled) return true;
-            if (_animator.IsInTransition(0)) return false;
+            int layer = GetLayerIndex(_baseLayerName);
+            if (layer < 0) return true;
+            if (_animator.IsInTransition(layer)) return false;
 
-            AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(0);
+            AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(layer);
             if (state.fullPathHash == _jump)
                 return state.normalizedTime >= _jumpFallStart;
             if (state.fullPathHash == _doubleJump)
@@ -210,35 +438,35 @@ namespace alpha.ingame.player
 
         public void FallAnim()
         {
-            if (_animator == null || !_animator.isActiveAndEnabled ||
-                !_animator.HasState(0, _fall))
-                return;
+            if (_animator == null || !_animator.isActiveAndEnabled) return;
+            int layer = GetLayerIndex(_baseLayerName);
+            if (layer < 0 || !_animator.HasState(layer, _fall)) return;
 
             _currentMoveState = 0;
 
-            _animator.CrossFadeInFixedTime(_fall, _fallBlendTime, 0, 0f); // 별도 Fall 클립을 처음부터 짧게 섞는다.
+            _animator.CrossFadeInFixedTime(_fall, _fallBlendTime, layer, 0f); // 별도 Fall 클립을 처음부터 짧게 섞는다.
         }
 
         public void LandAnim()
         {
-            if (_animator == null || !_animator.isActiveAndEnabled ||
-        !_animator.HasState(0, _land))
-                return;
+            if (_animator == null || !_animator.isActiveAndEnabled) return;
+            int layer = GetLayerIndex(_baseLayerName);
+            if (layer < 0 || !_animator.HasState(layer, _land)) return;
 
             _currentMoveState = 0;
-            _animator.CrossFadeInFixedTime(_land, 0.174f, 0, 0.1416163f);
+            _animator.CrossFadeInFixedTime(_land, 0.174f, layer, 0.1416163f);
         }
 
         public bool IsLandAnimFinished()
         {
-            if (_animator == null || !_animator.isActiveAndEnabled ||
-                !_animator.HasState(0, _land))
-                return true;
+            if (_animator == null || !_animator.isActiveAndEnabled) return true;
+            int layer = GetLayerIndex(_baseLayerName);
+            if (layer < 0 || !_animator.HasState(layer, _land)) return true;
 
-            if (_animator.IsInTransition(0))
+            if (_animator.IsInTransition(layer))
                 return false;
 
-            AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(0);
+            AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(layer);
             return state.fullPathHash == _land && state.normalizedTime >= 1f;
         }
 

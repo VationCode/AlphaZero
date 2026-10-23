@@ -10,6 +10,12 @@ namespace alpha.ingame.player
         AreaAttack = 3
     }
 
+    public enum ESkillActivationMode
+    {
+        Aim,
+        Self
+    }
+
     /// <summary>모든 스킬 에셋이 공유하는 변경되지 않는 설정값.</summary>
     public abstract class SkillData : ScriptableObject
     {
@@ -18,12 +24,28 @@ namespace alpha.ingame.player
         [SerializeField, TextArea(2, 4)] private string _description;
         [SerializeField] private Sprite _icon;
         [SerializeField, Min(0f)] private float _cooldown;
+        [SerializeField] private ESkillActivationMode _activationMode;
+
+        [Header("Animation Event Keys")]
+        [SerializeField] private string _executeEventKey = "Excute";
+        [SerializeField] private string _audio1EventKey = "Audio1";
+        [SerializeField] private string _audio2EventKey = "Audio2";
+
+        [Header("Animation Event Audio")]
+        [SerializeField] private AudioClip _audio1;
+        [SerializeField] private AudioClip _audio2;
 
         public ESkillId Id => _id;
         public string DisplayName => string.IsNullOrWhiteSpace(_displayName) ? name : _displayName;
         public string Description => _description;
         public Sprite Icon => _icon;
         public float Cooldown => Mathf.Max(0f, _cooldown);
+        public ESkillActivationMode ActivationMode => _activationMode;
+        public string ExecuteEventKey => _executeEventKey;
+        public string Audio1EventKey => _audio1EventKey;
+        public string Audio2EventKey => _audio2EventKey;
+        public AudioClip Audio1 => _audio1;
+        public AudioClip Audio2 => _audio2;
 
         protected virtual void OnValidate()
         {
