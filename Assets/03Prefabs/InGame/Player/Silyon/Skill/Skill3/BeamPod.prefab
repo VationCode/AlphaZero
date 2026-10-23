@@ -229,6 +229,7 @@ GameObject:
   - component: {fileID: 4965331073510626}
   - component: {fileID: 9000000000301}
   - component: {fileID: 9000000000303}
+  - component: {fileID: 9000000000304}
   m_Layer: 0
   m_Name: BeamPod
   m_TagString: Untagged
@@ -290,9 +291,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _pointCount: 3
   _radius: 0.15
-  _targetingMultiplier: 1.25
   _arrivalTime: 1.2
   _movementSmooth: 0.8
+--- !u!114 &9000000000304
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1685845671507644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 584d72eab6fa4abf96fb65e2c841ad13, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _moveSpeed: 15
+  _turnSpeed: 360
+  _maxPlayerDistance: 30
+  _targetApproachDistance: 2
+  _colliderSizeDistanceFactor: 0.35
+  _targetRandomMultiplier: 5
 --- !u!1 &996393448249279089
 GameObject:
   m_ObjectHideFlags: 0

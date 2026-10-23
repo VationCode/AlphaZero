@@ -2,20 +2,27 @@ using UnityEngine;
 
 namespace alpha.ingame.player
 {
-    /// <summary>모델에 미리 배치된 빔포드들을 한 번에 소환한다.</summary>
-    [RequireComponent(typeof(BeamPodFollow))]
+    /// <summary>월드에 생성된 빔포드 그룹의 포드와 추적·타겟팅을 시작한다.</summary>
+    [RequireComponent(typeof(BeamPodFollow), typeof(BeamPodTargetModule))]
     public sealed class BeamPodSummon : MonoBehaviour
     {
         private SummonLifetime[] _pods;
-        private BeamPodAutoMove[] _autoMoves;
+        private RandomPointMove[] _randomMoves;
+        private BeamPodTravel[] _travels;
         private Vector3[] _spawnLocalPositions;
         private Quaternion[] _spawnLocalRotations;
         private BeamPodFollow _follow;
+        private BeamPodTargetModule _targetModule;
+        private bool _started;
+
+        public bool HasActivePods => _targetModule != null && _targetModule.IsActive;
+        public void AdvanceCommand() => _targetModule?.AdvanceCommand();
 
         private void Awake()
         {
             _pods = GetComponentsInChildren<SummonLifetime>(true);
-            _autoMoves = new BeamPodAutoMove[_pods.Length];
+            _randomMoves = new RandomPointMove[_pods.Length];
+            _travels = new BeamPodTravel[_pods.Length];
             _spawnLocalPositions = new Vector3[_pods.Length];
             _spawnLocalRotations = new Quaternion[_pods.Length];
 
@@ -23,16 +30,19 @@ namespace alpha.ingame.player
             for (int i = 0; i < _pods.Length; i++)
             {
                 Transform podTransform = _pods[i].transform;
-                _autoMoves[i] = _pods[i].GetComponent<BeamPodAutoMove>();
+                _randomMoves[i] = _pods[i].GetComponent<RandomPointMove>();
+                _travels[i] = _pods[i].GetComponent<BeamPodTravel>();
                 _spawnLocalPositions[i] = podTransform.localPosition;
                 _spawnLocalRotations[i] = podTransform.localRotation;
             }
 
             _follow = GetComponent<BeamPodFollow>();
+            _targetModule = GetComponent<BeamPodTargetModule>();
         }
 
-        public bool Activate()
+        public bool Activate(BeamPodSkillData skill, PlayerCore player)
         {
+            if (_targetModule == null || skill == null || player == null) return false;
             if (_pods == null || _pods.Length == 0)
             {
                 Debug.LogError($"{nameof(BeamPodSummon)}: 빔포드에 {nameof(SummonLifetime)}을 연결하세요.", this);
@@ -41,8 +51,8 @@ namespace alpha.ingame.player
 
             for (int i = 0; i < _pods.Length; i++)
             {
-                if (_pods[i] != null && _autoMoves[i] != null) continue;
-                Debug.LogError($"{nameof(BeamPodSummon)}: 각 빔포드에 {nameof(BeamPodAutoMove)}를 연결하세요.", this);
+                if (_pods[i] != null && _randomMoves[i] != null && _travels[i] != null) continue;
+                Debug.LogError($"{nameof(BeamPodSummon)}: 각 빔포드에 {nameof(RandomPointMove)}와 {nameof(BeamPodTravel)}을 연결하세요.", this);
                 return false;
             }
 
@@ -52,7 +62,7 @@ namespace alpha.ingame.player
                 pod.gameObject.SetActive(false);
             }
 
-            if (_follow == null || !_follow.Begin()) return false;
+            if (_follow == null || !_follow.Begin(player)) return false;
 
             // OnEnable이 각 포드의 생존 시간을 새로 시작한다.
             for (int i = 0; i < _pods.Length; i++)
@@ -60,18 +70,25 @@ namespace alpha.ingame.player
                 SummonLifetime pod = _pods[i];
                 pod.transform.SetLocalPositionAndRotation(_spawnLocalPositions[i], _spawnLocalRotations[i]);
                 pod.gameObject.SetActive(true);
-                _autoMoves[i].Begin(_spawnLocalPositions[i]);
+                _randomMoves[i].Begin(_spawnLocalPositions[i]);
+                _travels[i].Begin(player.transform, _spawnLocalPositions[i]);
             }
-            return true;
+            if (_targetModule.Begin(skill, player))
+            {
+                _started = true;
+                return true;
+            }
+            foreach (SummonLifetime pod in _pods) pod.gameObject.SetActive(false);
+            return false;
         }
 
-        // 타겟 획득/해제 시 타겟팅 로직에서 호출한다.
-        public void SetTargeting(bool hasTarget)
+        private void Update()
         {
-            if (_autoMoves == null) return;
-            foreach (BeamPodAutoMove autoMove in _autoMoves)
-                if (autoMove != null && autoMove.gameObject.activeInHierarchy)
-                    autoMove.SetTargeting(hasTarget);
+            if (!_started) return;
+            foreach (SummonLifetime pod in _pods)
+                if (pod != null && pod.gameObject.activeInHierarchy && !pod.IsExpired) return;
+            Destroy(gameObject);
         }
+
     }
 }

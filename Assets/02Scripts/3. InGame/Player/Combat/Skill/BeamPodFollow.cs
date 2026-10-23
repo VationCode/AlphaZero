@@ -22,29 +22,41 @@ namespace alpha.ingame.player
         private void Awake()
         {
             _pods = GetComponentsInChildren<SummonLifetime>(true);
-            _player = GetComponentInParent<PlayerCore>(true)?.transform;
         }
 
-        public bool Begin()
+        public bool Begin(PlayerCore player)
         {
-            if (_player == null) _player = GetComponentInParent<PlayerCore>(true)?.transform;
+            _player = player != null ? player.transform : null;
             if (_player == null)
             {
                 Debug.LogError($"{nameof(BeamPodFollow)}: 플레이어가 없습니다.", this);
                 return false;
             }
 
-            if (!_hasFormationOffset)
-            {
-                _formationOffset = _player.InverseTransformPoint(transform.position);
-                _hasFormationOffset = true;
-            }
+            _formationOffset = _player.InverseTransformPoint(transform.position);
+            _hasFormationOffset = true;
 
             // 소환 직전 대형을 플레이어 방향으로 배치하고 이전 추적 속도를 지운다.
             _positionFollower.Reset();
             FollowPlayer(true);
             _isFollowing = true;
             return true;
+        }
+
+        // 공격 중에는 그룹을 월드에 고정해 포드가 플레이어 움직임을 상속받지 않게 한다.
+        public void Pause()
+        {
+            _isFollowing = false;
+            _positionFollower.Reset();
+        }
+
+        public void Resume()
+        {
+            if (!_hasFormationOffset || _player == null) return;
+            _currentPosition = transform.position;
+            _currentRotation = transform.rotation;
+            _positionFollower.Reset();
+            _isFollowing = true;
         }
 
         private void LateUpdate()
@@ -76,7 +88,7 @@ namespace alpha.ingame.player
                 ? Quaternion.LookRotation(forward.normalized, Vector3.up)
                 : snap ? transform.rotation : _currentRotation;
 
-            // 부모인 플레이어의 회전이 매 프레임 적용되므로 독립된 월드 자세를 기준으로 보간한다.
+            // 월드 자세를 기준으로 회전과 위치를 부드럽게 보간한다.
             Quaternion nextRotation = snap
                 ? targetRotation
                 : Quaternion.RotateTowards(_currentRotation, targetRotation,

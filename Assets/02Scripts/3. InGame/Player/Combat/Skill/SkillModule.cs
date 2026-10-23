@@ -44,6 +44,7 @@ namespace alpha.ingame.player
         private WeaponBuffSkillData _weaponBuff;
         private float _weaponBuffEndsAt;
         private GunWeapon _buffEffectGun;
+        private BeamPodSummon _beamPodGroup;
 
         public float FireRateMultiplier => IsWeaponBuffActive ? _weaponBuff.FireRateMultiplier : 1f;
         public float DamageMultiplier => IsWeaponBuffActive ? _weaponBuff.DamageMultiplier : 1f;
@@ -75,6 +76,8 @@ namespace alpha.ingame.player
             _playerCore?.CombatActionFlow?.EndSkill();
             ClearActiveSkill();
             StopWeaponBuff();
+            if (_beamPodGroup != null) Destroy(_beamPodGroup.gameObject);
+            _beamPodGroup = null;
             _scheduledAudio.Clear();
             _playerCore?.SkillDisplayChannel.Clear();
         }
@@ -111,6 +114,13 @@ namespace alpha.ingame.player
         private void OnSkillRequested(int slot)
         {
             SkillData requested = GetSkill(slot);
+            if (requested is BeamPodSkillData && _beamPodGroup != null &&
+                _beamPodGroup.HasActivePods)
+            {
+                // 소환 후의 3번 키는 쿨다운과 관계없이 포드 명령으로 전달한다.
+                _beamPodGroup.AdvanceCommand();
+                return;
+            }
             if (requested == null || GetRemainingCooldown(slot) > 0f ||
                 _playerCore == null || !CanCastOnGround()) return;
 
@@ -176,17 +186,24 @@ namespace alpha.ingame.player
 
         private void ActivateBeamPods(int slot, BeamPodSkillData skill)
         {
-            BeamPodSummon summon = _playerCore.CurrentModel?.GetComponentInChildren<BeamPodSummon>(true);
-            if (summon == null || _playerCore.CombatActionFlow?.TryBeginSkill() != true) return;
+            BeamPodSummon prefab = skill.BeamPodGroupPrefab;
+            if (prefab == null || _playerCore.CombatActionFlow?.TryBeginSkill() != true) return;
 
             _playerCore.CombatModule?.CancelSecondary();
-            if (summon.Activate())
+            if (_beamPodGroup != null) Destroy(_beamPodGroup.gameObject);
+            Transform owner = _playerCore.transform;
+            Quaternion rotation = Quaternion.Euler(0f, owner.eulerAngles.y, 0f);
+            Vector3 spawnPosition = owner.position + rotation * prefab.transform.localPosition;
+            BeamPodSummon summon = Instantiate(prefab, spawnPosition, rotation);
+            if (summon.Activate(skill, _playerCore))
             {
+                _beamPodGroup = summon;
                 PlayActivationCues(skill, new Pose(summon.transform.position, summon.transform.rotation));
                 _readyAt[skill] = Time.time + skill.Cooldown;
                 PublishSlot(slot);
                 SkillUsed?.Invoke(slot);
             }
+            else Destroy(summon.gameObject);
             _playerCore.CombatActionFlow.EndSkill();
         }
 
