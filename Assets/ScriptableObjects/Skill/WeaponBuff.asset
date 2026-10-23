@@ -15,7 +15,7 @@ MonoBehaviour:
   _id: 4
   _displayName: Weapon Buff
   _description: Temporarily increases weapon fire rate, damage, and magazine capacity.
-  _icon: {fileID: 21300000, guid: 47b8b247feb5bd643b66c26514bc5562, type: 3}
+  _icon: {fileID: 21300000, guid: 6e84bf94c7f55154bbc3144f41506afd, type: 3}
   _cooldown: 18
   _activationMode: 1
   _executeEventKey: Excute

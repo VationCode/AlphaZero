@@ -2776,6 +2776,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 519191522516104099}
+  - component: {fileID: 9000000000302}
   m_Layer: 0
   m_Name: BeamPodPos
   m_TagString: Untagged
@@ -2805,6 +2806,18 @@ Transform:
   - {fileID: 721388509621344074}
   m_Father: {fileID: 2723887474332459545}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9000000000302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2190680767438711190}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0f87d8dc88084dfaaf855814f1d505b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &2572012931243783363
 GameObject:
   m_ObjectHideFlags: 0
@@ -2928,6 +2941,8 @@ GameObject:
   - component: {fileID: 2723887474332459545}
   - component: {fileID: 6394012911573642481}
   - component: {fileID: 6300000000000000001}
+  - component: {fileID: 6300000000000000010}
+  - component: {fileID: 6300000000000000011}
   m_Layer: 0
   m_Name: Arete_Silyon
   m_TagString: Untagged
@@ -3064,6 +3079,120 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!82 &6300000000000000010
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3352615004720904355}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 0
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &6300000000000000011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3352615004720904355}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 77272019d6074265bb1ce90f889bbc39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _audioSource: {fileID: 6300000000000000010}
+  _startClip: {fileID: 0}
+  _pulseClip: {fileID: 8300000, guid: 525af49ffced87c4d96046b1c85b6240, type: 3}
+  _endClip: {fileID: 8300000, guid: 5b519d44ea90c84489b26a8636c256b2, type: 3}
+  _pulseInterval: 3.5
 --- !u!1 &3612115878946542402
 GameObject:
   m_ObjectHideFlags: 0
@@ -5214,6 +5343,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BeamPod
       objectReference: {fileID: 0}
+    - target: {fileID: 1685845671507644, guid: 732ea5edb9a911444adf1da69612d515, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4965331073510626, guid: 732ea5edb9a911444adf1da69612d515, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -5568,6 +5701,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _audioSource: {fileID: 6300000000000000001}
+  _jumpAudioKey: Jump
+  _jumpAudio: {fileID: 8300000, guid: 6f971f188ed8517448081b69167b67c8, type: 3}
+  _doubleJumpAudioKey: DoubleJump
+  _doubleJumpAudio: {fileID: 8300000, guid: 6f18895e6fe24f4439625e85becc608a, type: 3}
+  _landAudioKey: Land
+  _landAudio: {fileID: 8300000, guid: 94fc277c16514164ca471b15231cd096, type: 3}
 --- !u!4 &2470092748909544948 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: f5591e58f45db014faf4103a2b76b056, type: 3}
@@ -6076,6 +6215,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BeamPod
       objectReference: {fileID: 0}
+    - target: {fileID: 1685845671507644, guid: 732ea5edb9a911444adf1da69612d515, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4965331073510626, guid: 732ea5edb9a911444adf1da69612d515, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -6138,6 +6281,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: BeamPod (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 1685845671507644, guid: 732ea5edb9a911444adf1da69612d515, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4965331073510626, guid: 732ea5edb9a911444adf1da69612d515, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -6199,6 +6346,10 @@ PrefabInstance:
     - target: {fileID: 1685845671507644, guid: 732ea5edb9a911444adf1da69612d515, type: 3}
       propertyPath: m_Name
       value: BeamPod (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1685845671507644, guid: 732ea5edb9a911444adf1da69612d515, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4965331073510626, guid: 732ea5edb9a911444adf1da69612d515, type: 3}
       propertyPath: m_LocalPosition.x

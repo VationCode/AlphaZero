@@ -227,6 +227,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4965331073510626}
+  - component: {fileID: 9000000000301}
   m_Layer: 0
   m_Name: BeamPod
   m_TagString: Untagged
@@ -254,6 +255,25 @@ Transform:
   - {fileID: 5764818927513811868}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &9000000000301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1685845671507644}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8e77c0a221c84d318b53dba70c451ef4, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  _createEffect: {fileID: 0}
+  _intactRoot: {fileID: 0}
+  _brokenRoot: {fileID: 0}
+  _breakEffectPrefab: {fileID: 0}
+  _survivalTime: 15
+  _destroyOnExpire: 0
+  _debrisLifetime: 0
 --- !u!1 &1833031372164421160
 GameObject:
   m_ObjectHideFlags: 0
@@ -389,6 +409,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4965331073510626}
     m_Modifications:
+    - target: {fileID: 1833282048646924830, guid: 730e3981c1724914d93652faf607372d, type: 3}
+      propertyPath: lengthInSec
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7005278959131241377, guid: 730e3981c1724914d93652faf607372d, type: 3}
+      propertyPath: lengthInSec
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7005278959364281282, guid: 730e3981c1724914d93652faf607372d, type: 3}
+      propertyPath: lengthInSec
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7005278960625140482, guid: 730e3981c1724914d93652faf607372d, type: 3}
+      propertyPath: lengthInSec
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 7005278960792100168, guid: 730e3981c1724914d93652faf607372d, type: 3}
       propertyPath: m_LocalScale.x
       value: 0.03

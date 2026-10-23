@@ -5,7 +5,7 @@ namespace alpha.ingame.player
 {
     /// <summary>조준된 적을 향해 좌우 포구에서 번갈아 투사체를 발사한다.</summary>
     [DefaultExecutionOrder(100)]
-    [RequireComponent(typeof(CanonTargeting), typeof(CanonLifetime))]
+    [RequireComponent(typeof(CanonTargeting), typeof(SummonLifetime))]
     public sealed class CanonAttack : MonoBehaviour
     {
         [Header("Fire")]
@@ -26,7 +26,7 @@ namespace alpha.ingame.player
         [SerializeField] private CanonAnimator _canonAnimator;
 
         private CanonTargeting _targeting;
-        private CanonLifetime _lifetime;
+        private SummonLifetime _lifetime;
         private GunProjectilePool _projectilePool;
         private ImpactPool _impactPool;
         private MuzzleEffectPool _muzzleEffectPool;
@@ -36,7 +36,7 @@ namespace alpha.ingame.player
         private void Awake()
         {
             _targeting = GetComponent<CanonTargeting>();
-            _lifetime = GetComponent<CanonLifetime>();
+            _lifetime = GetComponent<SummonLifetime>();
             if (_projectilePrefab == null || _impactData == null ||
                 _firePoints == null || _firePoints.Length == 0)
             {
@@ -64,7 +64,7 @@ namespace alpha.ingame.player
         private void LateUpdate()
         {
             // 타겟 회전이 끝난 뒤 조준 상태를 검사한다.
-            if (_lifetime.IsBroken || !_targeting.isActiveAndEnabled || Time.time < _nextShotAt) return;
+            if (_lifetime.IsExpired || !_targeting.isActiveAndEnabled || Time.time < _nextShotAt) return;
 
             Collider target = _targeting.TargetCollider;
             if (target == null || !target.enabled || !target.gameObject.activeInHierarchy) return;

@@ -120,6 +120,12 @@ namespace alpha.ingame.player
                 return;
             }
 
+            if (requested is BeamPodSkillData beamPod)
+            {
+                ActivateBeamPods(slot, beamPod);
+                return;
+            }
+
             if (requested is not DeployableSkillData skill || skill.Prefab == null) return;
             if (_playerCore.CombatActionFlow?.TryBeginSkill() != true) return;
 
@@ -165,6 +171,22 @@ namespace alpha.ingame.player
             _readyAt[buff] = Time.time + buff.Cooldown;
             PublishSlot(slot);
             SkillUsed?.Invoke(slot);
+            _playerCore.CombatActionFlow.EndSkill();
+        }
+
+        private void ActivateBeamPods(int slot, BeamPodSkillData skill)
+        {
+            BeamPodSummon summon = _playerCore.CurrentModel?.GetComponentInChildren<BeamPodSummon>(true);
+            if (summon == null || _playerCore.CombatActionFlow?.TryBeginSkill() != true) return;
+
+            _playerCore.CombatModule?.CancelSecondary();
+            if (summon.Activate())
+            {
+                PlayActivationCues(skill, new Pose(summon.transform.position, summon.transform.rotation));
+                _readyAt[skill] = Time.time + skill.Cooldown;
+                PublishSlot(slot);
+                SkillUsed?.Invoke(slot);
+            }
             _playerCore.CombatActionFlow.EndSkill();
         }
 

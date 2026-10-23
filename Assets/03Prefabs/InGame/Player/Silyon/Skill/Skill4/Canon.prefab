@@ -88,9 +88,8 @@ MonoBehaviour:
   _brokenRoot: {fileID: 4036523287542401639}
   _breakEffectPrefab: {fileID: 2069352338822879331, guid: c3c93266f63556b48953b415aa6ee354, type: 3}
   _survivalTime: 15
+  _destroyOnExpire: 1
   _debrisLifetime: 2
-  _breakImpulse: 1
-  _breakTorque: 0.25
 --- !u!114 &9000000000102
 MonoBehaviour:
   m_ObjectHideFlags: 0
