@@ -30,6 +30,7 @@ namespace alpha.ingame.player
         public event Action<int> SkillRequested;
         public event Action<int> ExecuteConfirmRequested;
         public event Action<int> ExecuteCanceled;
+        public event Action ExecutionEnded;
 
         private void Awake()
         {
@@ -102,6 +103,7 @@ namespace alpha.ingame.player
             if (!IsExecuting) return;
             ChangeState(ESkillState.Idle);
             SelectedSlot = 0;
+            ExecutionEnded?.Invoke();
         }
 
         public void CancelExecute()
@@ -111,6 +113,7 @@ namespace alpha.ingame.player
             ChangeState(ESkillState.Idle);
             SelectedSlot = 0;
             ExecuteCanceled?.Invoke(slot);
+            ExecutionEnded?.Invoke();
         }
 
         public void RequestSkill(int slot) => SkillRequested?.Invoke(slot);

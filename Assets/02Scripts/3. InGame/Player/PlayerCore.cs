@@ -20,7 +20,10 @@ namespace alpha.ingame.player
         
         public LocomotionStateFlow LocomotionStateFlow { get; private set; }
         public CombatStateFlow CombatStateFlow { get; private set; }
+        public CombatActionFlow CombatActionFlow => CombatStateFlow?.Action;
+        public CombatStanceFlow CombatStanceFlow => CombatStateFlow?.Stance;
         public SkillStateFlow SkillStateFlow { get; private set; }
+        public SkillModule SkillModule { get; private set; }
         public SkillDisplayChannel SkillDisplayChannel { get; } = new SkillDisplayChannel();
         public AmmoDisplayChannel AmmoDisplayChannel { get; } = new AmmoDisplayChannel();
 
@@ -42,6 +45,7 @@ namespace alpha.ingame.player
             CombatStateFlow = GetComponentInChildren<CombatStateFlow>(true);
             CombatModule = GetComponentInChildren<CombatModule>(true);
             SkillStateFlow = GetComponentInChildren<SkillStateFlow>(true);
+            SkillModule = GetComponentInChildren<SkillModule>(true);
 
             EquipmentModule = GetComponentInChildren<EquipmentModule>(true);
             InventoryModule = GetComponentInChildren<InventoryModule>(true);

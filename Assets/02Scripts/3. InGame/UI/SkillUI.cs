@@ -1,6 +1,7 @@
 using System.Collections;
 using alpha.ingame.player;
 using alpha.ingame.skill;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -12,6 +13,7 @@ public sealed class SkillUI : MonoBehaviour
 
     private readonly Image[] _icons = new Image[4];
     private readonly Image[] _fills = new Image[4];
+    private readonly TMP_Text[] _times = new TMP_Text[4];
     private readonly Coroutine[] _fillRoutines = new Coroutine[4];
     private readonly SkillSlotDisplayState[] _slotStates = new SkillSlotDisplayState[4];
 
@@ -25,9 +27,10 @@ public sealed class SkillUI : MonoBehaviour
             Transform slot = _slotsRoot.Find($"Skill{i + 1}");
             _icons[i] = slot?.Find("Icon")?.GetComponent<Image>();
             _fills[i] = slot?.Find("Fill")?.GetComponent<Image>();
+            _times[i] = slot?.Find("Time (TMP)")?.GetComponent<TMP_Text>();
 
-            if (_icons[i] == null || _fills[i] == null)
-                Debug.LogWarning($"{nameof(SkillUI)}: Skill{i + 1}의 Icon 또는 Fill을 찾을 수 없습니다.", this);
+            if (_icons[i] == null || _fills[i] == null || _times[i] == null)
+                Debug.LogWarning($"{nameof(SkillUI)}: Skill{i + 1}의 Icon, Fill 또는 Time (TMP)를 찾을 수 없습니다.", this);
         }
     }
 
@@ -73,33 +76,48 @@ public sealed class SkillUI : MonoBehaviour
             _fillRoutines[index] = null;
         }
 
-        Image fill = _fills[index];
-        if (fill == null) return;
-
         // 재활성화 시에도 남은 시간으로 Fill을 복원한다.
-        float amount = GetFillAmount(state);
-        fill.fillAmount = amount;
-        if (amount > 0f)
+        float remaining = GetRemainingCooldown(state);
+        UpdateCooldownVisual(index, remaining);
+        if (remaining > 0f)
             _fillRoutines[index] = StartCoroutine(AnimateFill(index));
     }
 
     private IEnumerator AnimateFill(int index)
     {
-        Image fill = _fills[index];
         while (true)
         {
             yield return null;
-            float amount = GetFillAmount(_slotStates[index]);
-            fill.fillAmount = amount;
-            if (amount <= 0f) break;
+            float remaining = GetRemainingCooldown(_slotStates[index]);
+            UpdateCooldownVisual(index, remaining);
+            if (remaining <= 0f) break;
         }
         _fillRoutines[index] = null;
     }
 
-    private static float GetFillAmount(SkillSlotDisplayState state)
+    private void UpdateCooldownVisual(int index, float remaining)
+    {
+        SkillSlotDisplayState state = _slotStates[index];
+        Image fill = _fills[index];
+        if (fill != null)
+            fill.fillAmount = state.CooldownDuration > 0f
+                ? Mathf.Clamp01(remaining / state.CooldownDuration) : 0f;
+
+        TMP_Text time = _times[index];
+        if (time == null) return;
+        bool coolingDown = remaining > 0f;
+        if (coolingDown)
+        {
+            string seconds = Mathf.CeilToInt(remaining).ToString();
+            if (time.text != seconds) time.text = seconds;
+        }
+        if (time.gameObject.activeSelf != coolingDown)
+            time.gameObject.SetActive(coolingDown);
+    }
+
+    private static float GetRemainingCooldown(SkillSlotDisplayState state)
     {
         if (state.CooldownDuration <= 0f) return 0f;
-        // 사용 직후 1, 쿨다운 종료 시 0으로 감소한다.
-        return Mathf.Clamp01((state.CooldownEndTime - Time.time) / state.CooldownDuration);
+        return Mathf.Max(0f, state.CooldownEndTime - Time.time);
     }
 }

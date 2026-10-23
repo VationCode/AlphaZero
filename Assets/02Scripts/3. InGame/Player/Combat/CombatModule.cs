@@ -4,18 +4,17 @@ using UnityEngine;
 
 namespace alpha.ingame.player
 {
-    /// <summary>장착 무기와 전투 자세 유지 시간을 관리한다.</summary>
+    /// <summary>장착 무기의 사용 조건과 보조 조작을 관리한다.</summary>
     public class CombatModule : MonoBehaviour
     {
         [SerializeField, Min(0f)] private float _readyDuration = 1.5f;
 
         private PlayerCore _playerCore;
-        private float _readyUntil;
         private EquippableWeapon _secondaryWeapon;
         private WeaponSecondaryAction _activeSecondary;
 
         public GunWeapon CurrentGun => _playerCore?.EquipmentModule?.CurrentWeapon?.GetComponent<GunWeapon>();
-        public bool HasReadyTime => Time.time < _readyUntil;
+        public float ReadyDuration => _readyDuration;
         // 실제 Aim/Scope View가 활성화된 동안에만 부스터를 막는다.
         public bool IsAimOrScopeActive =>
             _activeSecondary is SecondaryViewAction view && view.IsActive;
@@ -38,7 +37,9 @@ namespace alpha.ingame.player
                 AlphaInput input = AlphaInput.Instance;
                 GunWeapon gun = CurrentGun;
                 return gun != null && gun.IsEquipped && !gun.IsReloading &&
-                       _playerCore?.CombatStateFlow?.IsReloading != true && input != null &&
+                       _playerCore?.CombatActionFlow?.CurrentState != ECombatAction.Reload &&
+                       _playerCore?.CombatActionFlow?.CurrentState != ECombatAction.Skill &&
+                       input != null &&
                        !input.IsQuickSlotOpen && !input.IsQuickSlotPressed &&
                        _playerCore?.SkillStateFlow?.IsExecuting != true &&
                        _playerCore?.SkillStateFlow?.IsPrimaryConsumedThisFrame != true &&
@@ -53,7 +54,7 @@ namespace alpha.ingame.player
                 AlphaInput input = AlphaInput.Instance;
                 GunWeapon gun = CurrentGun;
                 return gun != null && gun.IsEquipped && !gun.IsReloading &&
-                       _playerCore?.CombatStateFlow?.IsReloading != true && input != null &&
+                       _playerCore?.CombatActionFlow?.CurrentState == ECombatAction.Attack && input != null &&
                        !input.IsQuickSlotOpen && _playerCore?.SkillStateFlow?.IsExecuting != true &&
                        _playerCore?.SkillStateFlow?.IsPrimaryConsumedThisFrame != true &&
                        CanUseCombatFromLocomotion(input);
@@ -65,18 +66,18 @@ namespace alpha.ingame.player
             get
             {
                 AlphaInput input = AlphaInput.Instance;
-                CombatStateFlow flow = _playerCore?.CombatStateFlow;
-                bool isViewActive = _activeSecondary is SecondaryViewAction view && view.IsActive;
-                return input != null && !input.IsQuickSlotOpen && flow != null &&
+                CombatActionFlow action = _playerCore?.CombatActionFlow;
+                CombatStanceFlow stance = _playerCore?.CombatStanceFlow;
+                return input != null && !input.IsQuickSlotOpen && stance != null &&
                        _playerCore?.SkillStateFlow?.IsExecuting != true &&
                        CanUseCombatFromLocomotion(input) &&
-                       (!input.IsQuickSlotPressed || flow.CurrentState == ECombatState.Attack) &&
-                       (flow.IsCombatStanceActive || isViewActive);
+                       (!input.IsQuickSlotPressed || action?.IsAttacking == true) &&
+                       stance.IsCombat;
             }
         }
 
         public bool ShouldFaceAimDirection =>
-            IsCombatStanceActive && _playerCore?.CombatStateFlow?.IsReloading != true;
+            IsCombatStanceActive && _playerCore?.CombatActionFlow?.IsReloading != true;
 
         private void Awake()
         {
@@ -154,10 +155,7 @@ namespace alpha.ingame.player
         {
             if (gun == null || gun != CurrentGun) return;
             // 성공한 마지막 발사를 기준으로 Ready 종료 시각을 다시 계산한다.
-            StartReadyTime();
+            _playerCore?.CombatStanceFlow?.RefreshReady();
         }
-
-        public void StartReadyTime() => _readyUntil = Time.time + _readyDuration;
-        public void ClearReady() => _readyUntil = 0f;
     }
 }

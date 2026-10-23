@@ -1,18 +1,38 @@
 using System;
 using System.Collections.Generic;
+using alpha.ingame.item;
 using alpha.ingame.skill;
 using UnityEngine;
 
 namespace alpha.ingame.player
 {
-    /// <summary>1~4번 슬롯의 데이터와 설치형 스킬 실행을 연결한다.</summary>
+    /// <summary>1~4번 슬롯의 버프와 설치형 스킬 실행을 연결한다.</summary>
     [RequireComponent(typeof(SkillStateFlow))]
     [DefaultExecutionOrder(100)]
     public sealed class SkillModule : MonoBehaviour
     {
+        private sealed class ScheduledAudio
+        {
+            public readonly SkillData Skill;
+            public readonly float StartedAt;
+            public readonly SkillAudioCue[] Cues;
+            public readonly bool[] Played;
+
+            public ScheduledAudio(SkillData skill)
+            {
+                Skill = skill;
+                StartedAt = Time.time;
+                IReadOnlyList<SkillAudioCue> configured = skill.ActivationAudioCues;
+                Cues = new SkillAudioCue[configured.Count];
+                for (int index = 0; index < configured.Count; index++) Cues[index] = configured[index];
+                Played = new bool[Cues.Length];
+            }
+        }
+
         [SerializeField] private SkillData[] _slots = new SkillData[4];
 
         private readonly Dictionary<SkillData, float> _readyAt = new();
+        private readonly List<ScheduledAudio> _scheduledAudio = new();
         private SkillStateFlow _flow;
         private PlayerCore _playerCore;
         private DeployableSkillData _activeSkill;
@@ -21,6 +41,13 @@ namespace alpha.ingame.player
         private int _castingSlot;
         private bool _castSpawned;
         private float _castTimeoutAt;
+        private WeaponBuffSkillData _weaponBuff;
+        private float _weaponBuffEndsAt;
+        private GunWeapon _buffEffectGun;
+
+        public float FireRateMultiplier => IsWeaponBuffActive ? _weaponBuff.FireRateMultiplier : 1f;
+        public float DamageMultiplier => IsWeaponBuffActive ? _weaponBuff.DamageMultiplier : 1f;
+        private bool IsWeaponBuffActive => _weaponBuff != null && Time.time < _weaponBuffEndsAt;
 
         // 실제 스킬 실행이 성공하고 쿨다운이 시작된 뒤 알린다.
         public event Action<int> SkillUsed;
@@ -45,12 +72,17 @@ namespace alpha.ingame.player
             _flow.ExecuteConfirmRequested -= OnExecuteConfirmRequested;
             _flow.ExecuteCanceled -= OnExecuteCanceled;
             _flow.CancelExecute();
+            _playerCore?.CombatActionFlow?.EndSkill();
             ClearActiveSkill();
+            StopWeaponBuff();
+            _scheduledAudio.Clear();
             _playerCore?.SkillDisplayChannel.Clear();
         }
 
         private void LateUpdate()
         {
+            UpdateWeaponBuff();
+            UpdateScheduledAudio();
             if (_flow.IsCasting)
             {
                 UpdateCast();
@@ -78,9 +110,18 @@ namespace alpha.ingame.player
 
         private void OnSkillRequested(int slot)
         {
-            // 현재는 설치형만 실행한다. 다른 스킬 종류는 실행 로직을 추가할 때 연결한다.
-            if (GetSkill(slot) is not DeployableSkillData skill || skill.Prefab == null ||
-                GetRemainingCooldown(slot) > 0f || _playerCore == null || !CanCastOnGround()) return;
+            SkillData requested = GetSkill(slot);
+            if (requested == null || GetRemainingCooldown(slot) > 0f ||
+                _playerCore == null || !CanCastOnGround()) return;
+
+            if (requested is WeaponBuffSkillData buff)
+            {
+                ActivateWeaponBuff(slot, buff);
+                return;
+            }
+
+            if (requested is not DeployableSkillData skill || skill.Prefab == null) return;
+            if (_playerCore.CombatActionFlow?.TryBeginSkill() != true) return;
 
             if (skill.ActivationMode == ESkillActivationMode.Self)
             {
@@ -91,14 +132,73 @@ namespace alpha.ingame.player
                 _activeSkill = skill;
                 _playerCore.CombatModule?.CancelSecondary();
                 if (!TryBeginCast(slot, pose, true))
+                {
                     ClearActiveSkill();
+                    _playerCore.CombatActionFlow.EndSkill();
+                }
                 return;
             }
 
-            if (!_flow.BeginExecute(slot)) return;
+            if (!_flow.BeginExecute(slot))
+            {
+                _playerCore.CombatActionFlow.EndSkill();
+                return;
+            }
             _activeSkill = skill;
             _preview = new SkillPlacementPreview(skill.Prefab, skill.ClearanceRadius);
             _playerCore.CombatModule?.CancelSecondary();
+        }
+
+        private void ActivateWeaponBuff(int slot, WeaponBuffSkillData buff)
+        {
+            GunWeapon gun = _playerCore.EquipmentModule?.CurrentWeapon?.GetComponent<GunWeapon>();
+            if (gun == null || _playerCore.CombatActionFlow?.TryBeginSkill() != true) return;
+
+            // 강화는 즉시 발동하고 공격 행동 잠금은 바로 해제한다.
+            if (_weaponBuff != null) StopWeaponBuff();
+            _weaponBuff = buff;
+            _weaponBuffEndsAt = Time.time + buff.Duration;
+            ApplyMagazineBuff(buff.MagazineCapacityMultiplier);
+            UpdateWeaponBuff();
+            PlayActivationCues(buff, new Pose(_playerCore.transform.position,
+                _playerCore.transform.rotation));
+            _readyAt[buff] = Time.time + buff.Cooldown;
+            PublishSlot(slot);
+            SkillUsed?.Invoke(slot);
+            _playerCore.CombatActionFlow.EndSkill();
+        }
+
+        private void UpdateWeaponBuff()
+        {
+            if (_weaponBuff == null) return;
+            if (!IsWeaponBuffActive)
+            {
+                StopWeaponBuff();
+                return;
+            }
+
+            GunWeapon current = _playerCore?.EquipmentModule?.CurrentWeapon?.GetComponent<GunWeapon>();
+            if (current == _buffEffectGun) return;
+            _buffEffectGun?.SetSkillEffect(false);
+            _buffEffectGun = current;
+            _buffEffectGun?.SetSkillEffect(true, _weaponBuffEndsAt - Time.time);
+        }
+
+        private void StopWeaponBuff()
+        {
+            if (_weaponBuff != null) CancelScheduledAudio(_weaponBuff);
+            _buffEffectGun?.SetSkillEffect(false);
+            _buffEffectGun = null;
+            _playerCore?.EquipmentModule?.MainWeapon?.GetComponent<GunWeapon>()?.ClearMagazineBuff();
+            _playerCore?.EquipmentModule?.SubWeapon?.GetComponent<GunWeapon>()?.ClearMagazineBuff();
+            _weaponBuff = null;
+            _weaponBuffEndsAt = 0f;
+        }
+
+        private void ApplyMagazineBuff(float multiplier)
+        {
+            _playerCore.EquipmentModule?.MainWeapon?.GetComponent<GunWeapon>()?.ApplyMagazineBuff(multiplier);
+            _playerCore.EquipmentModule?.SubWeapon?.GetComponent<GunWeapon>()?.ApplyMagazineBuff(multiplier);
         }
 
         private void OnExecuteConfirmRequested(int slot)
@@ -116,6 +216,23 @@ namespace alpha.ingame.player
 
         private bool TryBeginCast(int slot, Pose pose, bool self)
         {
+            _castPose = pose;
+            _castingSlot = slot;
+            _castSpawned = false;
+
+            if (_activeSkill.CastAnimationClip == null)
+            {
+                // 모션이 없는 스킬은 확정 시점에 바로 실행한다.
+                if (!TrySpawn())
+                {
+                    if (_flow.IsExecuting) _flow.CancelExecute();
+                    return false;
+                }
+                FinishCast();
+                _playerCore.CombatActionFlow?.EndSkill();
+                return true;
+            }
+
             AnimationView animation = _playerCore.AnimationView;
             if (animation == null || !animation.PlaySkill(_activeSkill.AnimationState,
                     _activeSkill.CastAnimationClip, _activeSkill.CastDuration))
@@ -124,9 +241,6 @@ namespace alpha.ingame.player
                 return false;
             }
 
-            _castPose = pose;
-            _castingSlot = slot;
-            _castSpawned = false;
             _castTimeoutAt = Time.time + _activeSkill.CastDuration + 2f;
             if (!(self ? _flow.BeginSelfCast(slot) : _flow.BeginCast()))
             {
@@ -188,12 +302,11 @@ namespace alpha.ingame.player
                 return;
             }
 
-            if (source == null) return;
             AudioClip clip = string.Equals(eventKey, _activeSkill.Audio1EventKey, StringComparison.Ordinal)
                 ? _activeSkill.Audio1
                 : string.Equals(eventKey, _activeSkill.Audio2EventKey, StringComparison.Ordinal)
                     ? _activeSkill.Audio2 : null;
-            if (clip != null) source.PlayOneShot(clip);
+            PlaySkillAudio(clip, source);
         }
 
         private bool TrySpawn()
@@ -206,10 +319,80 @@ namespace alpha.ingame.player
             }
 
             _castSpawned = true;
+            PlayActivationCues(_activeSkill, _castPose);
             _readyAt[_activeSkill] = Time.time + _activeSkill.Cooldown;
             PublishSlot(_castingSlot);
             SkillUsed?.Invoke(_castingSlot);
             return true;
+        }
+
+        private void PlayActivationCues(SkillData skill, Pose pose)
+        {
+            CancelScheduledAudio(skill);
+            if (skill.ActivationAudioCues.Count > 0)
+            {
+                _scheduledAudio.Add(new ScheduledAudio(skill));
+                UpdateScheduledAudio(); // 지연 0초인 소리는 발동 프레임에 재생한다.
+            }
+            if (skill.ActivationEffectPrefab == null) return;
+
+            GameObject effect = Instantiate(skill.ActivationEffectPrefab, pose.position, pose.rotation);
+            float lifetime = skill.ActivationEffectLifetime;
+            effect.GetComponentInChildren<BondageChainEffectLifetime>()?.Activate(lifetime);
+            Destroy(effect, lifetime);
+        }
+
+        private void UpdateScheduledAudio()
+        {
+            for (int scheduleIndex = _scheduledAudio.Count - 1; scheduleIndex >= 0; scheduleIndex--)
+            {
+                ScheduledAudio schedule = _scheduledAudio[scheduleIndex];
+                if (schedule.Skill is WeaponBuffSkillData &&
+                    (schedule.Skill != _weaponBuff || !IsWeaponBuffActive))
+                {
+                    _scheduledAudio.RemoveAt(scheduleIndex);
+                    continue;
+                }
+
+                bool pending = false;
+                SkillAudioCue[] cues = schedule.Cues;
+                for (int cueIndex = 0; cueIndex < cues.Length; cueIndex++)
+                {
+                    if (schedule.Played[cueIndex]) continue;
+                    SkillAudioCue cue = cues[cueIndex];
+                    if (cue == null || cue.Clip == null)
+                    {
+                        schedule.Played[cueIndex] = true;
+                        continue;
+                    }
+
+                    if (Time.time - schedule.StartedAt < cue.Delay)
+                    {
+                        pending = true;
+                        continue;
+                    }
+
+                    schedule.Played[cueIndex] = true;
+                    PlaySkillAudio(cue.Clip, null, cue.Volume);
+                }
+
+                if (!pending) _scheduledAudio.RemoveAt(scheduleIndex);
+            }
+        }
+
+        private void CancelScheduledAudio(SkillData skill)
+        {
+            _scheduledAudio.RemoveAll(schedule => schedule.Skill == skill);
+        }
+
+        private void PlaySkillAudio(AudioClip clip, AudioSource source = null, float volume = 1f)
+        {
+            if (clip == null) return;
+            if (source == null && _playerCore?.CurrentModel != null)
+                source = _playerCore.CurrentModel
+                    .GetComponentInChildren<SkillAnimationEventRelay>(true)?.AudioSource;
+            if (source != null && source.isActiveAndEnabled)
+                source.PlayOneShot(clip, Mathf.Clamp01(volume));
         }
 
         private void FinishCast()

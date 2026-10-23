@@ -1,5 +1,37 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &540464524553878255
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4616942363771015347}
+  m_Layer: 8
+  m_Name: Skill1Effect
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4616942363771015347
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 540464524553878255}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: 0.70710677, w: 0.7071068}
+  m_LocalPosition: {x: -0.263, y: 0, z: 0.092}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2118125114060263866}
+  m_Father: {fileID: 5129790716566292870}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
 --- !u!1 &3351791509222600678
 GameObject:
   m_ObjectHideFlags: 0
@@ -162,6 +194,7 @@ Transform:
   - {fileID: 4031101077077371827}
   - {fileID: 6679922319801339194}
   - {fileID: 7581554435145826345}
+  - {fileID: 4616942363771015347}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7000000000000000001
@@ -184,9 +217,10 @@ MonoBehaviour:
   _fireMode: 1
   _shotMode: 0
   _fireInterval: 0.15
+  _minimumFireInterval: 0.1
   _magazineCapacity: 30
   _reloadFallbackDuration: 1
-  _reloadBlendOutDuration: 0.25
+  _reloadEndFadeDuration: 0.25
   _reloadEffectPoint: {fileID: 7581554435145826345}
   _reloadAudioEvents:
   - _key: Audio1
@@ -412,6 +446,72 @@ PrefabInstance:
 Transform:
   m_CorrespondingSourceObject: {fileID: 5706960345115239279, guid: 620045904b07d8040a160e9fd0967fef, type: 3}
   m_PrefabInstance: {fileID: 2999680906511177678}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &6602721477658270007
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 4616942363771015347}
+    m_Modifications:
+    - target: {fileID: 5099345410565900429, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5099345410565900429, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5099345410565900429, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5099345410565900429, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5099345410565900429, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5099345410565900429, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5099345410565900429, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5099345410565900429, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5099345410565900429, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5099345410565900429, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5099345410565900430, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_Name
+      value: Skill1_Effect_48_BondageChain
+      objectReference: {fileID: 0}
+    - target: {fileID: 5099345410565900430, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+--- !u!4 &2118125114060263866 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5099345410565900429, guid: a10800925ce604945977fee4e67f1bb1, type: 3}
+  m_PrefabInstance: {fileID: 6602721477658270007}
   m_PrefabAsset: {fileID: 0}
 --- !u!1001 &8601478722160599886
 PrefabInstance:

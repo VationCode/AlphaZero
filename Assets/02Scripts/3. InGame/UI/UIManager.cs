@@ -77,7 +77,7 @@ public class UIManager : MonoBehaviour
             CombatStateFlow combatFlow = FindFirstObjectByType<CombatStateFlow>();
             // 공격키를 놓은 프레임에도 입력 순서에 따라 창이 열리지 않게 한다.
             bool attackJustEnded = AlphaInput.Instance != null && AlphaInput.Instance.IsPrimaryReleased;
-            if (attackJustEnded || (combatFlow != null && combatFlow.CurrentState == ECombatState.Attack))
+            if (attackJustEnded || combatFlow?.Action?.IsAttacking == true)
                 return;
         }
 

@@ -8,6 +8,8 @@ namespace alpha.ingame.player
     {
         [SerializeField] private AudioSource _audioSource;
 
+        public AudioSource AudioSource => _audioSource;
+
         private PlayerCore _playerCore;
         private SkillModule _skillModule;
 

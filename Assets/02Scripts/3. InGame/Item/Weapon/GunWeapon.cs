@@ -53,6 +53,7 @@ namespace alpha.ingame.item
         [SerializeField] private EGunFireMode _fireMode = EGunFireMode.Single;
         [SerializeField] private EGunShotMode _shotMode = EGunShotMode.Projectile;
         [SerializeField, Min(0.01f)] private float _fireInterval = 0.2f;
+        [SerializeField, Min(0.01f)] private float _minimumFireInterval = 0.1f;
         [Header("Ammo")]
         [SerializeField, Min(1)] private int _magazineCapacity = 30;
         [FormerlySerializedAs("_reloadDuration")]
@@ -86,6 +87,8 @@ namespace alpha.ingame.item
         private float _nextShotTime;
         private float _reloadEndsAt;
         private int _currentAmmo;
+        private int _magazineBonus;
+        private int _remainingBonusAmmo;
         private bool _isReloading;
         private bool _reloadUsesAnimation;
         private bool _reloadCompletionStarted;
@@ -94,11 +97,13 @@ namespace alpha.ingame.item
         private bool _beamActive;
         private bool _beamLoopStarted;
         private float _beamLoopAt;
+        private BondageChainEffectLifetime _skillEffect;
+        private GameObject _skillEffectGroup;
 
         public Transform FirePoint => _firePoint;
         public Transform MuzzleEffectPoint => _muzzleEffectPoint != null ? _muzzleEffectPoint : _firePoint;
         public int CurrentAmmo => _currentAmmo;
-        public int MagazineCapacity => Mathf.Max(1, _magazineCapacity);
+        public int MagazineCapacity => Mathf.Max(1, _magazineCapacity) + _magazineBonus;
         public bool CanReload => IsEquipped && !_isReloading && _currentAmmo < MagazineCapacity;
         public bool IsReloading => _isReloading;
         public event Action<int, int> AmmoChanged;
@@ -106,12 +111,18 @@ namespace alpha.ingame.item
         public override void Initialize(PlayerCore owner)
         {
             base.Initialize(owner);
+            _magazineBonus = 0;
+            _remainingBonusAmmo = 0;
             _currentAmmo = MagazineCapacity;
             _isReloading = false;
             _reloadCompletionStarted = false;
             // 프리팹에 배치한 이펙트만 재생 대상으로 등록한다.
             _muzzleEffects = new PlacedWeaponEffects(MuzzleEffectPoint, _muzzleEffectMaxLifetime);
             _reloadEffects = new PlacedWeaponEffects(_reloadEffectPoint);
+            _skillEffect = GetComponentInChildren<BondageChainEffectLifetime>(true);
+            _skillEffectGroup = _skillEffect != null && _skillEffect.transform.parent != transform
+                ? _skillEffect.transform.parent.gameObject : null;
+            SetSkillEffect(false);
             // 무기를 만들 때 선택한 판정 방식에 필요한 풀을 준비한다.
             EnsurePools();
         }
@@ -153,6 +164,7 @@ namespace alpha.ingame.item
                 Owner?.AnimationView?.StopReload(_reloadEndFadeDuration);
             StopReloadEffect();
             _currentAmmo = MagazineCapacity;
+            _remainingBonusAmmo = _magazineBonus;
             AmmoChanged?.Invoke(_currentAmmo, MagazineCapacity);
         }
 
@@ -277,6 +289,54 @@ namespace alpha.ingame.item
             _muzzleEffects?.StopAll();
         }
 
+        public void SetSkillEffect(bool active, float duration = 0f)
+        {
+            if (_skillEffectGroup == null || _skillEffect == null) return;
+            if (!active)
+            {
+                _skillEffect.gameObject.SetActive(false);
+                _skillEffectGroup.SetActive(false);
+                return;
+            }
+
+            _skillEffectGroup.SetActive(true);
+            _skillEffect.gameObject.SetActive(true);
+            _skillEffect.Activate(duration);
+        }
+
+        public void ApplyMagazineBuff(float multiplier)
+        {
+            ClearMagazineBuff();
+            int baseCapacity = Mathf.Max(1, _magazineCapacity);
+            int increasedCapacity = Mathf.RoundToInt(baseCapacity * Mathf.Max(1f, multiplier));
+            _magazineBonus = Mathf.Max(0, increasedCapacity - baseCapacity);
+            _remainingBonusAmmo = _magazineBonus;
+            _currentAmmo += _magazineBonus;
+            AmmoChanged?.Invoke(_currentAmmo, MagazineCapacity);
+        }
+
+        public void ClearMagazineBuff()
+        {
+            if (_magazineBonus == 0) return;
+            // 보너스 탄약부터 소비했으므로 남은 보너스만 제거한다.
+            _currentAmmo = Mathf.Max(0, _currentAmmo - _remainingBonusAmmo);
+            _magazineBonus = 0;
+            _remainingBonusAmmo = 0;
+            AmmoChanged?.Invoke(_currentAmmo, MagazineCapacity);
+        }
+
+        private float EffectiveFireInterval()
+        {
+            float baseInterval = Mathf.Max(0.01f, _fireInterval);
+            float multiplier = Owner?.SkillModule?.FireRateMultiplier ?? 1f;
+            // 총마다 지정한 최소 간격보다 빠르게 발사하지 않는다.
+            return Mathf.Max(Mathf.Min(baseInterval, Mathf.Max(0.01f, _minimumFireInterval)),
+                baseInterval / Mathf.Max(1f, multiplier));
+        }
+
+        private float EffectiveDamage() =>
+            _damage * (Owner?.SkillModule?.DamageMultiplier ?? 1f);
+
         private void PlayFallbackReloadEvents()
         {
             if (_reloadAudioEvents != null)
@@ -317,11 +377,12 @@ namespace alpha.ingame.item
         {
             if (_isReloading || _currentAmmo <= 0 || _firePoint == null || Time.time < _nextShotTime) return false;
             if (_shotMode == EGunShotMode.Projectile && _projectilePrefab == null) return false;
-            _nextShotTime = Time.time + Mathf.Max(0.01f, _fireInterval);
+            _nextShotTime = Time.time + EffectiveFireInterval();
             EnsurePools();
 
             Vector3 direction = GetAimDirection();
-            float damage = Mathf.Lerp(_damage, _damage * _fullChargeDamageMultiplier, charge);
+            float baseDamage = EffectiveDamage();
+            float damage = Mathf.Lerp(baseDamage, baseDamage * _fullChargeDamageMultiplier, charge);
             if (_shotMode == EGunShotMode.Hitscan)
             {
                 // 총구에서 다시 검사해 카메라와 총구 사이의 장애물을 반영한다.
@@ -385,7 +446,7 @@ namespace alpha.ingame.item
                 return;
             }
 
-            _nextShotTime = Time.time + Mathf.Max(0.01f, _fireInterval);
+            _nextShotTime = Time.time + EffectiveFireInterval();
             ConsumeRound();
             Vector3 direction = GetAimDirection();
             if (TryGetNearestHit(new Ray(_firePoint.position, direction), _aimDistance, out RaycastHit hit))
@@ -394,7 +455,7 @@ namespace alpha.ingame.item
                 foreach (MonoBehaviour behaviour in hit.collider.GetComponentsInParent<MonoBehaviour>())
                 {
                     if (behaviour is not IDamageable damageable) continue;
-                    damageable.TakeDamage(_damage, Owner.gameObject);
+                    damageable.TakeDamage(EffectiveDamage(), Owner.gameObject);
                     break;
                 }
             }
@@ -404,6 +465,7 @@ namespace alpha.ingame.item
 
         private void ConsumeRound()
         {
+            if (_remainingBonusAmmo > 0) _remainingBonusAmmo--;
             _currentAmmo--;
             AmmoChanged?.Invoke(_currentAmmo, MagazineCapacity);
         }
