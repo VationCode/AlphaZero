@@ -40,7 +40,7 @@ namespace alpha.ingame.player
                 return;
             }
 
-            // Ready 및 재장전 중에도 입력 없이 CombatMove Tree의 대기를 유지한다.
+            // 전투 자세일 때만 입력 없이 CombatMove Tree의 대기를 유지한다.
             if (moveInput.sqrMagnitude <= 0.0001f && !isCombat)
             {
                 _StateMachine.ChangeState(ELocomotionState.Idle);

@@ -76,8 +76,7 @@ namespace alpha.ingame.player
             }
         }
 
-        public bool ShouldFaceAimDirection =>
-            IsCombatStanceActive && _playerCore?.CombatActionFlow?.IsReloading != true;
+        public bool ShouldFaceAimDirection => IsCombatStanceActive;
 
         private void Awake()
         {

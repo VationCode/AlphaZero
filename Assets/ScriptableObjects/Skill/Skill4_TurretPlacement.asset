@@ -16,7 +16,7 @@ MonoBehaviour:
   _displayName: Turret
   _description: "\uC124\uCE58\uD615 \uC790\uB3D9 \uCE90\uB17C"
   _icon: {fileID: 21300000, guid: b1d0c0aaa89ad5d4085d5cc75b9c35b7, type: 3}
-  _cooldown: 2
+  _cooldown: 10
   _activationMode: 0
   _executeEventKey: Excute
   _audio1EventKey: Audio1

@@ -226,9 +226,6 @@ namespace alpha.ingame.player
         private void UpdateFacing(Vector3 p_direction, bool p_faceCameraImmediately)
         {
             if (_characterCtrl == null) return;
-            // 재장전 중에는 전투 이동 자세를 유지한 채 모든 방향 회전을 멈춘다.
-            if (_playerCore?.CombatActionFlow?.IsReloading == true) return;
-
             Transform playerTransform = _characterCtrl.transform;
             if (LockOnTarget != null)
             {

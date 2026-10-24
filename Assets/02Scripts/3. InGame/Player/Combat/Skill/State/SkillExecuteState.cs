@@ -12,9 +12,10 @@ namespace alpha.ingame.player
         public override void UpdateState()
         {
             AlphaInput input = AlphaInput.Instance;
-            if (input.IsSecondaryPressed)
+            // 설치 위치를 고르는 중에는 같은 번호키로도 취소한다.
+            if (input.IsSecondaryPressed || Flow.PressedSlotThisFrame == Flow.SelectedSlot)
             {
-                Flow.CancelExecute();
+                Flow.RequestCancel();
                 return;
             }
 
@@ -36,7 +37,7 @@ namespace alpha.ingame.player
         public override void UpdateState()
         {
             if (AlphaInput.Instance?.IsSecondaryPressed == true)
-                Flow.CancelExecute();
+                Flow.RequestCancel();
         }
 
         public override void ExitState() { }

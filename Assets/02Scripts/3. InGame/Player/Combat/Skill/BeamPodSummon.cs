@@ -17,7 +17,21 @@ namespace alpha.ingame.player
         private bool _started;
 
         public bool HasActivePods => _targetModule != null && _targetModule.IsActive;
-        public void AdvanceCommand() => _targetModule?.AdvanceCommand();
+        public bool IsAttacking => _targetModule != null && _targetModule.IsAttacking;
+        public float ActiveProgress
+        {
+            get
+            {
+                if (!_started || _pods == null) return 0f;
+                float progress = 0f;
+                // 일부 포드가 파괴돼도 마지막 포드가 남은 시간까지 표시한다.
+                foreach (SummonLifetime pod in _pods)
+                    if (pod != null) progress = Mathf.Max(progress, pod.ActiveProgress);
+                return progress;
+            }
+        }
+        public EBeamPodCommandResult AdvanceCommand() => _targetModule != null
+            ? _targetModule.AdvanceCommand() : EBeamPodCommandResult.None;
 
         private void Awake()
         {

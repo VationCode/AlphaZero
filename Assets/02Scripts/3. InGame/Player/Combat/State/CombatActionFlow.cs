@@ -149,8 +149,6 @@ namespace alpha.ingame.player
 
             _activeGun = null;
             CurrentState = ECombatAction.Idle;
-            // LeftArm 레이어의 페이드까지 끝난 뒤 자세 유지 시간을 새로 시작한다.
-            _playerCore.CombatStanceFlow?.RefreshReady();
         }
 
         private void CancelCurrent()

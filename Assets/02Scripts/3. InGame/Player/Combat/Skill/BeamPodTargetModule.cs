@@ -3,11 +3,13 @@ using UnityEngine;
 
 namespace alpha.ingame.player
 {
+    public enum EBeamPodCommandResult { None, Attack, Cancel }
+
     /// <summary>타겟을 포드에 배정하고 3번 키의 접근·복귀 명령을 전달한다.</summary>
     [DefaultExecutionOrder(157)]
     public sealed class BeamPodTargetModule : MonoBehaviour, IPlayerTargetSession
     {
-        private enum PodCommandState { Targeting, Approaching, Returning }
+        private enum PodCommandState { Targeting, Approaching }
 
         private readonly List<Collider> _targets = new();
         private readonly List<int> _activePods = new();
@@ -76,24 +78,20 @@ namespace alpha.ingame.player
             else AssignPods();
         }
 
-        public void AdvanceCommand()
+        public EBeamPodCommandResult AdvanceCommand()
         {
-            if (!IsActive) return;
+            if (!IsActive) return EBeamPodCommandResult.None;
             if (_commandState == PodCommandState.Targeting)
             {
-                if (_targets.Count == 0) return;
+                if (_targets.Count == 0) return EBeamPodCommandResult.None;
                 _playerTargeting.FreezeTargets(this);
                 _commandState = PodCommandState.Approaching;
                 _follow.Pause();
                 ApplyTravelCommands();
+                return EBeamPodCommandResult.Attack;
             }
-            else if (_commandState == PodCommandState.Approaching)
-                CancelAttack();
-            else
-            {
-                _commandState = PodCommandState.Targeting;
-                _playerTargeting.Retarget(this);
-            }
+            CancelAttack();
+            return EBeamPodCommandResult.Cancel;
         }
 
         private void Update()
@@ -127,8 +125,9 @@ namespace alpha.ingame.player
 
         private void CancelAttack()
         {
-            _commandState = PodCommandState.Returning;
-            _playerTargeting.ClearTargets(this);
+            _commandState = PodCommandState.Targeting;
+            // 복귀를 시작하는 프레임에 현재 화면의 타겟 표시도 다시 켠다.
+            _playerTargeting.Retarget(this);
             ApplyTravelCommands();
             _follow.Resume();
         }

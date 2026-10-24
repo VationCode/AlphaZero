@@ -159,7 +159,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: -250, y: 75}
-  m_SizeDelta: {x: 480, y: 130}
+  m_SizeDelta: {x: 480, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &71062899
 MonoBehaviour:
@@ -8148,6 +8148,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _playerCore: {fileID: 381566875}
   _slotsRoot: {fileID: 71062898}
+  _selectionScale: 1.1
+  _selectionPulseDuration: 0.28
+  _selectionAudioSource: {fileID: 379617195}
+  _selectionClip: {fileID: 8300000, guid: 422ac2b524ebc154c8c04a02fc525f79, type: 3}
+  _cancelClip: {fileID: 8300000, guid: 9be48db27601ed04e867786b076fbe2b, type: 3}
+  _beamPodTargetingColor: {r: 0.2, g: 1, b: 0.35, a: 1}
+  _beamPodAttackingColor: {r: 1, g: 0.25, b: 0.25, a: 1}
 --- !u!114 &9000000000108
 MonoBehaviour:
   m_ObjectHideFlags: 0

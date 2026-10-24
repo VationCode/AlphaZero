@@ -21,8 +21,9 @@ namespace alpha.ingame.player
             get
             {
                 ECombatAction action = _playerCore.CombatActionFlow?.CurrentState ?? ECombatAction.Idle;
-                bool combat = action == ECombatAction.Attack || action == ECombatAction.Reload ||
-                              (action == ECombatAction.Idle &&
+                // 재장전은 Ready 시간이나 조준 상태를 변경하지 않는다.
+                bool combat = action == ECombatAction.Attack ||
+                              ((action == ECombatAction.Idle || action == ECombatAction.Reload) &&
                                (Time.time < _readyUntil || _playerCore.CombatModule?.IsAimOrScopeActive == true));
                 return combat ? ECombatStance.Combat : ECombatStance.Normal;
             }

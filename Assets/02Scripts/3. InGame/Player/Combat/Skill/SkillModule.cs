@@ -29,10 +29,32 @@ namespace alpha.ingame.player
             }
         }
 
+        private sealed class ActiveDeployable
+        {
+            public readonly SkillData Skill;
+            public readonly GameObject Instance;
+            private readonly SummonLifetime _summon;
+            private readonly ShieldInstance _shield;
+
+            public ActiveDeployable(SkillData skill, GameObject instance,
+                SummonLifetime summon, ShieldInstance shield)
+            {
+                Skill = skill;
+                Instance = instance;
+                _summon = summon;
+                _shield = shield;
+            }
+
+            public float Progress => Instance == null ? 0f :
+                _summon != null ? _summon.ActiveProgress :
+                _shield != null ? _shield.ActiveProgress : 0f;
+        }
+
         [SerializeField] private SkillData[] _slots = new SkillData[4];
 
         private readonly Dictionary<SkillData, float> _readyAt = new();
         private readonly List<ScheduledAudio> _scheduledAudio = new();
+        private readonly List<ActiveDeployable> _activeDeployables = new();
         private SkillStateFlow _flow;
         private PlayerCore _playerCore;
         private DeployableSkillData _activeSkill;
@@ -45,11 +67,49 @@ namespace alpha.ingame.player
         private float _weaponBuffEndsAt;
         private GunWeapon _buffEffectGun;
         private BeamPodSummon _beamPodGroup;
+        private int _beamPodSlot;
 
         public float FireRateMultiplier => IsWeaponBuffActive ? _weaponBuff.FireRateMultiplier : 1f;
         public float DamageMultiplier => IsWeaponBuffActive ? _weaponBuff.DamageMultiplier : 1f;
+        // 포드가 남아 있는 동안에만 해당 슬롯의 상태색을 표시한다.
+        public int ActiveBeamPodSlot => _beamPodGroup != null && _beamPodGroup.HasActivePods
+            ? _beamPodSlot : 0;
+        public bool IsBeamPodAttacking => _beamPodGroup != null && _beamPodGroup.IsAttacking;
         private bool IsWeaponBuffActive => _weaponBuff != null && Time.time < _weaponBuffEndsAt;
 
+        // 쿨타임과 별도로 실제로 살아 있는 스킬 효과의 남은 비율을 돌려준다.
+        public float GetActiveProgress(int slot)
+        {
+            SkillData skill = GetSkill(slot);
+            if (skill == null) return 0f;
+            if (skill is WeaponBuffSkillData buff)
+                return _weaponBuff == buff && IsWeaponBuffActive
+                    ? Mathf.Clamp01((_weaponBuffEndsAt - Time.time) / buff.Duration) : 0f;
+            if (skill is BeamPodSkillData)
+                return _beamPodGroup != null && _beamPodSlot == slot
+                    ? _beamPodGroup.ActiveProgress : 0f;
+
+            float progress = 0f;
+            for (int i = _activeDeployables.Count - 1; i >= 0; i--)
+            {
+                ActiveDeployable active = _activeDeployables[i];
+                float remaining = active.Progress;
+                if (remaining <= 0f)
+                {
+                    _activeDeployables.RemoveAt(i);
+                    continue;
+                }
+                // 같은 슬롯의 설치물이 겹치면 남은 비율이 가장 큰 것을 표시한다.
+                if (active.Skill == skill) progress = Mathf.Max(progress, remaining);
+            }
+            return progress;
+        }
+
+        // 실제로 받아들인 스킬 선택을 UI에 알린다.
+        public event Action<int> SkillSelected;
+        // 위치 선택과 포드 공격 명령에만 버튼 선택음을 재생한다.
+        public event Action<int> SkillSelectionSoundRequested;
+        public event Action<int> SkillCanceled;
         // 실제 스킬 실행이 성공하고 쿨다운이 시작된 뒤 알린다.
         public event Action<int> SkillUsed;
 
@@ -64,6 +124,7 @@ namespace alpha.ingame.player
             _flow.SkillRequested += OnSkillRequested;
             _flow.ExecuteConfirmRequested += OnExecuteConfirmRequested;
             _flow.ExecuteCanceled += OnExecuteCanceled;
+            _flow.CancelRequested += OnCancelRequested;
             for (int slot = 1; slot <= 4; slot++) PublishSlot(slot);
         }
 
@@ -72,13 +133,16 @@ namespace alpha.ingame.player
             _flow.SkillRequested -= OnSkillRequested;
             _flow.ExecuteConfirmRequested -= OnExecuteConfirmRequested;
             _flow.ExecuteCanceled -= OnExecuteCanceled;
+            _flow.CancelRequested -= OnCancelRequested;
             _flow.CancelExecute();
             _playerCore?.CombatActionFlow?.EndSkill();
             ClearActiveSkill();
             StopWeaponBuff();
             if (_beamPodGroup != null) Destroy(_beamPodGroup.gameObject);
             _beamPodGroup = null;
+            _beamPodSlot = 0;
             _scheduledAudio.Clear();
+            _activeDeployables.Clear();
             _playerCore?.SkillDisplayChannel.Clear();
         }
 
@@ -118,7 +182,13 @@ namespace alpha.ingame.player
                 _beamPodGroup.HasActivePods)
             {
                 // 소환 후의 3번 키는 쿨다운과 관계없이 포드 명령으로 전달한다.
-                _beamPodGroup.AdvanceCommand();
+                EBeamPodCommandResult result = _beamPodGroup.AdvanceCommand();
+                if (result == EBeamPodCommandResult.Cancel) SkillCanceled?.Invoke(slot);
+                else if (result == EBeamPodCommandResult.Attack)
+                {
+                    SkillSelected?.Invoke(slot);
+                    SkillSelectionSoundRequested?.Invoke(slot);
+                }
                 return;
             }
             if (requested == null || GetRemainingCooldown(slot) > 0f ||
@@ -152,6 +222,7 @@ namespace alpha.ingame.player
                     ClearActiveSkill();
                     _playerCore.CombatActionFlow.EndSkill();
                 }
+                else SkillSelected?.Invoke(slot);
                 return;
             }
 
@@ -163,6 +234,8 @@ namespace alpha.ingame.player
             _activeSkill = skill;
             _preview = new SkillPlacementPreview(skill.Prefab, skill.ClearanceRadius);
             _playerCore.CombatModule?.CancelSecondary();
+            SkillSelected?.Invoke(slot);
+            SkillSelectionSoundRequested?.Invoke(slot);
         }
 
         private void ActivateWeaponBuff(int slot, WeaponBuffSkillData buff)
@@ -180,6 +253,7 @@ namespace alpha.ingame.player
                 _playerCore.transform.rotation));
             _readyAt[buff] = Time.time + buff.Cooldown;
             PublishSlot(slot);
+            SkillSelected?.Invoke(slot);
             SkillUsed?.Invoke(slot);
             _playerCore.CombatActionFlow.EndSkill();
         }
@@ -191,6 +265,8 @@ namespace alpha.ingame.player
 
             _playerCore.CombatModule?.CancelSecondary();
             if (_beamPodGroup != null) Destroy(_beamPodGroup.gameObject);
+            _beamPodGroup = null;
+            _beamPodSlot = 0;
             Transform owner = _playerCore.transform;
             Quaternion rotation = Quaternion.Euler(0f, owner.eulerAngles.y, 0f);
             Vector3 spawnPosition = owner.position + rotation * prefab.transform.localPosition;
@@ -198,9 +274,11 @@ namespace alpha.ingame.player
             if (summon.Activate(skill, _playerCore))
             {
                 _beamPodGroup = summon;
+                _beamPodSlot = slot;
                 PlayActivationCues(skill, new Pose(summon.transform.position, summon.transform.rotation));
                 _readyAt[skill] = Time.time + skill.Cooldown;
                 PublishSlot(slot);
+                SkillSelected?.Invoke(slot);
                 SkillUsed?.Invoke(slot);
             }
             else Destroy(summon.gameObject);
@@ -364,6 +442,12 @@ namespace alpha.ingame.player
                 return false;
             }
 
+            SummonLifetime summon = instance.GetComponent<SummonLifetime>();
+            ShieldInstance shieldInstance = instance.GetComponent<ShieldInstance>();
+            if (summon != null || shieldInstance != null)
+                _activeDeployables.Add(new ActiveDeployable(_activeSkill, instance,
+                    summon, shieldInstance));
+
             _castSpawned = true;
             if (_activeSkill is ShieldSkillData shield)
             {
@@ -454,6 +538,8 @@ namespace alpha.ingame.player
         }
 
         private void OnExecuteCanceled(int slot) => ClearActiveSkill();
+
+        private void OnCancelRequested(int slot) => SkillCanceled?.Invoke(slot);
 
         private void ClearActiveSkill()
         {

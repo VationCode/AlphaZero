@@ -7,11 +7,16 @@ namespace alpha.ingame.player
     public sealed class ShieldInstance : MonoBehaviour
     {
         private float _expiresAt;
+        private float _duration;
         private bool _activated;
+
+        public float ActiveProgress => _activated && isActiveAndEnabled
+            ? Mathf.Clamp01((_expiresAt - Time.time) / _duration) : 0f;
 
         public void Activate(float duration)
         {
             duration = Mathf.Max(0.1f, duration);
+            _duration = duration;
             _expiresAt = Time.time + duration;
 
             // 프리팹의 짧은 구체 버스트와 8초 지속 파티클을 설치 시간에 맞춘다.

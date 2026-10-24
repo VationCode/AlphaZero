@@ -35,6 +35,7 @@ namespace alpha.ingame.player
         public event Action<int> SkillRequested;
         public event Action<int> ExecuteConfirmRequested;
         public event Action<int> ExecuteCanceled;
+        public event Action<int> CancelRequested;
         public event Action ExecutionEnded;
 
         private void Awake()
@@ -133,6 +134,15 @@ namespace alpha.ingame.player
             SelectedSlot = 0;
             ExecuteCanceled?.Invoke(slot);
             ExecutionEnded?.Invoke();
+        }
+
+        // 입력으로 취소한 경우만 알린다. 내부 실패나 비활성화에는 취소음을 내지 않는다.
+        public void RequestCancel()
+        {
+            if (!IsExecuting) return;
+            int slot = SelectedSlot;
+            CancelExecute();
+            CancelRequested?.Invoke(slot);
         }
 
         public void RequestSkill(int slot) => SkillRequested?.Invoke(slot);

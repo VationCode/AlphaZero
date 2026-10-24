@@ -17,8 +17,12 @@ namespace alpha.ingame.player
         [Tooltip("부서지는 시간"),SerializeField, Min(0f)] private float _debrisLifetime = 2f;
 
         private bool _isExpired;
+        private float _expiresAt;
 
         public bool IsExpired => _isExpired;
+        // 파괴 외형이 남아 있어도 실제 소환이 끝나면 UI 진행률은 0이다.
+        public float ActiveProgress => isActiveAndEnabled && !_isExpired
+            ? Mathf.Clamp01((_expiresAt - Time.time) / Mathf.Max(0.01f, _survivalTime)) : 0f;
 
         private void Awake()
         {
@@ -34,6 +38,7 @@ namespace alpha.ingame.player
         private void OnEnable()
         {
             _isExpired = false;
+            _expiresAt = Time.time + Mathf.Max(0f, _survivalTime);
             // Unity 참조의 빈 값은 ?. 대신 Unity의 null 비교로 확인한다.
             if (_intactRoot != null) _intactRoot.gameObject.SetActive(true);
             if (_brokenRoot != null) _brokenRoot.gameObject.SetActive(false);

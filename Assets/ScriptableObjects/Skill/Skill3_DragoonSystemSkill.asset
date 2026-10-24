@@ -16,7 +16,7 @@ MonoBehaviour:
   _displayName: Beam Pod
   _description: "\uBE54\uD3EC\uB4DC \uC18C\uD658"
   _icon: {fileID: 21300000, guid: b7707e46675a98548b340209c346da6a, type: 3}
-  _cooldown: 2
+  _cooldown: 30
   _activationMode: 1
   _executeEventKey: Excute
   _audio1EventKey: Audio1
