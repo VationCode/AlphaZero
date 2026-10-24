@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 030f83c6e7fd7a844b11e3b9f4516aac
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355538
+  packageName: Scythe Animation Pack
+  packageVersion: 1.0
+  assetPath: Assets/Scythe Animation Pack/Animations/Humanoid/02_Attack/11_Speed_Attack/01_Speed_Attack/Speed_Attack_Loop.anim
+  uploadId: 980002

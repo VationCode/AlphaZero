@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 32f3b4c89c105684b9011d73f7e9f03c
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355538
+  packageName: Scythe Animation Pack
+  packageVersion: 1.0
+  assetPath: Assets/Scythe Animation Pack/Animations/Humanoid/05_Jump/01_Jump/05_Jump_R_90/Jump_to_Run_R_90.anim
+  uploadId: 980002

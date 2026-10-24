@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 7a8f6a3f878d0c34584cc96b826988cc
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355538
+  packageName: Scythe Animation Pack
+  packageVersion: 1.0
+  assetPath: Assets/Scythe Animation Pack/Animations/Humanoid/02_Attack/10_Buff/Buff.anim
+  uploadId: 980002

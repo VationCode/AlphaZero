@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 81f1633684bc7c042926a48b9ef0d5fd
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355538
+  packageName: Scythe Animation Pack
+  packageVersion: 1.0
+  assetPath: Assets/Scythe Animation Pack/Animations/Humanoid/08_Hit/11_Get_Up/Get_up_B.anim
+  uploadId: 980002

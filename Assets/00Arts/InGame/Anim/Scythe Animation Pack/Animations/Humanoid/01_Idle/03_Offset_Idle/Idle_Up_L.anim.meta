@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c4ba1d5c39193ac4283aed86a0de1e63
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 7400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 355538
+  packageName: Scythe Animation Pack
+  packageVersion: 1.0
+  assetPath: Assets/Scythe Animation Pack/Animations/Humanoid/01_Idle/03_Offset_Idle/Idle_Up_L.anim
+  uploadId: 980002
