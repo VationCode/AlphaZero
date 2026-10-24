@@ -10,19 +10,22 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 69d23b8488df4ea7a320047b71f922c1, type: 3}
-  m_Name: TurretPlacement
+  m_Name: Skill4_TurretPlacement
   m_EditorClassIdentifier: 
   _id: 1
   _displayName: Turret
   _description: "\uC124\uCE58\uD615 \uC790\uB3D9 \uCE90\uB17C"
   _icon: {fileID: 21300000, guid: b1d0c0aaa89ad5d4085d5cc75b9c35b7, type: 3}
-  _cooldown: 10
+  _cooldown: 2
   _activationMode: 0
   _executeEventKey: Excute
   _audio1EventKey: Audio1
   _audio2EventKey: Audio2
   _audio1: {fileID: 8300000, guid: e30af13cb04e9fd4ea09157a6c563678, type: 3}
   _audio2: {fileID: 8300000, guid: 46b93336c30b1e74bbd03b94ff33eb79, type: 3}
+  _activationAudioCues: []
+  _activationEffectPrefab: {fileID: 0}
+  _activationEffectLifetime: 3
   _prefab: {fileID: 7218214149929976134, guid: 528841eb3f3d98149a09a53e232bc2ba, type: 3}
   _placementOffset: {x: 0, y: 0, z: 0}
   _maxDistance: 12

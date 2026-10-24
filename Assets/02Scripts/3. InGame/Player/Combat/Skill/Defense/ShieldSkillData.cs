@@ -8,8 +8,11 @@ namespace alpha.ingame.player
     {
         [Header("Shield")]
         [SerializeField, Min(0.1f)] private float _duration = 8f;
+        [Tooltip("Excute 이벤트 후 이동 입력을 다시 받을 때까지의 시간(초)")]
+        [SerializeField, Min(0f)] private float _moveDelayAfterExecute = 0.2f;
 
         public float Duration => Mathf.Max(0.1f, _duration);
+        public float MoveDelayAfterExecute => Mathf.Max(0f, _moveDelayAfterExecute);
 
         public override bool TryActivateInstance(GameObject instance)
         {
@@ -27,6 +30,7 @@ namespace alpha.ingame.player
         {
             base.OnValidate();
             _duration = Mathf.Max(0.1f, _duration);
+            _moveDelayAfterExecute = Mathf.Max(0f, _moveDelayAfterExecute);
         }
     }
 }

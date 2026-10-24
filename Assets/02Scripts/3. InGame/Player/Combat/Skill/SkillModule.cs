@@ -317,6 +317,13 @@ namespace alpha.ingame.player
                 return;
             }
 
+            // 쉴드는 Excute 이후 대기 시간이 끝나면 스킬 레이어도 내려 이동 모션을 보인다.
+            if (_activeSkill is ShieldSkillData && _castSpawned)
+            {
+                if (!_flow.IsMovementLocked) FinishCast();
+                return;
+            }
+
             if (!_playerCore.AnimationView.TryGetSkillProgress(out float progress)) return;
 
             if (progress < 1f) return;
@@ -358,6 +365,12 @@ namespace alpha.ingame.player
             }
 
             _castSpawned = true;
+            if (_activeSkill is ShieldSkillData shield)
+            {
+                _flow.ScheduleMovementUnlock(shield.MoveDelayAfterExecute);
+                _castTimeoutAt = Mathf.Max(_castTimeoutAt,
+                    Time.time + shield.MoveDelayAfterExecute + 2f);
+            }
             PlayActivationCues(_activeSkill, _castPose);
             _readyAt[_activeSkill] = Time.time + _activeSkill.Cooldown;
             PublishSlot(_castingSlot);

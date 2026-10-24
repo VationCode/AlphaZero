@@ -18,6 +18,7 @@ namespace alpha.ingame.player
         [Tooltip("타겟 콜라이더의 가로 크기를 접근 거리에 반영하는 비율")]
         [SerializeField, Min(0f)] private float _colliderSizeDistanceFactor = 0.35f;
         [SerializeField, Min(1f)] private float _targetRandomMultiplier = 1.25f;
+        [SerializeField, Min(0.01f)] private float _attackPositionTolerance = 0.2f;
 
         private RandomPointMove _randomMove;
         private SummonLifetime _lifetime;
@@ -29,11 +30,13 @@ namespace alpha.ingame.player
         private bool _isActive;
         private bool _isApproaching;
         private bool _isReturning;
+        private bool _isAtAttackPosition;
 
         // 공격을 끝내고 추적을 재개할지 그룹이 각 포드의 실제 위치로 판단한다.
         public bool IsBeyondPlayerLimit => _isActive && _player != null &&
             (transform.position - _player.position).sqrMagnitude >
             _maxPlayerDistance * _maxPlayerDistance;
+        public bool IsAtAttackPosition => _isApproaching && _isAtAttackPosition;
 
         private void Awake()
         {
@@ -51,6 +54,7 @@ namespace alpha.ingame.player
             _isActive = player != null;
             _isApproaching = false;
             _isReturning = false;
+            _isAtAttackPosition = false;
             _randomMove.SetRadiusMultiplier(1f);
             _randomMove.SetOrigin(formationLocalPosition);
         }
@@ -58,6 +62,7 @@ namespace alpha.ingame.player
         public void MoveToTarget(Collider target)
         {
             if (!_isActive || target == null) return;
+            if (_target != target) _isAtAttackPosition = false;
             _target = target;
             _isApproaching = true;
             _isReturning = false;
@@ -69,6 +74,7 @@ namespace alpha.ingame.player
             _target = null;
             _isReturning |= _isApproaching;
             _isApproaching = false;
+            _isAtAttackPosition = false;
             _randomMove.SetRadiusMultiplier(1f);
         }
 
@@ -112,6 +118,11 @@ namespace alpha.ingame.player
             _baseWorldPosition = _isApproaching || _isReturning
                 ? Vector3.MoveTowards(current, destination, _moveSpeed * Time.deltaTime)
                 : destination;
+            // 기준 위치가 목표 접근 위치에 도착해야 빔을 켤 수 있다.
+            float tolerance = _isAtAttackPosition
+                ? _attackPositionTolerance * 1.5f : _attackPositionTolerance;
+            _isAtAttackPosition = _isApproaching &&
+                (_baseWorldPosition - destination).sqrMagnitude <= tolerance * tolerance;
             if (_isReturning && (_baseWorldPosition - destination).sqrMagnitude < 0.0004f)
                 _isReturning = false;
             _randomMove.SetOrigin(group.InverseTransformPoint(_baseWorldPosition));
@@ -138,6 +149,7 @@ namespace alpha.ingame.player
             _target = null;
             _isApproaching = false;
             _isReturning = false;
+            _isAtAttackPosition = false;
         }
     }
 }

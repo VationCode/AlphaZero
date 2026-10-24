@@ -9,6 +9,7 @@ namespace alpha.ingame.player
         private SummonLifetime[] _pods;
         private RandomPointMove[] _randomMoves;
         private BeamPodTravel[] _travels;
+        private BeamPodAttack[] _attacks;
         private Vector3[] _spawnLocalPositions;
         private Quaternion[] _spawnLocalRotations;
         private BeamPodFollow _follow;
@@ -23,6 +24,7 @@ namespace alpha.ingame.player
             _pods = GetComponentsInChildren<SummonLifetime>(true);
             _randomMoves = new RandomPointMove[_pods.Length];
             _travels = new BeamPodTravel[_pods.Length];
+            _attacks = new BeamPodAttack[_pods.Length];
             _spawnLocalPositions = new Vector3[_pods.Length];
             _spawnLocalRotations = new Quaternion[_pods.Length];
 
@@ -32,6 +34,7 @@ namespace alpha.ingame.player
                 Transform podTransform = _pods[i].transform;
                 _randomMoves[i] = _pods[i].GetComponent<RandomPointMove>();
                 _travels[i] = _pods[i].GetComponent<BeamPodTravel>();
+                _attacks[i] = _pods[i].GetComponent<BeamPodAttack>();
                 _spawnLocalPositions[i] = podTransform.localPosition;
                 _spawnLocalRotations[i] = podTransform.localRotation;
             }
@@ -51,8 +54,9 @@ namespace alpha.ingame.player
 
             for (int i = 0; i < _pods.Length; i++)
             {
-                if (_pods[i] != null && _randomMoves[i] != null && _travels[i] != null) continue;
-                Debug.LogError($"{nameof(BeamPodSummon)}: 각 빔포드에 {nameof(RandomPointMove)}와 {nameof(BeamPodTravel)}을 연결하세요.", this);
+                if (_pods[i] != null && _randomMoves[i] != null &&
+                    _travels[i] != null && _attacks[i] != null) continue;
+                Debug.LogError($"{nameof(BeamPodSummon)}: 각 빔포드에 이동 및 공격 컴포넌트를 연결하세요.", this);
                 return false;
             }
 
@@ -72,6 +76,10 @@ namespace alpha.ingame.player
                 pod.gameObject.SetActive(true);
                 _randomMoves[i].Begin(_spawnLocalPositions[i]);
                 _travels[i].Begin(player.transform, _spawnLocalPositions[i]);
+                if (_attacks[i].Begin(player.transform, skill.SightLayers, skill.TargetLayers))
+                    continue;
+                foreach (SummonLifetime activePod in _pods) activePod.gameObject.SetActive(false);
+                return false;
             }
             if (_targetModule.Begin(skill, player))
             {

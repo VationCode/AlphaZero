@@ -141,7 +141,7 @@ namespace alpha.ingame.player
 
         private void LateUpdate()
         {
-            if (_playerCore?.SkillStateFlow?.IsCasting == true) return;
+            if (_playerCore?.SkillStateFlow?.IsMovementLocked == true) return;
 
             // 공중에서는 이동 입력 방향 회전을 유지하고, 락온만 대상 회전을 우선한다.
             if (LockOnTarget != null || (!_isAirMoving && ShouldFaceAimDirection))

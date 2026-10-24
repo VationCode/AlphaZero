@@ -77,7 +77,7 @@ GameObject:
   - component: {fileID: 206293292149116621}
   - component: {fileID: 206293292149116626}
   m_Layer: 0
-  m_Name: BeamPodGroup
+  m_Name: Skill3_BeamPodGroup
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

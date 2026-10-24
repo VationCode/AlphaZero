@@ -32,6 +32,7 @@ namespace alpha.ingame.player
         }
 
         public bool IsActive => _isActive && CountActivePods() > 0;
+        public bool IsAttacking => _isActive && _commandState == PodCommandState.Approaching;
 
         public bool Begin(BeamPodSkillData skill, PlayerCore player)
         {

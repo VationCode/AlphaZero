@@ -19,10 +19,15 @@ namespace alpha.ingame.player
         private Dictionary<ESkillState, SkillState> _states;
         private SkillState _currentState;
         private int _primaryConsumedFrame = -1;
+        private bool _movementUnlockScheduled;
+        private float _movementUnlockAt;
 
         public ESkillState CurrentState { get; private set; } = ESkillState.Idle;
         public bool IsExecuting => _currentState != null && CurrentState != ESkillState.Idle;
         public bool IsCasting => _currentState != null && CurrentState == ESkillState.Casting;
+        public bool IsMovementLocked =>
+            (IsCasting && !_movementUnlockScheduled) ||
+            (_movementUnlockScheduled && Time.time < _movementUnlockAt);
         public bool IsPrimaryConsumedThisFrame => _primaryConsumedFrame == Time.frameCount;
         public int SelectedSlot { get; private set; }
         public int PressedSlotThisFrame { get; private set; }
@@ -67,6 +72,8 @@ namespace alpha.ingame.player
             SelectedSlot = 0;
             PressedSlotThisFrame = 0;
             _primaryConsumedFrame = -1;
+            _movementUnlockScheduled = false;
+            _movementUnlockAt = 0f;
         }
 
         // 슬롯의 스킬이 실행 가능한지 판단한 뒤 호출한다.
@@ -76,6 +83,7 @@ namespace alpha.ingame.player
                 return false;
 
             SelectedSlot = slot;
+            _movementUnlockScheduled = false;
             ChangeState(ESkillState.Execute);
             return true;
         }
@@ -83,6 +91,7 @@ namespace alpha.ingame.player
         public bool BeginCast()
         {
             if (CurrentState != ESkillState.Execute) return false;
+            _movementUnlockScheduled = false;
             ChangeState(ESkillState.Casting);
             return true;
         }
@@ -94,8 +103,17 @@ namespace alpha.ingame.player
                 return false;
 
             SelectedSlot = slot;
+            _movementUnlockScheduled = false;
             ChangeState(ESkillState.Casting);
             return true;
+        }
+
+        // 실행 이벤트 이후 지정한 시간이 지나면 애니메이션 진행과 별개로 이동을 허용한다.
+        public void ScheduleMovementUnlock(float delay)
+        {
+            if (!IsCasting) return;
+            _movementUnlockAt = Time.time + Mathf.Max(0f, delay);
+            _movementUnlockScheduled = true;
         }
 
         public void CompleteExecute()
@@ -109,6 +127,7 @@ namespace alpha.ingame.player
         public void CancelExecute()
         {
             if (!IsExecuting) return;
+            _movementUnlockScheduled = false;
             int slot = SelectedSlot;
             ChangeState(ESkillState.Idle);
             SelectedSlot = 0;
