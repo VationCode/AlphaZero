@@ -6,6 +6,10 @@ namespace alpha.ingame.enemy
     /// <summary>순찰 설정을 보관하고 전방의 도달 가능한 목적지를 고른다.</summary>
     public sealed class EnemyPatrolArea : MonoBehaviour
     {
+        [Header("Movement")]
+        [SerializeField, Min(0.01f), InspectorName("Patrol Speed")]
+        private float _patrolSpeed = 3.5f;
+
         [Header("Patrol Area (Scene Placed Enemy)")]
         [SerializeField, Min(0.01f)] private float _areaSizeX = 20f;
         [SerializeField, Min(0.01f)] private float _areaSizeZ = 20f;
@@ -27,6 +31,7 @@ namespace alpha.ingame.enemy
         private NavMeshAgent _agent;
         private bool _initialized;
 
+        public float PatrolSpeed => Mathf.Max(0.01f, _patrolSpeed);
         public float IdleDuration => Mathf.Max(0f, _idleDuration);
         public float Idle2Duration => Mathf.Max(0f, _idle2Duration);
         public bool IsReady => _initialized && _bodyCollider != null &&
@@ -157,6 +162,7 @@ namespace alpha.ingame.enemy
 
         private void OnValidate()
         {
+            _patrolSpeed = Mathf.Max(0.01f, _patrolSpeed);
             _areaSizeX = Mathf.Max(0.01f, _areaSizeX);
             _areaSizeZ = Mathf.Max(0.01f, _areaSizeZ);
             _nextPointSearchAngle = Mathf.Clamp(_nextPointSearchAngle, 1f, 360f);

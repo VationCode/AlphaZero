@@ -12,6 +12,7 @@ namespace alpha.ingame.enemy
         public EnemyLocomotionModule Locomotion { get; private set; }
         public EnemyCombatModule Combat { get; private set; }
         public EnemyChaseModule Chase { get; private set; }
+        public EnemyAnimationView AnimationView { get; private set; }
         public Vector3 ActivityOrigin { get; private set; }
         public bool IsDead => Health != null && Health.IsDead;
 
@@ -28,6 +29,7 @@ namespace alpha.ingame.enemy
             Locomotion = GetComponentInChildren<EnemyLocomotionModule>(true);
             Combat = GetComponentInChildren<EnemyCombatModule>(true);
             Chase = GetComponentInChildren<EnemyChaseModule>(true);
+            AnimationView = GetComponentInChildren<EnemyAnimationView>(true);
             if (Health != null) Health.Died += HandleDied;
             if (Info == null || Health == null)
                 Debug.LogError($"{name}: EnemyInfo와 Health/EnemyHealth가 필요합니다.", this);

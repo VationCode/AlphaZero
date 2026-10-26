@@ -22,6 +22,7 @@ namespace alpha.ingame.enemy
 
         public EEnemyState CurrentState { get; private set; } = EEnemyState.Idle;
         public EEnemyPatrolPhase PatrolPhase => _patrol?.Phase ?? EEnemyPatrolPhase.Selecting;
+        public bool IsReturningFromChase => _patrol?.IsReturningFromChase ?? false;
         public EnemyPatrolArea PatrolArea { get; private set; }
 
         private void Awake()
@@ -75,6 +76,8 @@ namespace alpha.ingame.enemy
             if (PatrolArea == null || !PatrolArea.IsReady ||
                 _enemy.Locomotion == null || !_enemy.Locomotion.CanMove)
             {
+                // 복귀 자체가 불가능하면 재감지 차단을 남기지 않는다.
+                _enemy.Combat?.ClearReturnTargetSuppression();
                 ChangeState(EEnemyState.Idle);
                 return;
             }
@@ -83,10 +86,14 @@ namespace alpha.ingame.enemy
             _patrol.RequestReturnToStart();
         }
 
+        public void EndReturnToPatrolOrigin() =>
+            _enemy?.Combat?.ClearReturnTargetSuppression();
+
         private void OnDisable()
         {
             _enemy?.Locomotion?.Stop();
             _enemy?.Chase?.End();
+            _enemy?.Combat?.CancelMeleeAttack();
         }
     }
 }

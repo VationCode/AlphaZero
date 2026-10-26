@@ -46,7 +46,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5720700565304b2a92e5b3809c68df76, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _moveSpeed: 3.5
 --- !u!1 &2527160566457538029
 GameObject:
   m_ObjectHideFlags: 0
@@ -122,6 +121,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4daa07b9895d4adf91987b7b366abbec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _idleStatePath: Base Layer.Idle
+  _idle2StatePath: Base Layer.Idle2
+  _walkStatePath: Base Layer.Walk
+  _runStatePath: Base Layer.Run
+  _attackAnimations: []
   _walkSpeedThreshold: 0.05
   _transitionDuration: 0.15
 --- !u!1 &7825682051457241491
@@ -236,14 +240,22 @@ MonoBehaviour:
   _chaseStopDistance: 2
   _showChaseStopDistance: 1
   _chaseStopColor: {r: 0.7, g: 0.3, b: 1, a: 0.9}
+  _useReleaseDistance: 1
   _releaseDistance: 20
+  _useLostSight: 1
   _lostSightDuration: 2
+  _usePathFailure: 1
   _pathFailureDuration: 0.5
+  _useActivityArea: 1
   _activityRadius: 25
-  _maxChaseDuration: 0
-  _noProgressDuration: 0
+  _useMaxChaseDuration: 0
+  _maxChaseDuration: 10
+  _useNoProgress: 0
+  _noProgressDuration: 3
   _progressDistance: 0.5
+  _useCombatArea: 0
   _combatArea: {fileID: 0}
+  _logCancelReason: 0
 --- !u!114 &730000000000000007
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -256,6 +268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ba1e66fd241899468b9bcb9023fd679, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _patrolSpeed: 3.5
   _areaSizeX: 20
   _areaSizeZ: 20
   _nextPointSearchAngle: 90

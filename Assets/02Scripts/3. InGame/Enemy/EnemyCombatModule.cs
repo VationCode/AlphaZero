@@ -6,7 +6,7 @@ using UnityEditor;
 
 namespace alpha.ingame.enemy
 {
-    /// <summary>전투 대상을 감지하고 공격 사거리를 판단한다.</summary>
+    /// <summary>전투 대상을 감지하고 근접 공격의 클립 선택과 실행 시간을 관리한다.</summary>
     public sealed class EnemyCombatModule : MonoBehaviour
     {
         [Header("Detection")]
@@ -27,7 +27,9 @@ namespace alpha.ingame.enemy
 
         private EnemyCore _enemy;
         private Transform _suppressedTarget;
+        private float _meleeAttackEndsAt;
         public Transform Target { get; private set; }
+        public bool IsMeleeAttacking { get; private set; }
         public float DetectionRange => Mathf.Max(0f, _detectionRange);
         public float DetectionAngle => Mathf.Clamp(_detectionAngle, 1f, 360f);
         public float AttackRange => Mathf.Max(0f, _attackRange);
@@ -51,14 +53,8 @@ namespace alpha.ingame.enemy
 
             if (_suppressedTarget == _player.transform)
             {
-                Vector3 separation = _player.transform.position - _enemy.transform.position;
-                separation.y = 0f;
-                if (separation.sqrMagnitude <= DetectionRange * DetectionRange)
-                {
-                    Target = null;
-                    return;
-                }
-                _suppressedTarget = null;
+                Target = null;
+                return;
             }
 
             Target = CanSee(_player.transform) ? _player.transform : null;
@@ -84,10 +80,15 @@ namespace alpha.ingame.enemy
             return Vector3.Angle(forward, offset) <= DetectionAngle * 0.5f;
         }
 
-        public void SuppressTargetUntilOutOfRange(Transform target)
+        public void SuppressTargetDuringReturn(Transform target)
         {
             _suppressedTarget = target;
             Target = null;
+        }
+
+        public void ClearReturnTargetSuppression()
+        {
+            _suppressedTarget = null;
         }
 
         public bool IsTargetInRange(Transform target)
@@ -98,11 +99,37 @@ namespace alpha.ingame.enemy
             return offset.sqrMagnitude <= AttackRange * AttackRange;
         }
 
+        public bool TryChooseMeleeAnimation(int animationCount, out int index)
+        {
+            index = -1;
+            if (_enemy == null || _enemy.IsDead || _enemy.Info == null ||
+                _enemy.Info.AttackStyle != EEnemyAttackStyle.Melee ||
+                IsMeleeAttacking || animationCount <= 0) return false;
+
+            // 공격을 시작할 때 한 번만 클립을 뽑는다.
+            index = Random.Range(0, animationCount);
+            return true;
+        }
+
+        public void BeginMeleeAttack(float animationDuration)
+        {
+            IsMeleeAttacking = true;
+            _meleeAttackEndsAt = Time.time + Mathf.Max(0.01f, animationDuration);
+        }
+
+        public void TickMeleeAttack()
+        {
+            if (IsMeleeAttacking && Time.time >= _meleeAttackEndsAt)
+                IsMeleeAttacking = false;
+        }
+
+        public void CancelMeleeAttack() => IsMeleeAttacking = false;
+
         public void Stop()
         {
+            CancelMeleeAttack();
             Target = null;
             _suppressedTarget = null;
-            // 공격 동작이 추가되면 여기에서 함께 중단한다.
         }
 
         private void OnDrawGizmos()

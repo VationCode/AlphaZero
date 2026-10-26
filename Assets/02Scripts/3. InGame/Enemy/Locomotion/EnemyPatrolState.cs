@@ -14,13 +14,18 @@ namespace alpha.ingame.enemy
     public sealed class EnemyPatrolState : EnemyState
     {
         private const float RetryDelay = 1f;
+        private const float ArrivalTolerance = 0.25f;
+        private const int MaxReturnFailures = 3;
 
         private float _phaseEndTime;
         private bool _hasVisitedPoint;
         private bool _returningToStart;
+        private bool _returningFromChase;
+        private int _returnFailures;
         private bool _warnedNoDestination;
 
         public EEnemyPatrolPhase Phase { get; private set; } = EEnemyPatrolPhase.Selecting;
+        public bool IsReturningFromChase => _returningToStart && _returningFromChase;
 
         public EnemyPatrolState(EnemyCore enemy, EnemyStateFlow flow) : base(enemy, flow) { }
 
@@ -29,6 +34,8 @@ namespace alpha.ingame.enemy
             Enemy.Locomotion?.Stop();
             _hasVisitedPoint = false;
             _returningToStart = false;
+            _returningFromChase = false;
+            _returnFailures = 0;
             _warnedNoDestination = false;
             Phase = EEnemyPatrolPhase.Selecting;
             _phaseEndTime = Time.time;
@@ -37,6 +44,8 @@ namespace alpha.ingame.enemy
         public void RequestReturnToStart()
         {
             _returningToStart = true;
+            _returningFromChase = true;
+            _returnFailures = 0;
             _hasVisitedPoint = true;
             _warnedNoDestination = false;
             Phase = EEnemyPatrolPhase.Selecting;
@@ -55,27 +64,26 @@ namespace alpha.ingame.enemy
             if (patrolArea == null || !patrolArea.IsReady || Enemy.Locomotion == null ||
                 !Enemy.Locomotion.CanMove)
             {
+                if (_returningToStart) EndReturnAttempt();
                 Flow.ChangeState(EEnemyState.Idle);
                 return;
             }
 
             if (Phase == EEnemyPatrolPhase.Moving)
             {
-                if (Enemy.Locomotion.HasReachedPatrolDestination())
+                if (Enemy.Locomotion.HasReachedDestination(ArrivalTolerance))
                 {
                     Enemy.Locomotion.Stop();
                     if (_returningToStart)
-                    {
-                        _hasVisitedPoint = false;
-                        _returningToStart = false;
-                    }
+                        EndReturnAttempt();
                     else _hasVisitedPoint = true;
 
                     BeginArrivalWait(patrolArea);
                 }
-                else if (Enemy.Locomotion.PathFailed)
+                else if (Enemy.Locomotion.HasPathFailed(ArrivalTolerance, 0.5f))
                 {
                     Enemy.Locomotion.Stop();
+                    RegisterReturnFailure();
                     Phase = EEnemyPatrolPhase.Selecting;
                     _phaseEndTime = Time.time + RetryDelay;
                 }
@@ -113,13 +121,17 @@ namespace alpha.ingame.enemy
                 }
             }
 
-            if (found && Enemy.Locomotion.MovePatrolTowards(destination))
+            // 추적 취소로 시작한 복귀만 추적 속도를 사용한다.
+            float moveSpeed = IsReturningFromChase && Enemy.Chase != null
+                ? Enemy.Chase.ChaseSpeed : patrolArea.PatrolSpeed;
+            if (found && Enemy.Locomotion.MoveTo(destination, moveSpeed))
             {
                 Phase = EEnemyPatrolPhase.Moving;
                 _warnedNoDestination = false;
             }
             else
             {
+                RegisterReturnFailure();
                 if (!_warnedNoDestination)
                 {
                     Debug.LogWarning($"{Enemy.name}: 도달 가능한 순찰 목적지를 찾지 못했습니다.",
@@ -128,6 +140,22 @@ namespace alpha.ingame.enemy
                 }
                 _phaseEndTime = Time.time + RetryDelay;
             }
+        }
+
+        private void RegisterReturnFailure()
+        {
+            if (!_returningToStart || ++_returnFailures < MaxReturnFailures) return;
+            // 복귀 경로를 반복해서 찾지 못하면 일반 순찰로 돌아가 재감지를 허용한다.
+            EndReturnAttempt();
+        }
+
+        private void EndReturnAttempt()
+        {
+            _hasVisitedPoint = false;
+            _returningToStart = false;
+            _returningFromChase = false;
+            _returnFailures = 0;
+            Flow.EndReturnToPatrolOrigin();
         }
 
         private void BeginArrivalWait(EnemyPatrolArea patrolArea)
