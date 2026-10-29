@@ -77,6 +77,20 @@ namespace alpha.ingame.player
                 LocomotionModule.OnMove += AnimationView.MoveAnim;
                 LocomotionModule.OnJump += AnimationView.JumpAnim;
             }
+            if (CombatModule != null && AnimationView != null)
+                CombatModule.ShotFired += AnimationView.PlayFireRecoil;
+        }
+
+        private void OnDestroy()
+        {
+            if (AnimationView == null) return;
+            if (LocomotionModule != null)
+            {
+                LocomotionModule.OnMove -= AnimationView.MoveAnim;
+                LocomotionModule.OnJump -= AnimationView.JumpAnim;
+            }
+            if (CombatModule != null)
+                CombatModule.ShotFired -= AnimationView.PlayFireRecoil;
         }
 
         private bool CreateModel(EAreteType p_areteType)

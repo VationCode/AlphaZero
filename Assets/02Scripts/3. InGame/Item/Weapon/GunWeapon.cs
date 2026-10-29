@@ -151,7 +151,7 @@ namespace alpha.ingame.item
                 BeginReloadCompletion();
             }
 
-            // LeftArm 레이어의 페이드가 끝날 때까지 공격을 잠근다.
+            // UpperArm 레이어의 페이드가 끝날 때까지 공격을 잠근다.
             if (animationView == null || !animationView.IsReloadActive)
                 FinishReload();
         }
@@ -404,7 +404,7 @@ namespace alpha.ingame.item
             if (_audioSource != null && _fireAudioClip != null)
                 _audioSource.PlayOneShot(_fireAudioClip);
             // 적중 여부와 관계없이 실제 발사가 일어나면 전투 자세 시간을 갱신한다.
-            Owner.CombatModule?.RegisterSuccessfulAttack(this);
+            Owner.CombatModule?.RegisterSuccessfulAttack(this, playFireRecoil: true);
             return true;
         }
 

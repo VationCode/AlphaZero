@@ -1,3 +1,4 @@
+using System;
 using alpha.ingame.input;
 using alpha.ingame.item;
 using UnityEngine;
@@ -12,6 +13,8 @@ namespace alpha.ingame.player
         private PlayerCore _playerCore;
         private EquippableWeapon _secondaryWeapon;
         private WeaponSecondaryAction _activeSecondary;
+
+        public event Action ShotFired;
 
         public GunWeapon CurrentGun => _playerCore?.EquipmentModule?.CurrentWeapon?.GetComponent<GunWeapon>();
         public float ReadyDuration => _readyDuration;
@@ -150,11 +153,12 @@ namespace alpha.ingame.player
                    !(input.IsJump && locomotion.CanGroundJump);
         }
 
-        public void RegisterSuccessfulAttack(GunWeapon gun)
+        public void RegisterSuccessfulAttack(GunWeapon gun, bool playFireRecoil = false)
         {
             if (gun == null || gun != CurrentGun) return;
             // 성공한 마지막 발사를 기준으로 Ready 종료 시각을 다시 계산한다.
             _playerCore?.CombatStanceFlow?.RefreshReady();
+            if (playFireRecoil) ShotFired?.Invoke();
         }
     }
 }

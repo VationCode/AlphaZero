@@ -822,7 +822,8 @@ MonoBehaviour:
   - _areteType: 2
     _baseController: {fileID: 9100000, guid: a47c636ca02d24245a91ac331ef1f999, type: 2}
   _baseLayerName: Base Layer
-  _reloadLayerName: LeftArm
+  _reloadLayerName: UpperArm
+  _fireLayerName: Upper
   _skillLayerName: Full Body
   _moveBlendTime: 0.12
 --- !u!4 &2293099609650060087 stripped

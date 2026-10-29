@@ -3602,7 +3602,8 @@ MonoBehaviour:
   - _areteType: 2
     _baseController: {fileID: 9100000, guid: a47c636ca02d24245a91ac331ef1f999, type: 2}
   _baseLayerName: Base Layer
-  _reloadLayerName: Upper
+  _reloadLayerName: UpperArm
+  _fireLayerName: Upper
   _skillLayerName: Full Body
   _moveBlendTime: 0.12
   _jumpFallStart: 0.4
@@ -11676,6 +11677,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack1
     _eventKey: Effect2
     _effectObject: {fileID: 5094069729387799703}
@@ -11683,6 +11686,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack1
     _eventKey: Effect3
     _effectObject: {fileID: 1469930750}
@@ -11690,6 +11695,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack1
     _eventKey: Effect4
     _effectObject: {fileID: 5094069729387799681}
@@ -11697,6 +11704,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack2
     _eventKey: Effect1
     _effectObject: {fileID: 3757309401773409648}
@@ -11704,6 +11713,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack2
     _eventKey: Effect2
     _effectObject: {fileID: 819617263353923663}
@@ -11711,6 +11722,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack2
     _eventKey: Effect3
     _effectObject: {fileID: 1718020458}
@@ -11718,6 +11731,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack2
     _eventKey: Effect4
     _effectObject: {fileID: 5429625428793335504, guid: e4ace8e2bb8663b4ea9c0c28adc0ea45, type: 3}
@@ -11725,6 +11740,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack2
     _eventKey: Effect5
     _effectObject: {fileID: 3835836343253444776, guid: fa759a83215d9f6488d70fc6d006c373, type: 3}
@@ -11732,6 +11749,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack3
     _eventKey: Effect1
     _effectObject: {fileID: 88544942}
@@ -11739,6 +11758,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack3
     _eventKey: Effect2
     _effectObject: {fileID: 1957144188}
@@ -11746,6 +11767,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack3
     _eventKey: Effect3
     _effectObject: {fileID: 92873634}
@@ -11753,6 +11776,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack3
     _eventKey: Effect4
     _effectObject: {fileID: 611340124}
@@ -11760,6 +11785,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack4
     _eventKey: Effect1
     _effectObject: {fileID: 502415187}
@@ -11767,6 +11794,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 2
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack4
     _eventKey: Effect2
     _effectObject: {fileID: 190475710433245044, guid: feb051f9389ba6f47a9d92b3d84c3ad1, type: 3}
@@ -11775,6 +11804,8 @@ MonoBehaviour:
     _spawnPoints:
     - {fileID: 502415188}
     _spawnLifetime: 8
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack5
     _eventKey: Effect1
     _effectObject: {fileID: 6802441676828287360}
@@ -11783,6 +11814,8 @@ MonoBehaviour:
     _spawnPoints:
     - {fileID: 502415188}
     _spawnLifetime: 8
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack5
     _eventKey: Effect2
     _effectObject: {fileID: 2027801378}
@@ -11791,6 +11824,8 @@ MonoBehaviour:
     _spawnPoints:
     - {fileID: 502415188}
     _spawnLifetime: 8
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack6
     _eventKey: Effect1
     _effectObject: {fileID: 6062033381880750570}
@@ -11804,6 +11839,8 @@ MonoBehaviour:
     - {fileID: 1325710507}
     - {fileID: 631088208}
     _spawnLifetime: 8
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack6
     _eventKey: Effect2
     _effectObject: {fileID: 5094069729387799703}
@@ -11817,6 +11854,8 @@ MonoBehaviour:
     - {fileID: 1325710507}
     - {fileID: 631088208}
     _spawnLifetime: 8
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack6
     _eventKey: Effect3
     _effectObject: {fileID: 7692912934077393847, guid: 26ec5fdbed5d7064dbd6333f92731d32, type: 3}
@@ -11831,6 +11870,8 @@ MonoBehaviour:
     - {fileID: 1810774290}
     - {fileID: 936994590}
     _spawnLifetime: 8
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack6
     _eventKey: Effect4
     _effectObject: {fileID: 5134013068304586303}
@@ -11844,6 +11885,8 @@ MonoBehaviour:
     - {fileID: 1325710507}
     - {fileID: 631088208}
     _spawnLifetime: 8
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack6
     _eventKey: Effect5
     _effectObject: {fileID: 5094069729387799681}
@@ -11857,6 +11900,8 @@ MonoBehaviour:
     - {fileID: 1325710507}
     - {fileID: 631088208}
     _spawnLifetime: 8
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack6
     _eventKey: Effect6
     _effectObject: {fileID: 7692912934077393847, guid: 26ec5fdbed5d7064dbd6333f92731d32, type: 3}
@@ -11870,6 +11915,8 @@ MonoBehaviour:
     - {fileID: 1325710507}
     - {fileID: 631088208}
     _spawnLifetime: 8
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack7
     _eventKey: Effect1
     _effectObject: {fileID: 1844022603}
@@ -11877,6 +11924,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 15
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack7
     _eventKey: Effect2
     _effectObject: {fileID: 7005278960792100175, guid: bae8eea4757e7cf4baea3638a74d3ea8, type: 3}
@@ -11884,6 +11933,8 @@ MonoBehaviour:
     _spawnPositionMode: 0
     _spawnPoints: []
     _spawnLifetime: 4
+    _preserveInactiveChildren: 0
+    _randomYaw: 0
   - _attackId: Attack7
     _eventKey: Effect3
     _effectObject: {fileID: 4655638111592275231, guid: 19be50c7f41ad6541b5534f86bb5483d, type: 3}
@@ -11892,7 +11943,7 @@ MonoBehaviour:
     _spawnPoints: []
     _spawnLifetime: 15
     _preserveInactiveChildren: 1
-    _randomYaw: 1
+    _randomYaw: 0
 --- !u!1 &880000000000000010
 GameObject:
   m_ObjectHideFlags: 0

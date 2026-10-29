@@ -23,7 +23,8 @@ namespace alpha.ingame.player
 
         [Header("Animator Layers")]
         [SerializeField] private string _baseLayerName = "Base Layer";
-        [SerializeField] private string _reloadLayerName = "LeftArm";
+        [SerializeField] private string _reloadLayerName = "UpperArm";
+        [SerializeField] private string _fireLayerName = "Upper";
         [SerializeField] private string _skillLayerName = "Full Body";
 
         [Header("Blend Time")]
@@ -51,6 +52,8 @@ namespace alpha.ingame.player
         private int _land;
         private int _reload;
         private int _reloadEmpty;
+        private int _fire;
+        private int _fireEmpty;
         private int _skillEmpty;
         private readonly int _skillCastSpeed = Animator.StringToHash("SkillCastSpeed");
 
@@ -67,6 +70,9 @@ namespace alpha.ingame.player
         private bool _reloadAnimationEntered;
         private float _reloadFadeStartTime;
         private float _reloadFadeDuration;
+        private bool _fireAnimationActive;
+        private bool _fireAnimationEntered;
+        private float _fireStartedAt;
         private bool _skillAnimationActive;
         private int _skillState;
 
@@ -95,6 +101,8 @@ namespace alpha.ingame.player
             _land = Animator.StringToHash(_baseLayerName + ".Land");
             _reload = Animator.StringToHash(_reloadLayerName + ".Reload");
             _reloadEmpty = Animator.StringToHash(_reloadLayerName + ".Empty");
+            _fire = Animator.StringToHash(_fireLayerName + ".R_Fire");
+            _fireEmpty = Animator.StringToHash(_fireLayerName + ".Empty");
             _skillEmpty = Animator.StringToHash(_skillLayerName + ".Empty");
         }
 
@@ -106,6 +114,7 @@ namespace alpha.ingame.player
         {
             StopSkill();
             StopReload();
+            StopFireRecoil();
             if (_cameraModule != null)
                 _cameraModule.OnViewChanged -= HandleCameraViewChanged;
             HandleCameraViewChanged(ECameraViewType.Default);
@@ -130,6 +139,7 @@ namespace alpha.ingame.player
             // 생성된 모델의 Animator에 해당 아레테 컨트롤러를 적용한다.
             StopSkill();
             StopReload();
+            StopFireRecoil();
             _animator = p_animator;
             RefreshStateHashes();
             PlayerCore playerCore = GetComponentInParent<PlayerCore>();
@@ -153,6 +163,7 @@ namespace alpha.ingame.player
 
         private void Update()
         {
+            UpdateFireRecoil();
             if (_reloadFadeDuration <= 0f) return;
             if (_animator == null || !_animator.isActiveAndEnabled)
             {
@@ -196,7 +207,7 @@ namespace alpha.ingame.player
             float weight = 0f;
             if (viewType == ECameraViewType.Aim && !_skillAnimationActive)
             {
-                if (!_reloadAnimationActive)
+                if (!_reloadAnimationActive && !_fireAnimationActive)
                     weight = 1f;
                 else if (_reloadFadeDuration > 0f)
                 {
@@ -210,12 +221,13 @@ namespace alpha.ingame.player
 
         public bool PlayReload()
         {
+            StopFireRecoil();
             if (_animator == null || !_animator.isActiveAndEnabled) return false;
 
             int layer = GetLayerIndex(_reloadLayerName);
             if (layer < 0 || !_animator.HasState(layer, _reload)) return false;
 
-            // 왼팔 레이어의 Reload 상태를 처음부터 재생한다.
+            // UpperArm 레이어의 Reload 상태를 처음부터 재생한다.
             _reloadFadeDuration = 0f;
             _reloadAnimationActive = true;
             _reloadAnimationEntered = false;
@@ -258,7 +270,7 @@ namespace alpha.ingame.player
             if (blendOutDuration > 0f && _animator != null && _animator.isActiveAndEnabled &&
                 GetLayerIndex(_reloadLayerName) >= 0)
             {
-                // 완료 지점부터 왼팔 레이어만 서서히 줄인다.
+                // 완료 지점부터 UpperArm 레이어만 서서히 줄인다.
                 _reloadFadeStartTime = Time.time;
                 _reloadFadeDuration = blendOutDuration;
                 return;
@@ -288,8 +300,75 @@ namespace alpha.ingame.player
                 ? _cameraModule.ActiveViewType : ECameraViewType.Default);
         }
 
+        public void PlayFireRecoil()
+        {
+            if (_animator == null || !_animator.isActiveAndEnabled ||
+                _reloadAnimationActive || _skillAnimationActive) return;
+
+            int layer = GetLayerIndex(_fireLayerName);
+            if (layer < 0 || !_animator.HasState(layer, _fire)) return;
+
+            // 연사 중에도 실제 발사마다 반동 클립을 첫 프레임부터 다시 재생한다.
+            _fireAnimationActive = true;
+            _fireAnimationEntered = false;
+            _fireStartedAt = Time.time;
+            _animator.SetLayerWeight(layer, 1f);
+            _animator.Play(_fire, layer, 0f);
+            HandleCameraViewChanged(_cameraModule != null
+                ? _cameraModule.ActiveViewType : ECameraViewType.Default);
+        }
+
+        private void UpdateFireRecoil()
+        {
+            if (!_fireAnimationActive) return;
+            if (_animator == null || !_animator.isActiveAndEnabled)
+            {
+                StopFireRecoil();
+                return;
+            }
+
+            int layer = GetLayerIndex(_fireLayerName);
+            if (layer < 0)
+            {
+                StopFireRecoil();
+                return;
+            }
+
+            AnimatorStateInfo state = _animator.GetCurrentAnimatorStateInfo(layer);
+            if (state.fullPathHash == _fire)
+            {
+                _fireAnimationEntered = true;
+                if (state.normalizedTime < 1f) return;
+            }
+            else if (!_fireAnimationEntered && Time.time - _fireStartedAt < 1f)
+                return;
+
+            StopFireRecoil();
+        }
+
+        public void StopFireRecoil()
+        {
+            _fireAnimationActive = false;
+            _fireAnimationEntered = false;
+
+            if (_animator != null)
+            {
+                int layer = GetLayerIndex(_fireLayerName);
+                if (layer >= 0)
+                {
+                    _animator.SetLayerWeight(layer, 0f);
+                    if (_animator.isActiveAndEnabled && _animator.HasState(layer, _fireEmpty))
+                        _animator.Play(_fireEmpty, layer, 0f);
+                }
+            }
+
+            HandleCameraViewChanged(_cameraModule != null
+                ? _cameraModule.ActiveViewType : ECameraViewType.Default);
+        }
+
         public bool PlaySkill(string stateName, AnimationClip clip, float castDuration)
         {
+            StopFireRecoil();
             if (string.IsNullOrWhiteSpace(stateName) || clip == null ||
                 castDuration <= 0f || _animator == null ||
                 !_animator.isActiveAndEnabled) return false;
