@@ -10,21 +10,30 @@ namespace alpha.ingame.item
         [SerializeField, Min(0.01f)] private float _speed = 60f;
         [SerializeField, Min(0.01f)] private float _lifetime = 3f;
         [SerializeField] private SphereCollider _collisionCollider;
+        [SerializeField] private LayerMask _triggerHitLayers = 1 << 9;
 
         private GunProjectilePool _pool;
         private ImpactPool _impactPool;
         private Transform _owner;
+        private Collider _lockedTarget;
+        private Transform _lockedTargetRoot;
+        private bool _requiresLockedTarget;
         private Vector3 _direction;
         private float _damage;
         private float _remainingDistance;
         private float _expiresAt;
 
         public void Launch(GunProjectilePool pool, ImpactPool impactPool,
-            Transform owner, Vector3 position, Vector3 direction, float damage, float maxDistance)
+            Transform owner, Vector3 position, Vector3 direction, float damage, float maxDistance,
+            Collider lockedTarget = null)
         {
             _pool = pool;
             _impactPool = impactPool;
             _owner = owner;
+            _lockedTarget = lockedTarget;
+            _requiresLockedTarget = lockedTarget != null;
+            _lockedTargetRoot = lockedTarget != null && lockedTarget.attachedRigidbody != null
+                ? lockedTarget.attachedRigidbody.transform : null;
             _direction = direction.normalized;
             _damage = damage;
             _remainingDistance = maxDistance;
@@ -45,6 +54,12 @@ namespace alpha.ingame.item
         private void Update()
         {
             if (_pool == null) return;
+            if (_requiresLockedTarget && (_lockedTarget == null || !_lockedTarget.enabled ||
+                !_lockedTarget.gameObject.activeInHierarchy))
+            {
+                _pool.Return(this);
+                return;
+            }
             if (Time.time >= _expiresAt || _remainingDistance <= 0f)
             {
                 _pool.Return(this);
@@ -56,7 +71,7 @@ namespace alpha.ingame.item
             float radius = _collisionCollider.radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.y), Mathf.Abs(scale.z));
             Vector3 center = _collisionCollider.transform.TransformPoint(_collisionCollider.center);
             int count = Physics.SphereCastNonAlloc(center, radius, _direction, Hits,
-                distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
+                distance, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide);
 
             int nearest = -1;
             float nearestDistance = distance;
@@ -64,6 +79,11 @@ namespace alpha.ingame.item
             {
                 Collider collider = Hits[i].collider;
                 if (collider == null || (_owner != null && collider.transform.IsChildOf(_owner))) continue;
+                // 터렛이 고정한 보스 콜라이더 앞의 다른 부위는 관통하고 선택 부위에 맞춘다.
+                if (_lockedTarget != null && _lockedTargetRoot != null &&
+                    collider != _lockedTarget && collider.transform.IsChildOf(_lockedTargetRoot)) continue;
+                if (collider.isTrigger &&
+                    (_triggerHitLayers.value & (1 << collider.gameObject.layer)) == 0) continue;
                 if (nearest >= 0 && Hits[i].distance >= nearestDistance) continue;
                 nearest = i;
                 nearestDistance = Hits[i].distance;

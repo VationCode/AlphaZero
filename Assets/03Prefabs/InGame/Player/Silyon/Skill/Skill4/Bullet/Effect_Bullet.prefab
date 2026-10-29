@@ -49,6 +49,9 @@ MonoBehaviour:
   _speed: 60
   _lifetime: 3
   _collisionCollider: {fileID: 3298286134460375248}
+  _triggerHitLayers:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!96 &2883493879629822461
 TrailRenderer:
   serializedVersion: 3

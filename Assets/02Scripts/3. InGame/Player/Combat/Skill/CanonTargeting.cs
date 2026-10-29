@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace alpha.ingame.player
 {
-    /// <summary>가장 가까운 적을 찾아 포탑 상부와 좌우 포구를 각 축으로 회전시킨다.</summary>
+    /// <summary>처음 선택한 적 콜라이더를 유지하며 포탑 상부와 포구를 회전시킨다.</summary>
     [DefaultExecutionOrder(160)]
     public sealed class CanonTargeting : MonoBehaviour
     {
@@ -11,7 +11,7 @@ namespace alpha.ingame.player
 
         [Header("Target Search")]
         [SerializeField] private LayerMask _targetLayers = 1 << 9;
-        [SerializeField] private LayerMask _sightLayers = ~0;
+        [SerializeField] private LayerMask _sightLayers = Physics.DefaultRaycastLayers;
         [SerializeField, Min(0.1f)] private float _range = 12f;
         [SerializeField, Min(0.05f)] private float _scanInterval = 0.2f;
 
@@ -26,11 +26,13 @@ namespace alpha.ingame.player
         private Quaternion _baseYawRotation;
         private Quaternion[] _basePitchRotations;
         private Collider _target;
+        private bool _hasLineOfSight;
         private float _yawAngle;
         private float _pitchAngle;
         private float _nextScanAt;
 
-        public Collider TargetCollider => _target;
+        public Collider TargetCollider => _hasLineOfSight ? _target : null;
+        public float Range => _range;
 
         private void Awake()
         {
@@ -55,7 +57,12 @@ namespace alpha.ingame.player
             }
         }
 
-        private void OnEnable() => _nextScanAt = 0f;
+        private void OnEnable()
+        {
+            _target = null;
+            _hasLineOfSight = false;
+            _nextScanAt = 0f;
+        }
 
         private void LateUpdate()
         {
@@ -63,19 +70,31 @@ namespace alpha.ingame.player
             if (_yawAxis == null || !_yawAxis.gameObject.activeInHierarchy)
             {
                 _target = null;
+                _hasLineOfSight = false;
                 return;
             }
 
+            if (_target != null && (!_target.enabled || !_target.gameObject.activeInHierarchy ||
+                (_target.bounds.center - transform.position).sqrMagnitude > _range * _range))
+            {
+                _target = null;
+                _hasLineOfSight = false;
+            }
+
+            // 처음 고른 콜라이더가 유효한 동안에는 다시 탐색하지 않는다.
             if (Time.time >= _nextScanAt)
             {
-                SearchTarget();
+                if (_target == null)
+                {
+                    SearchTarget();
+                    _hasLineOfSight = _target != null;
+                }
+                else _hasLineOfSight = HasLineOfSight(_target, true);
                 _nextScanAt = Time.time + _scanInterval;
             }
 
-            if (_target == null || !_target.enabled || !_target.gameObject.activeInHierarchy ||
-                (_target.bounds.center - transform.position).sqrMagnitude > _range * _range)
+            if (_target == null)
             {
-                _target = null;
                 RotateToRest();
                 return;
             }
@@ -86,7 +105,7 @@ namespace alpha.ingame.player
         private void SearchTarget()
         {
             int count = Physics.OverlapSphereNonAlloc(transform.position, _range, _candidates,
-                _targetLayers, QueryTriggerInteraction.Ignore);
+                _targetLayers, QueryTriggerInteraction.Collide);
             Collider nearest = null;
             float nearestDistance = _range * _range;
 
@@ -96,7 +115,7 @@ namespace alpha.ingame.player
                 if (candidate == null || candidate.transform.IsChildOf(transform)) continue;
 
                 float distance = (candidate.bounds.center - transform.position).sqrMagnitude;
-                if (distance >= nearestDistance || !HasLineOfSight(candidate)) continue;
+                if (distance >= nearestDistance || !HasLineOfSight(candidate, false)) continue;
                 nearest = candidate;
                 nearestDistance = distance;
             }
@@ -104,7 +123,7 @@ namespace alpha.ingame.player
             _target = nearest;
         }
 
-        private bool HasLineOfSight(Collider candidate)
+        private bool HasLineOfSight(Collider candidate, bool allowSameEnemyColliders)
         {
             Vector3 origin = _yawAxis.position;
             Vector3 direction = candidate.bounds.center - origin;
@@ -112,14 +131,19 @@ namespace alpha.ingame.player
             if (distance < 0.01f) return true;
 
             int count = Physics.RaycastNonAlloc(origin, direction / distance, _sightHits,
-                distance, _sightLayers, QueryTriggerInteraction.Ignore);
+                distance, _sightLayers, QueryTriggerInteraction.Collide);
             Collider nearest = null;
             float nearestDistance = distance;
+            Transform targetRoot = allowSameEnemyColliders && candidate.attachedRigidbody != null
+                ? candidate.attachedRigidbody.transform : null;
             for (int i = 0; i < count; i++)
             {
                 Collider hit = _sightHits[i].collider;
                 if (hit == null || hit.transform.IsChildOf(transform) ||
+                    (hit.isTrigger && (_targetLayers.value & (1 << hit.gameObject.layer)) == 0) ||
                     _sightHits[i].distance >= nearestDistance) continue;
+                // 고정 타겟의 다른 피격 부위는 시야에서 제외하고 외부 장애물은 확인한다.
+                if (targetRoot != null && hit != candidate && hit.transform.IsChildOf(targetRoot)) continue;
                 nearest = hit;
                 nearestDistance = _sightHits[i].distance;
             }

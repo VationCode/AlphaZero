@@ -232,7 +232,10 @@ namespace alpha.ingame.player
                 return;
             }
             _activeSkill = skill;
-            _preview = new SkillPlacementPreview(skill.Prefab, skill.ClearanceRadius);
+            CanonTargeting turret = skill is TurretSkillData
+                ? skill.Prefab.GetComponentInChildren<CanonTargeting>(true) : null;
+            _preview = new SkillPlacementPreview(skill.Prefab, skill.ClearanceRadius,
+                turret != null ? turret.Range : 0f);
             _playerCore.CombatModule?.CancelSecondary();
             SkillSelected?.Invoke(slot);
             SkillSelectionSoundRequested?.Invoke(slot);

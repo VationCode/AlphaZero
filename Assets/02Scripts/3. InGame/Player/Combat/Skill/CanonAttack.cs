@@ -75,10 +75,10 @@ namespace alpha.ingame.player
             if (toTarget.sqrMagnitude < 0.0001f ||
                 Vector3.Angle(firePoint.forward, toTarget) > _aimTolerance) return;
 
-            // 발사 방향은 각 포구에서 적 중심으로 계산하고, 포구를 번갈아 사용한다.
+            // 발사 방향은 각 포구에서 선택한 콜라이더 중심으로 계산하고, 포구를 번갈아 사용한다.
             Vector3 direction = toTarget.normalized;
             _projectilePool.Rent().Launch(_projectilePool, _impactPool,
-                transform, firePoint.position, direction, _damage, toTarget.magnitude + 1f);
+                transform, firePoint.position, direction, _damage, toTarget.magnitude + 1f, target);
             _canonAnimator?.PlayShoot();
             _muzzleEffectPool?.Spawn(firePoint);
             if (_audioSource != null && _fireAudioClip != null)

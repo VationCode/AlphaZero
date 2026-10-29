@@ -12,7 +12,7 @@ namespace alpha.ingame.player
         [Header("Targeting")]
         [SerializeField, Min(0.1f)] private float _maxTargetDistance = 20f;
         [SerializeField] private LayerMask _targetLayers = 1 << 9;
-        [SerializeField] private LayerMask _sightLayers = ~0;
+        [SerializeField] private LayerMask _sightLayers = Physics.DefaultRaycastLayers;
 
         public BeamPodSummon BeamPodGroupPrefab => _beamPodGroupPrefab;
         public float MaxTargetDistance => Mathf.Max(0.1f, _maxTargetDistance);

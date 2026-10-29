@@ -70,6 +70,7 @@ namespace alpha.ingame.item
         [SerializeField] private ImpactData _impactData;
         [SerializeField, Min(0f)] private float _damage = 10f;
         [SerializeField, Min(0.01f)] private float _aimDistance = 200f;
+        [SerializeField] private LayerMask _triggerHitLayers = 1 << 9;
         [SerializeField, Min(0.01f)] private float _chargeDuration = 1.5f;
         [SerializeField, Min(0f)] private float _minimumChargeTime = 0.2f;
         [SerializeField, Min(1f)] private float _fullChargeDamageMultiplier = 2f;
@@ -510,9 +511,11 @@ namespace alpha.ingame.item
             float nearestDistance = maxDistance;
             bool found = false;
             foreach (RaycastHit hit in Physics.RaycastAll(ray, maxDistance,
-                         Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+                         Physics.DefaultRaycastLayers, QueryTriggerInteraction.Collide))
             {
                 if (hit.collider == null || hit.collider.transform.IsChildOf(Owner.transform) ||
+                    (hit.collider.isTrigger &&
+                     (_triggerHitLayers.value & (1 << hit.collider.gameObject.layer)) == 0) ||
                     hit.distance >= nearestDistance) continue;
                 nearestHit = hit;
                 nearestDistance = hit.distance;

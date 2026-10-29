@@ -87,7 +87,7 @@ MonoBehaviour:
   _intactRoot: {fileID: 4604415517014379363}
   _brokenRoot: {fileID: 4036523287542401639}
   _breakEffectPrefab: {fileID: 2069352338822879331, guid: c3c93266f63556b48953b415aa6ee354, type: 3}
-  _survivalTime: 15
+  _survivalTime: 25
   _destroyOnExpire: 1
   _debrisLifetime: 2
 --- !u!114 &9000000000102
@@ -107,8 +107,8 @@ MonoBehaviour:
     m_Bits: 512
   _sightLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
-  _range: 20
+    m_Bits: 1011
+  _range: 30
   _scanInterval: 0.2
   _yawAxis: {fileID: 4604415517014379363}
   _pitchAxes:
