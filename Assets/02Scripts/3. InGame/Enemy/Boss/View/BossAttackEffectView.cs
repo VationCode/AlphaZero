@@ -19,7 +19,8 @@ namespace alpha.ingame.enemy.boss
         {
             Targeting,
             Current,
-            Specified
+            Specified,
+            RandomTargetArea
         }
 
         [Serializable]
@@ -32,6 +33,8 @@ namespace alpha.ingame.enemy.boss
             [SerializeField] private SpawnPositionMode _spawnPositionMode;
             [SerializeField] private List<Transform> _spawnPoints = new();
             [SerializeField, Min(0.01f)] private float _spawnLifetime = 2f;
+            [SerializeField] private bool _preserveInactiveChildren;
+            [SerializeField] private bool _randomYaw;
 
             public string AttackId => _attackId;
             public string EventKey => _eventKey;
@@ -40,6 +43,8 @@ namespace alpha.ingame.enemy.boss
             public SpawnPositionMode PositionMode => _spawnPositionMode;
             public IReadOnlyList<Transform> SpawnPoints => _spawnPoints;
             public float SpawnLifetime => _spawnLifetime;
+            public bool PreserveInactiveChildren => _preserveInactiveChildren;
+            public bool RandomYaw => _randomYaw;
         }
 
         [SerializeField] private List<EffectBinding> _bindings = new();
@@ -93,7 +98,8 @@ namespace alpha.ingame.enemy.boss
             bool hasTargetPosition, Vector3 targetPosition)
         {
             if (!_effects.TryGetValue((attackId, eventKey), out EffectBinding binding) ||
-                !binding.IsSpawn || binding.EffectObject == null) return;
+                !binding.IsSpawn || binding.EffectObject == null ||
+                binding.PositionMode == SpawnPositionMode.RandomTargetArea) return;
 
             if (binding.PositionMode == SpawnPositionMode.Specified)
             {
@@ -118,17 +124,80 @@ namespace alpha.ingame.enemy.boss
                 SpawnAt(binding, position, binding.EffectObject.transform.rotation);
         }
 
+        public bool IsRandomTargetArea(string attackId, string eventKey) =>
+            _effects.TryGetValue((attackId, eventKey), out EffectBinding binding) &&
+            binding.IsSpawn && binding.PositionMode == SpawnPositionMode.RandomTargetArea;
+
+        public bool TryGetSpawnSpacing(string attackId, string eventKey, out float spacing)
+        {
+            spacing = 0f;
+            if (!_effects.TryGetValue((attackId, eventKey), out EffectBinding binding) ||
+                !binding.IsSpawn || binding.PositionMode != SpawnPositionMode.RandomTargetArea ||
+                binding.EffectObject == null) return false;
+
+            GameObject prefab = binding.EffectObject;
+            float footprint = 0f;
+            foreach (Collider collider in prefab.GetComponentsInChildren<Collider>(true))
+            {
+                if (!collider.enabled) continue;
+                Vector3 scale = collider.transform.lossyScale;
+                float radius;
+                Vector3 localCenter;
+                switch (collider)
+                {
+                    case SphereCollider sphere:
+                        radius = sphere.radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z));
+                        localCenter = sphere.center;
+                        break;
+                    case CapsuleCollider capsule when capsule.direction == 1:
+                        radius = capsule.radius * Mathf.Max(Mathf.Abs(scale.x), Mathf.Abs(scale.z));
+                        localCenter = capsule.center;
+                        break;
+                    default:
+                        continue;
+                }
+                Vector3 offset = collider.transform.TransformPoint(localCenter) - prefab.transform.position;
+                offset.y = 0f;
+                footprint = Mathf.Max(footprint, offset.magnitude + radius);
+            }
+            if (footprint <= 0f)
+            {
+                Debug.LogError($"{name}: {attackId}/{eventKey} 프리팹에서 소환 간격을 계산할 콜라이더가 없습니다.", this);
+                return false;
+            }
+
+            spacing = footprint * 2f + 0.1f; // Trigger가 생성 직후 서로 닿지 않도록 여유를 둔다.
+            return true;
+        }
+
+        public void SpawnEffectAtPositions(string attackId, string eventKey,
+            IReadOnlyList<Vector3> positions)
+        {
+            if (!_effects.TryGetValue((attackId, eventKey), out EffectBinding binding) ||
+                !binding.IsSpawn || binding.PositionMode != SpawnPositionMode.RandomTargetArea ||
+                binding.EffectObject == null || positions == null) return;
+
+            Quaternion rotation = binding.EffectObject.transform.rotation;
+            foreach (Vector3 position in positions)
+                SpawnAt(binding, position, rotation);
+        }
+
         private void SpawnAt(EffectBinding binding, Vector3 position, Quaternion rotation)
         {
+            if (binding.RandomYaw)
+                rotation = Quaternion.AngleAxis(UnityEngine.Random.Range(0f, 360f), Vector3.up) * rotation;
+            // 자식 Rigidbody가 생성될 때부터 같은 방향을 갖도록 회전값을 먼저 정한다.
             GameObject instance = Instantiate(binding.EffectObject, position, rotation);
             ParticleSystem[] particles = instance.GetComponentsInChildren<ParticleSystem>(true);
-            foreach (ParticleSystem particle in particles)
-                for (Transform node = particle.transform;
-                     node != null && node != instance.transform; node = node.parent)
-                    node.gameObject.SetActive(true);
+            if (!binding.PreserveInactiveChildren)
+                foreach (ParticleSystem particle in particles)
+                    for (Transform node = particle.transform;
+                         node != null && node != instance.transform; node = node.parent)
+                        node.gameObject.SetActive(true);
             instance.SetActive(true);
             foreach (ParticleSystem particle in particles)
             {
+                if (!particle.gameObject.activeInHierarchy) continue;
                 particle.Clear();
                 particle.Play();
             }

@@ -100,6 +100,22 @@ namespace alpha.ingame.enemy.boss
             return false;
         }
 
+        // 보스의 최초 정면처럼 위치와 무관한 월드 방향으로 회전한다.
+        public bool FaceForward(Vector3 worldForward)
+        {
+            if (_recoveryRotationLocked || IsButting || _body == null ||
+                _body.isKinematic || IsJumping) return false;
+
+            Vector3 direction = Vector3.ProjectOnPlane(worldForward, Vector3.up);
+            if (direction.sqrMagnitude < 0.0001f) return false;
+            Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
+            if (Quaternion.Angle(_body.rotation, targetRotation) <= 0.01f) return true;
+            Quaternion next = Quaternion.RotateTowards(_body.rotation, targetRotation,
+                _turnSpeed * Time.fixedDeltaTime);
+            _body.MoveRotation(next);
+            return false;
+        }
+
         // 공격 후 대기 중에는 물리 충돌에도 방향이 바뀌지 않게 한다.
         public void LockRecoveryRotation()
         {

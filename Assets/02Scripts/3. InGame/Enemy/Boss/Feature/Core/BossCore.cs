@@ -38,7 +38,7 @@ namespace alpha.ingame.enemy.boss
             Chasing.Bind(Locomotion);
             ActionModule.Bind(transform);
             Action.Bind(Encounter, idle, chasingState, attackingState,
-                ActionModule, Chasing, Locomotion);
+                ActionModule, Chasing, Locomotion, transform.position, transform.forward);
             Animation.Bind(Action);
             Animation.AttackAnimationFinished += Action.CompleteAttackAnimation;
             Animation.Attack3JumpStarted += Action.BeginAttack3Jump;

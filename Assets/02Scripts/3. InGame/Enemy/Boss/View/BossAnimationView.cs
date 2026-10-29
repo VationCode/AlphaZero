@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace alpha.ingame.enemy.boss
@@ -16,6 +17,7 @@ namespace alpha.ingame.enemy.boss
         [SerializeField] private string _attack4State = "Attack4";
         [SerializeField] private string _attack5State = "Attack5";
         [SerializeField] private string _attack6State = "Attack6";
+        [SerializeField] private string _attack7State = "Attack7";
         [SerializeField] private BossAttackEffectView _attackEffects;
 
         private BossActionFlow _flow;
@@ -32,6 +34,7 @@ namespace alpha.ingame.enemy.boss
         private bool _attack3JumpActive;
         private float _attack3JumpStartNormalizedTime;
         private float _attack3JumpEndNormalizedTime;
+        private readonly List<Vector3> _attack7SpawnPositions = new();
 
         public bool IsReady => _animator != null && _animator.runtimeAnimatorController != null;
         public event Action AttackAnimationFinished;
@@ -62,8 +65,19 @@ namespace alpha.ingame.enemy.boss
             if (_flow == null || _flow.CurrentState != EBossActionState.Attacking ||
                 string.IsNullOrEmpty(_flow.CurrentAttackId)) return;
 
+            string attackId = _flow.CurrentAttackId;
+            if (_attackEffects != null && _attackEffects.IsRandomTargetArea(attackId, eventKey))
+            {
+                if (attackId == "Attack7" &&
+                    _attackEffects.TryGetSpawnSpacing(attackId, eventKey, out float spacing) &&
+                    _flow.TryGetAttack7SpawnPositions(spacing, _attack7SpawnPositions))
+                    _attackEffects.SpawnEffectAtPositions(attackId, eventKey,
+                        _attack7SpawnPositions);
+                return;
+            }
+
             bool hasTargetPosition = _flow.TryGetTargetingPosition(out Vector3 position);
-            _attackEffects?.SpawnEffect(_flow.CurrentAttackId, eventKey,
+            _attackEffects?.SpawnEffect(attackId, eventKey,
                 hasTargetPosition, position);
         }
 
@@ -138,9 +152,13 @@ namespace alpha.ingame.enemy.boss
         public void Bind(BossActionFlow flow)
         {
             if (_flow != null) _flow.StateChanged -= HandleStateChanged;
+            if (_flow != null) _flow.AttackStageChanged -= HandleAttackStageChanged;
             _flow = flow;
             if (isActiveAndEnabled && _flow != null)
+            {
                 _flow.StateChanged += HandleStateChanged;
+                _flow.AttackStageChanged += HandleAttackStageChanged;
+            }
         }
 
         private void Start()
@@ -152,7 +170,9 @@ namespace alpha.ingame.enemy.boss
         {
             if (_flow == null) return;
             _flow.StateChanged -= HandleStateChanged;
+            _flow.AttackStageChanged -= HandleAttackStageChanged;
             _flow.StateChanged += HandleStateChanged;
+            _flow.AttackStageChanged += HandleAttackStageChanged;
             HandleStateChanged(_flow.CurrentState);
         }
 
@@ -166,6 +186,7 @@ namespace alpha.ingame.enemy.boss
             _attack3JumpActive = false;
             if (_flow == null) return;
             _flow.StateChanged -= HandleStateChanged;
+            _flow.AttackStageChanged -= HandleAttackStageChanged;
         }
 
         private void LateUpdate()
@@ -248,6 +269,8 @@ namespace alpha.ingame.enemy.boss
             _attack5ButtActive = false;
         }
 
+        private void HandleAttackStageChanged() => HandleStateChanged(EBossActionState.Attacking);
+
         private void HandleStateChanged(EBossActionState state)
         {
             if (!IsReady || !_animator.isActiveAndEnabled) return;
@@ -264,6 +287,7 @@ namespace alpha.ingame.enemy.boss
                 "Attack4" => _attack4State,
                 "Attack5" => _attack5State,
                 "Attack6" => _attack6State,
+                "Attack7" => _attack7State,
                 _ => null
             };
             _awaitingAttackEnd = !string.IsNullOrEmpty(_currentAttackState);
@@ -272,7 +296,7 @@ namespace alpha.ingame.enemy.boss
                 EBossActionState.Idle => _idleState,
                 EBossActionState.AttackRecovery => _idleState,
                 EBossActionState.Chasing => _chaseState,
-                EBossActionState.Attacking => _currentAttackState,
+                EBossActionState.Attacking => _currentAttackState ?? _chaseState,
                 _ => null
             };
             if (string.IsNullOrEmpty(animationState)) return;

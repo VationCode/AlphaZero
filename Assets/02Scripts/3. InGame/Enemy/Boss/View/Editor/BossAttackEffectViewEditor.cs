@@ -111,6 +111,8 @@ namespace alpha.ingame.enemy.boss.editor
                     binding.FindPropertyRelative("_spawnPoints"), true) + 2f;
             if (!HasObjectMove(binding))
                 height += EditorGUIUtility.singleLineHeight + 2f;
+            height += EditorGUIUtility.singleLineHeight + 2f;
+            height += EditorGUIUtility.singleLineHeight + 2f;
             return height;
         }
 
@@ -130,7 +132,7 @@ namespace alpha.ingame.enemy.boss.editor
             SerializedProperty spawnPositionMode = binding.FindPropertyRelative("_spawnPositionMode");
             EditorGUI.PropertyField(positionMode, spawnPositionMode,
                 new GUIContent("Spawn Position",
-                    "Targeting: TargetingStart 위치, Current: AttackEffectPos 현재 위치, Specified: 지정한 Transform 위치"));
+                    "Targeting: 타겟 위치에 1개, Current: 현재 위치에 1개, Specified: 지정한 위치마다 1개, RandomTargetArea: 타겟 주변에 여러 개"));
             float nextY = positionMode.yMax + 2f;
             if (spawnPositionMode.enumValueIndex == 2)
             {
@@ -146,7 +148,15 @@ namespace alpha.ingame.enemy.boss.editor
                 Rect lifetime = new Rect(rect.x, nextY, rect.width, rect.height);
                 EditorGUI.PropertyField(lifetime, binding.FindPropertyRelative("_spawnLifetime"),
                     new GUIContent("Lifetime (s)"));
+                nextY = lifetime.yMax + 2f;
             }
+            Rect preserve = new Rect(rect.x, nextY, rect.width, rect.height);
+            EditorGUI.PropertyField(preserve,
+                binding.FindPropertyRelative("_preserveInactiveChildren"),
+                new GUIContent("Preserve Inactive Children"));
+            Rect randomYaw = new Rect(rect.x, preserve.yMax + 2f, rect.width, rect.height);
+            EditorGUI.PropertyField(randomYaw, binding.FindPropertyRelative("_randomYaw"),
+                new GUIContent("Random Y Rotation"));
         }
 
         private static bool HasObjectMove(SerializedProperty binding)

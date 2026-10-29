@@ -23,6 +23,15 @@ namespace alpha.ingame.enemy.boss
         [SerializeField, Min(0f)] private float _attack5ButtDistance = 2.62f;
         [SerializeField] private bool _showAttack5ButtDistance = true;
 
+        [Header("Attack7 Summon")]
+        [Tooltip("플레이어의 고정된 위치를 중심으로 소환체 전체가 들어갈 범위의 반경입니다.")]
+        [SerializeField, Min(0f)] private float _attack7SpawnRadius = 8f;
+        [Tooltip("Attack7의 EffectSpawn 이벤트 한 번에 생성할 소환체 수입니다.")]
+        [SerializeField, Min(1)] private int _attack7SpawnCount = 6;
+        [SerializeField] private bool _showAttack7SpawnRadius = true;
+        [Tooltip("작업 씬에서 소환 범위의 중심으로 표시할 플레이어입니다.")]
+        [SerializeField] private Transform _attack7PreviewTarget;
+
         private readonly Collider[] _targetCandidates = new Collider[32];
         private Transform _boss;
 
@@ -33,6 +42,55 @@ namespace alpha.ingame.enemy.boss
             (_targetLayers.value & (1 << CurrentTarget.gameObject.layer)) != 0;
         public IReadOnlyList<BossAttackCastConditions> AttackConditions => _attackConditions;
         public float Attack5ButtDistance => _attack5ButtDistance;
+
+        // 타깃을 중심으로 서로 닿지 않는 무작위 소환 위치를 고른다.
+        public void GetAttack7SpawnPositions(Vector3 center, float minSpacing,
+            CharacterController player,
+            List<Vector3> positions)
+        {
+            positions.Clear();
+            float radius = Mathf.Max(0f, _attack7SpawnRadius - minSpacing * 0.5f);
+            if (radius <= 0f)
+            {
+                Debug.LogWarning($"{name}: Attack7 소환 반경이 프리팹의 충돌 범위보다 작습니다.", this);
+                return;
+            }
+
+            float minSpacingSqr = minSpacing * minSpacing;
+            Vector3 playerCenter = player.transform.TransformPoint(player.center);
+            Vector3 playerScale = player.transform.lossyScale;
+            float horizontalScale = Mathf.Max(Mathf.Abs(playerScale.x), Mathf.Abs(playerScale.z));
+            float playerClearance = minSpacing * 0.5f +
+                (player.radius + player.skinWidth) * horizontalScale + 0.1f;
+            float playerClearanceSqr = playerClearance * playerClearance;
+            int maxAttempts = Mathf.Max(64, _attack7SpawnCount * 64);
+            for (int attempt = 0; attempt < maxAttempts &&
+                 positions.Count < _attack7SpawnCount; attempt++)
+            {
+                float angle = UnityEngine.Random.value * Mathf.PI * 2f;
+                float distance = radius * Mathf.Sqrt(UnityEngine.Random.value);
+                Vector3 candidate = center + new Vector3(
+                    Mathf.Cos(angle) * distance, 0f, Mathf.Sin(angle) * distance);
+                Vector3 toPlayer = candidate - playerCenter;
+                toPlayer.y = 0f;
+                if (toPlayer.sqrMagnitude < playerClearanceSqr) continue;
+
+                bool overlaps = false;
+                foreach (Vector3 placed in positions)
+                {
+                    Vector3 offset = candidate - placed;
+                    offset.y = 0f;
+                    if (offset.sqrMagnitude >= minSpacingSqr) continue;
+                    overlaps = true;
+                    break;
+                }
+                if (!overlaps) positions.Add(candidate);
+            }
+
+            if (positions.Count < _attack7SpawnCount)
+                Debug.LogWarning($"{name}: Attack7 소환 범위에 {_attack7SpawnCount}마리를 " +
+                    $"겹치지 않게 배치할 수 없어 {positions.Count}마리만 생성합니다.", this);
+        }
 
         public void Bind(Transform boss) => _boss = boss;
 
@@ -92,6 +150,8 @@ namespace alpha.ingame.enemy.boss
         private void OnValidate()
         {
             _attack5ButtDistance = Mathf.Max(0f, _attack5ButtDistance);
+            _attack7SpawnRadius = Mathf.Max(0f, _attack7SpawnRadius);
+            _attack7SpawnCount = Mathf.Max(1, _attack7SpawnCount);
             if (_attackConditions == null) return;
 
             foreach (BossAttackCastConditions conditions in _attackConditions)
@@ -123,6 +183,37 @@ namespace alpha.ingame.enemy.boss
 
             if (_showAttack5ButtDistance && _attack5ButtDistance > 0f)
                 DrawAttack5ButtGizmo(center, forward, _attack5ButtDistance);
+
+            if (_showAttack7SpawnRadius && _attack7SpawnRadius > 0f)
+                DrawAttack7SpawnGizmo();
+        }
+
+        private void DrawAttack7SpawnGizmo()
+        {
+            Vector3? targetPosition = null;
+            if (Application.isPlaying)
+            {
+                BossActionFlow flow = GetComponentInParent<BossCore>(true)?.Action;
+                if (flow != null && flow.CurrentAttackId == "Attack7" &&
+                    flow.TryGetTargetingPosition(out Vector3 lockedPosition))
+                    targetPosition = lockedPosition;
+            }
+
+            if (!targetPosition.HasValue)
+            {
+                Transform target = Application.isPlaying && CurrentTarget != null
+                    ? CurrentTarget : _attack7PreviewTarget;
+                if (target == null) return;
+                targetPosition = target.position;
+            }
+
+            Vector3 center = targetPosition.Value + Vector3.up * 0.1f;
+            Color previous = Handles.color;
+            Handles.color = new Color(1f, 0.35f, 0.8f, 1f);
+            Handles.DrawWireDisc(center, Vector3.up, _attack7SpawnRadius);
+            Handles.Label(center + Vector3.right * _attack7SpawnRadius +
+                Vector3.up * 0.35f, $"Attack7 summon {_attack7SpawnRadius:0.#}m");
+            Handles.color = previous;
         }
 
         private static void DrawAttack5ButtGizmo(Vector3 start, Vector3 forward,

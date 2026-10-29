@@ -33,7 +33,12 @@ namespace alpha.ingame.enemy.boss
         private Vector3 _attack3LandingTarget;
         private bool _attack3JumpStarted;
         private bool _attack5ButtStarted;
+        private Vector3 _initialBossPosition;
+        private Vector3 _initialBossForward;
+        private EAttack7Phase _attack7Phase;
         private readonly Dictionary<string, ChaseFailure> _chaseFailures = new();
+
+        private enum EAttack7Phase { None, Jump, FaceInitialForward, Attack }
 
         private readonly struct ChaseFailure
         {
@@ -52,11 +57,13 @@ namespace alpha.ingame.enemy.boss
         public EBossActionState CurrentState { get; private set; } = EBossActionState.Idle;
         public string CurrentAttackId { get; private set; }
         public event Action<EBossActionState> StateChanged;
+        public event Action AttackStageChanged;
 
         public void Bind(BossEncounterFlow encounter, BossIdleState idle,
             BossChasingState chasing, BossAttackingState attacking,
             BossActionModule actionModule,
-            BossChasingModule chasingModule, BossLocomotionModule locomotion)
+            BossChasingModule chasingModule, BossLocomotionModule locomotion,
+            Vector3 initialBossPosition, Vector3 initialBossForward)
         {
             if (_encounter != null)
                 _encounter.StateChanged -= HandleEncounterStateChanged;
@@ -67,6 +74,8 @@ namespace alpha.ingame.enemy.boss
             _attacking = attacking;
             _actions = actionModule;
             _locomotion = locomotion;
+            _initialBossPosition = initialBossPosition;
+            _initialBossForward = Vector3.ProjectOnPlane(initialBossForward, Vector3.up).normalized;
             _idle?.Bind(this, actionModule);
             _chasing?.Bind(this, chasingModule);
             if (_encounter == null) return;
@@ -98,6 +107,14 @@ namespace alpha.ingame.enemy.boss
 
             if (CurrentState == EBossActionState.Chasing && _chasing != null)
                 _chasing.FixedTick();
+            else if (CurrentState == EBossActionState.Attacking &&
+                _attack7Phase == EAttack7Phase.FaceInitialForward &&
+                _locomotion != null && _locomotion.FaceForward(_initialBossForward))
+            {
+                _attack7Phase = EAttack7Phase.Attack;
+                CurrentAttackId = "Attack7";
+                AttackStageChanged?.Invoke();
+            }
         }
 
         public bool TryBeginChasing(Transform target, BossAttackCastConditions attack)
@@ -120,7 +137,7 @@ namespace alpha.ingame.enemy.boss
                 attack == null || !attack.IsEnabled || (attack.AttackId != "Attack1" &&
                     attack.AttackId != "Attack2" && attack.AttackId != "Attack3" &&
                     attack.AttackId != "Attack4" && attack.AttackId != "Attack5" &&
-                    attack.AttackId != "Attack6") ||
+                    attack.AttackId != "Attack6" && attack.AttackId != "Attack7") ||
                 _attacking == null || _actions == null || _locomotion == null ||
                 !_locomotion.CanMove || _locomotion.IsJumping || _locomotion.IsButting ||
                 target == null || !_locomotion.IsFacing(target.position) ||
@@ -130,10 +147,12 @@ namespace alpha.ingame.enemy.boss
             // TargetingStart를 사용하는 공격은 이벤트 시점의 대상 위치를 확정한다.
             _targetingTarget = target;
             _targetingLocked = false;
-            // 시전 시점의 타깃 위치를 착지점으로 고정한다.
-            if (attack.AttackId == "Attack3")
-                _attack3LandingTarget = target.position;
-            CurrentAttackId = attack.AttackId;
+            // 단독 Attack3은 타깃 위치, Attack7의 선행 점프는 최초 위치를 착지점으로 사용한다.
+            _attack7Phase = attack.AttackId == "Attack7" ? EAttack7Phase.Jump : EAttack7Phase.None;
+            if (attack.AttackId == "Attack3" || _attack7Phase == EAttack7Phase.Jump)
+                _attack3LandingTarget = _attack7Phase == EAttack7Phase.Jump
+                    ? _initialBossPosition : target.position;
+            CurrentAttackId = _attack7Phase == EAttack7Phase.Jump ? "Attack3" : attack.AttackId;
             SetState(EBossActionState.Attacking);
             return true;
         }
@@ -153,11 +172,25 @@ namespace alpha.ingame.enemy.boss
             return CurrentState == EBossActionState.Attacking && _targetingLocked;
         }
 
+        public bool TryGetAttack7SpawnPositions(float minSpacing, List<Vector3> positions)
+        {
+            if (CurrentState != EBossActionState.Attacking ||
+                CurrentAttackId != "Attack7" || !_targetingLocked ||
+                _actions == null || _targetingTarget == null ||
+                !_targetingTarget.gameObject.activeInHierarchy) return false;
+
+            CharacterController player = _targetingTarget.GetComponent<CharacterController>();
+            if (player == null || !player.enabled) return false;
+            _actions.GetAttack7SpawnPositions(_targetingPosition, minSpacing, player, positions);
+            return positions.Count > 0;
+        }
+
         public bool IsAttackReady(BossAttackCastConditions attack) =>
             attack != null && attack.IsEnabled &&
             (attack.AttackId == "Attack1" || attack.AttackId == "Attack2" ||
                 attack.AttackId == "Attack3" || attack.AttackId == "Attack4" ||
-                attack.AttackId == "Attack5" || attack.AttackId == "Attack6") &&
+                attack.AttackId == "Attack5" || attack.AttackId == "Attack6" ||
+                attack.AttackId == "Attack7") &&
             _attacking != null && _attacking.IsReady(attack);
 
         public void BeginAttack5Butt()
@@ -211,8 +244,20 @@ namespace alpha.ingame.enemy.boss
         // View의 재생 완료 신호를 받아 상태만 전환한다.
         public void CompleteAttackAnimation()
         {
-            if (CurrentState != EBossActionState.Attacking ||
-                _attacking == null || !_attacking.Complete()) return;
+            if (CurrentState != EBossActionState.Attacking || _attacking == null) return;
+
+            // Attack7은 Attack3 착지 후 처음 배치된 정면으로 돌아선 다음 시작한다.
+            if (_attack7Phase == EAttack7Phase.Jump)
+            {
+                if (_attack3JumpStarted) _locomotion?.CompleteJump();
+                _attack3JumpStarted = false;
+                _attack7Phase = EAttack7Phase.FaceInitialForward;
+                CurrentAttackId = null;
+                AttackStageChanged?.Invoke();
+                return;
+            }
+            if (_attack7Phase == EAttack7Phase.FaceInitialForward ||
+                !_attacking.Complete()) return;
 
             if (_attack3JumpStarted) _locomotion?.CompleteJump();
             if (_attack5ButtStarted) _locomotion?.EndButtMotion();
@@ -282,6 +327,7 @@ namespace alpha.ingame.enemy.boss
                 _targetingLocked = false;
                 _attack3JumpStarted = false;
                 _attack5ButtStarted = false;
+                _attack7Phase = EAttack7Phase.None;
                 _attacking?.Exit();
                 CurrentAttackId = null;
             }
@@ -344,6 +390,7 @@ namespace alpha.ingame.enemy.boss
                 if (_attack5ButtStarted) _locomotion?.Stop();
                 _attack3JumpStarted = false;
                 _attack5ButtStarted = false;
+                _attack7Phase = EAttack7Phase.None;
                 _attacking?.Exit();
                 CurrentAttackId = null;
                 CurrentState = EBossActionState.Idle;
