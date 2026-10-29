@@ -34,7 +34,8 @@ namespace alpha.ingame.player
         {
             public Collider Collider;
             public Transform Root;
-            public float DistanceSquared;
+            public float AimDistanceSquared;
+            public float WorldDistanceSquared;
         }
 
         private void Awake() => _player = GetComponentInParent<PlayerCore>(true);
@@ -80,8 +81,10 @@ namespace alpha.ingame.player
         private void RefreshVisibleTargets(Camera camera, bool forcePublish)
         {
             _visible.Clear();
+            Rect screenRect = camera.pixelRect;
+            Vector2 aim = screenRect.center;
             int count = Physics.OverlapSphereNonAlloc(_player.transform.position, _maxDistance,
-                _candidates, _targetLayers, QueryTriggerInteraction.Ignore);
+                _candidates, _targetLayers, QueryTriggerInteraction.Collide);
             for (int i = 0; i < count; i++)
             {
                 Collider candidate = _candidates[i];
@@ -90,11 +93,21 @@ namespace alpha.ingame.player
 
                 Transform root = TargetRoot(candidate);
                 Vector3 point = candidate.bounds.center;
-                float distanceSquared = (point - _player.transform.position).sqrMagnitude;
-                if (distanceSquared > _maxDistance * _maxDistance ||
-                    !IsOnScreen(camera, point) || !HasLineOfSight(camera, candidate, root))
+                float worldDistanceSquared = (point - _player.transform.position).sqrMagnitude;
+                if (worldDistanceSquared > _maxDistance * _maxDistance) continue;
+                Vector3 screen = camera.WorldToScreenPoint(point);
+                if (screen.z <= 0f || !screenRect.Contains(new Vector2(screen.x, screen.y)) ||
+                    !HasLineOfSight(camera, candidate))
                     continue;
 
+                float aimDistanceSquared = new Vector2(screen.x - aim.x, screen.y - aim.y).sqrMagnitude;
+                TargetCandidate visible = new()
+                {
+                    Collider = candidate,
+                    Root = root,
+                    AimDistanceSquared = aimDistanceSquared,
+                    WorldDistanceSquared = worldDistanceSquared
+                };
                 int existing = -1;
                 for (int j = 0; j < _visible.Count; j++)
                     if (_visible[j].Root == root)
@@ -102,23 +115,13 @@ namespace alpha.ingame.player
                         existing = j;
                         break;
                     }
-                if (existing >= 0 && _visible[existing].DistanceSquared <= distanceSquared) continue;
-                TargetCandidate visible = new()
-                {
-                    Collider = candidate,
-                    Root = root,
-                    DistanceSquared = distanceSquared
-                };
+                // 보스의 여러 콜라이더도 한 타겟으로 묶고 에임에 가까운 부위를 대표로 고른다.
+                if (existing >= 0 && CompareCandidates(_visible[existing], visible) <= 0) continue;
                 if (existing >= 0) _visible[existing] = visible;
                 else _visible.Add(visible);
             }
 
-            _visible.Sort((a, b) =>
-            {
-                int byDistance = a.DistanceSquared.CompareTo(b.DistanceSquared);
-                return byDistance != 0 ? byDistance :
-                    a.Collider.GetInstanceID().CompareTo(b.Collider.GetInstanceID());
-            });
+            _visible.Sort(CompareCandidates);
             int targetCount = Mathf.Min(_maxTargets, _visible.Count);
             bool changed = _targets.Count != targetCount;
             if (!changed)
@@ -210,13 +213,16 @@ namespace alpha.ingame.player
             return root;
         }
 
-        private static bool IsOnScreen(Camera camera, Vector3 point)
+        private static int CompareCandidates(TargetCandidate a, TargetCandidate b)
         {
-            Vector3 screen = camera.WorldToScreenPoint(point);
-            return screen.z > 0f && camera.pixelRect.Contains(new Vector2(screen.x, screen.y));
+            int byAim = a.AimDistanceSquared.CompareTo(b.AimDistanceSquared);
+            if (byAim != 0) return byAim;
+            int byWorldDistance = a.WorldDistanceSquared.CompareTo(b.WorldDistanceSquared);
+            return byWorldDistance != 0 ? byWorldDistance :
+                a.Collider.GetInstanceID().CompareTo(b.Collider.GetInstanceID());
         }
 
-        private bool HasLineOfSight(Camera camera, Collider target, Transform targetRoot)
+        private bool HasLineOfSight(Camera camera, Collider target)
         {
             Vector3 origin = camera.transform.position;
             Vector3 direction = target.bounds.center - origin;
@@ -224,17 +230,22 @@ namespace alpha.ingame.player
             if (distance < 0.01f) return true;
 
             int count = Physics.RaycastNonAlloc(origin, direction / distance, _sightHits,
-                distance, _sightLayers, QueryTriggerInteraction.Ignore);
+                distance, _sightLayers, QueryTriggerInteraction.Collide);
+            Collider nearest = null;
+            float nearestDistance = distance;
             for (int i = 0; i < count; i++)
             {
-                Transform hit = _sightHits[i].transform;
-                if (hit == null ||
-                    (hit.IsChildOf(_player.transform) &&
-                     (_targetLayers.value & (1 << hit.gameObject.layer)) == 0) ||
-                    hit.IsChildOf(targetRoot)) continue;
-                return false;
+                Collider hitCollider = _sightHits[i].collider;
+                if (hitCollider == null || _sightHits[i].distance >= nearestDistance) continue;
+                if (hitCollider.isTrigger &&
+                    (_targetLayers.value & (1 << hitCollider.gameObject.layer)) == 0) continue;
+                Transform hit = hitCollider.transform;
+                if (hit.IsChildOf(_player.transform) &&
+                    (_targetLayers.value & (1 << hit.gameObject.layer)) == 0) continue;
+                nearest = hitCollider;
+                nearestDistance = _sightHits[i].distance;
             }
-            return true;
+            return nearest == null || nearest == target;
         }
     }
 }

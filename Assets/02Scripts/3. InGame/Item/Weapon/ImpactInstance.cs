@@ -81,7 +81,7 @@ namespace alpha.ingame.item
             // 한 대상의 여러 콜라이더가 겹쳐도 한 틱에 피해는 한 번만 준다.
             _damagedTargets.Clear();
             Collider[] hits = Physics.OverlapSphere(_impactPoint, _data.Radius,
-                _data.TargetLayers, QueryTriggerInteraction.Ignore);
+                _data.TargetLayers, QueryTriggerInteraction.Collide);
             foreach (Collider collider in hits)
             {
                 MonoBehaviour target = FindDamageable(collider);

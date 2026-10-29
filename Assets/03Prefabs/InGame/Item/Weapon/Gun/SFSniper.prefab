@@ -271,6 +271,9 @@ MonoBehaviour:
   _impactData: {fileID: 11400000, guid: f27c32348cfd401d8e0367d600104d59, type: 2}
   _damage: 60
   _aimDistance: 300
+  _triggerHitLayers:
+    serializedVersion: 2
+    m_Bits: 512
   _chargeDuration: 1.5
   _minimumChargeTime: 0.2
   _fullChargeDamageMultiplier: 2

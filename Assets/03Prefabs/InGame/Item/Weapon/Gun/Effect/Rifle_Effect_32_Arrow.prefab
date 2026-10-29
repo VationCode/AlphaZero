@@ -34409,6 +34409,9 @@ MonoBehaviour:
   _speed: 70
   _lifetime: 3
   _collisionCollider: {fileID: 3262745811621416497}
+  _triggerHitLayers:
+    serializedVersion: 2
+    m_Bits: 512
 --- !u!135 &3262745811621416497
 SphereCollider:
   m_ObjectHideFlags: 0

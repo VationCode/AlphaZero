@@ -75,31 +75,33 @@ namespace alpha.ingame.player
                 return;
             }
 
-            // RaycastNonAlloc 결과는 거리순이 아니므로, 자기 그룹과 플레이어를 제외한 첫 충돌을 찾는다.
-            int count = Physics.RaycastNonAlloc(origin, toTarget / distance, _hits,
-                distance + 0.1f, _hitLayers, QueryTriggerInteraction.Ignore);
-            int nearest = -1;
-            float nearestDistance = float.PositiveInfinity;
-            for (int i = 0; i < count; i++)
-            {
-                Collider hitCollider = _hits[i].collider;
-                if (hitCollider == null || hitCollider.transform.IsChildOf(_group)) continue;
-                if (hitCollider.transform.IsChildOf(_player) &&
-                    (_targetLayers.value & (1 << hitCollider.gameObject.layer)) == 0) continue;
-                if (_hits[i].distance >= nearestDistance) continue;
-                nearest = i;
-                nearestDistance = _hits[i].distance;
-            }
-
-            if (nearest < 0 || !IsAssignedTarget(_hits[nearest].collider, target))
+            // 보스의 다른 자식 콜라이더보다 먼저 맞더라도 배정된 콜라이더의 충돌점을 사용한다.
+            Vector3 direction = toTarget / distance;
+            if (!target.Raycast(new Ray(origin, direction), out RaycastHit targetHit, distance + 0.1f))
             {
                 StopEffects();
                 return;
             }
 
-            // 반복되는 빔·Hit 파티클은 생성하지 않고 켜 둔 채 충돌점만 갱신한다.
-            _hitEffect.position = _hits[nearest].point;
-            _beamVisual.Show(origin, _hits[nearest].point);
+            // 타겟에 도달하기 전에 다른 적이나 지형이 가로막는지만 확인한다.
+            int count = Physics.RaycastNonAlloc(origin, direction, _hits,
+                targetHit.distance, _hitLayers, QueryTriggerInteraction.Collide);
+            for (int i = 0; i < count; i++)
+            {
+                Collider hitCollider = _hits[i].collider;
+                if (hitCollider == null || hitCollider.transform.IsChildOf(_group)) continue;
+                if (hitCollider.isTrigger &&
+                    (_targetLayers.value & (1 << hitCollider.gameObject.layer)) == 0) continue;
+                if (hitCollider.transform.IsChildOf(_player) &&
+                    (_targetLayers.value & (1 << hitCollider.gameObject.layer)) == 0) continue;
+                if (IsPartOfAssignedEnemy(hitCollider, target)) continue;
+                StopEffects();
+                return;
+            }
+
+            // 반복되는 빔·Hit 파티클은 생성하지 않고 선택된 콜라이더의 충돌점만 갱신한다.
+            _hitEffect.position = targetHit.point;
+            _beamVisual.Show(origin, targetHit.point);
             if (!_hitEffect.gameObject.activeSelf) _hitEffect.gameObject.SetActive(true);
             if (!_isFiring)
             {
@@ -109,7 +111,7 @@ namespace alpha.ingame.player
             }
         }
 
-        private bool IsAssignedTarget(Collider hit, Collider target)
+        private bool IsPartOfAssignedEnemy(Collider hit, Collider target)
         {
             if (hit == target) return true;
             Transform root = target.attachedRigidbody != null

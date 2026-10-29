@@ -30,10 +30,10 @@ MonoBehaviour:
   _activationEffectPrefab: {fileID: 0}
   _activationEffectLifetime: 3
   _beamPodGroupPrefab: {fileID: 206293292149116620, guid: 7c9b9868e77bbf64682894e6e375f5d5, type: 3}
-  _maxTargetDistance: 20
+  _maxTargetDistance: 60
   _targetLayers:
     serializedVersion: 2
     m_Bits: 512
   _sightLayers:
     serializedVersion: 2
-    m_Bits: 4294967295
+    m_Bits: 1011
